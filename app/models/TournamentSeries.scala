@@ -5,7 +5,7 @@ package models
   * @version 1.0 23/04/2016 23:37
   */
 case class TournamentSeries(
-                             seriesId: Option[String],
+                             seriesId: String,
                              seriesName: String,
                              seriesColor: String,
                              numberOfSetsToWin: Int,
@@ -15,7 +15,6 @@ case class TournamentSeries(
                              showReferees: Boolean,
                              currentRoundNr: Int,
                              tournamentId: String) extends Crudable[TournamentSeries]{
-  override def getId: String = this.seriesId.get
-
-  override def setId(newId: String): TournamentSeries = this.copy(seriesId = Some(newId))
+  override def getId: String = this.seriesId
+  override def setId(newId: String): TournamentSeries = this.copy(seriesId =newId)
 }

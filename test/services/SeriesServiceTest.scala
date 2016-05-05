@@ -15,17 +15,17 @@ class SeriesServiceTest extends PlaySpec{
     "return a list of series of a tournament" in {
 
       val series = waitFor(seriesService.getTournamentSeriesOfTournament("1"))
-      series must contain(TournamentSeries(Some("1"), "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1"))
+      series must contain(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1"))
     }
 
     "create a series, he/she recieves an id" in {
-      val series = Await.result(seriesService.create(TournamentSeries(None, "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      series.get.seriesId.get.length mustBe 36
+      val series = Await.result(seriesService.create(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
+      series.get.seriesId.length mustBe 36
     }
 
     "update a series" in {
-      val createdTournamentSeries = Await.result(seriesService.create(TournamentSeries(None, "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      val series = Await.result(seriesService.update(TournamentSeries(None, "Open zonder voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION).get
+      val createdTournamentSeries = Await.result(seriesService.create(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
+      val series = Await.result(seriesService.update(TournamentSeries("1", "Open zonder voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION).get
       series.seriesName mustBe "Open zonder voorgift"
     }
 

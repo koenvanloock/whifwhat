@@ -10,15 +10,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PlayerService extends GenericAtomicCrudService[Player]{
 
   val players =List(
-    Player(None, "Koen","Van Loock", Ranks.D0 ),
-    Player(None, "Hans","Van Bael", Ranks.E4 ),
-    Player(None, "Luk","Geraets", Ranks.D6 ),
-    Player(None, "Lode","Van Renterghem", Ranks.E6 ),
-    Player(None, "Tim","Firquet", Ranks.C2 ),
-    Player(None, "Aram","Pauwels", Ranks.B4 ),
-    Player(None, "Tim","Uitdewilligen", Ranks.E0 ),
-    Player(None, "Matthias","Lesuise", Ranks.D6 ),
-    Player(None, "Gil","Corrujeira-Figueira", Ranks.D0 )
+    Player("1", "Koen","Van Loock", Ranks.D0 ),
+    Player("2", "Hans","Van Bael", Ranks.E4 ),
+    Player("3", "Luk","Geraets", Ranks.D6 ),
+    Player("4", "Lode","Van Renterghem", Ranks.E6 ),
+    Player("5", "Tim","Firquet", Ranks.C2 ),
+    Player("6", "Aram","Pauwels", Ranks.B4 ),
+    Player("7", "Tim","Uitdewilligen", Ranks.E0 ),
+    Player("8", "Matthias","Lesuise", Ranks.D6 ),
+    Player("9", "Gil","Corrujeira-Figueira", Ranks.D0 )
   )
 
 

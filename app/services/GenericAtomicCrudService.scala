@@ -9,6 +9,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 abstract class GenericAtomicCrudService[T <: Crudable[T]] {
+
   def create(crudable:  T) = {
     val newId = UUID.randomUUID().toString
     //create in db

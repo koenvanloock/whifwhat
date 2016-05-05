@@ -13,25 +13,25 @@ class PlayerServiceTest extends PlaySpec {
     "return a list of players" in {
 
       val players =  waitFor(playerService.getPlayers)
-      players must contain(Player(None, "Aram","Pauwels", Ranks.B4))
+      players must contain(Player("6", "Aram","Pauwels", Ranks.B4))
     }
 
 
     "create a player, he/she recieves an id" in {
 
-      val player =  Await.result(playerService.createPlayer(Player(None, "Aram","Pauwels", Ranks.B4)),DEFAULT_DURATION)
-        player.get.playerId.get.length mustBe 36
+      val player =  Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)),DEFAULT_DURATION)
+        player.get.playerId.length mustBe 36
     }
 
     "update a player" in {
-      val createdPlayer = Await.result(playerService.createPlayer(Player(None, "Aram","Pauwels", Ranks.B4)), DEFAULT_DURATION)
+      val createdPlayer = Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)), DEFAULT_DURATION)
       val player = Await.result(playerService.updatePlayer(Player(createdPlayer.get.playerId, "Koen","Pauwels", Ranks.B4)), DEFAULT_DURATION).get
       player.firstname mustBe "Koen"
     }
 
     "delete a player" in {
-      waitFor(playerService.deletePlayer("2"))
-      val player =  waitFor(playerService.getPlayer("2"))
+      waitFor(playerService.deletePlayer("122"))
+      val player =  waitFor(playerService.getPlayer("122"))
       player mustBe None
     }
   }

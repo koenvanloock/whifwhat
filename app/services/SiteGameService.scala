@@ -5,4 +5,5 @@ import models.SiteGame
 
 class SiteGameService extends  GenericAtomicCrudService[SiteGame]{
 
+
 }

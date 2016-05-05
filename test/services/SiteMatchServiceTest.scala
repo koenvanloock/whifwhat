@@ -17,18 +17,18 @@ class SiteMatchServiceTest extends PlaySpec{
     "return a match by id" in {
 
       val siteMatch =  waitFor(matchService.getMatch("1"))
-      siteMatch mustBe Some(SiteMatch(Some("1"),"1","2",3,true,21,2))
+      siteMatch mustBe Some(SiteMatch("1","1","2",3,true,21,2))
     }
 
 
     "create a match, it recieves an id" in {
 
-      val siteMatch =  Await.result(matchService.create(SiteMatch(Some("1"),"1","2",3,true,21,2)),DEFAULT_DURATION)
-      siteMatch.get.matchId.get.length mustBe 36
+      val siteMatch =  Await.result(matchService.create(SiteMatch("1","1","2",3,true,21,2)),DEFAULT_DURATION)
+      siteMatch.get.matchId.length mustBe 36
     }
 
     "update a match" in {
-      val createdMatch = Await.result(matchService.create(SiteMatch(Some("2"),"3","1",3,true,21,2)), DEFAULT_DURATION).get
+      val createdMatch = Await.result(matchService.create(SiteMatch("2","3","1",3,true,21,2)), DEFAULT_DURATION).get
       val siteMatch = Await.result(matchService.update(SiteMatch(createdMatch.matchId,"4","1",3,true,21,2)), DEFAULT_DURATION).get
         siteMatch.playerA mustBe "4"
     }

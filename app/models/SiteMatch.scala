@@ -1,7 +1,7 @@
 package models
 
 case class SiteMatch(
-                      matchId: Option[String],
+                      matchId: String,
                       playerA: String,
                       playerB: String,
 
@@ -9,7 +9,18 @@ case class SiteMatch(
                       isHandicapForB: Boolean,
                       targetScore: Int,
                       numberOfSetsToWin: Int) extends Crudable[SiteMatch]{
-  override def getId: String = matchId.get
+  override def getId: String = matchId
 
-  override def setId(newId: String): SiteMatch = this.copy(matchId = Some(newId))
+  override def setId(newId: String): SiteMatch = this.copy(matchId = newId)
 }
+
+case class SiteMatchWithGames(
+                      matchId: String,
+                      playerA: String,
+                      playerB: String,
+
+                      handicap: Int,
+                      isHandicapForB: Boolean,
+                      targetScore: Int,
+                      numberOfSetsToWin: Int,
+                      sets: List[SiteGame])

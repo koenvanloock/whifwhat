@@ -7,7 +7,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class SeriesService extends GenericAtomicCrudService[TournamentSeries]{
   val series=  List(
-    TournamentSeries(Some("1"), "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
+    TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
   )
 
   def getTournamentSeries(seriesId: String): Future[Option[TournamentSeries]] = {

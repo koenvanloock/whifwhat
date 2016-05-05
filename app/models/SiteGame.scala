@@ -4,10 +4,10 @@ package models
   * @author Koen Van Loock
   * @version 1.0 24/04/2016 0:19
   */
-case class SiteGame(id: Option[String], matchId: String, pointA: Int, pointB : Int) extends Crudable[SiteGame]{
-  override def getId: String = id.get
+case class SiteGame(id: String, matchId: String, pointA: Int, pointB : Int, gameNr: Int) extends Crudable[SiteGame]{
+  override def getId: String = id
 
-  override def setId(newId: String): SiteGame = this.copy(id=Some(newId))
+  override def setId(newId: String): SiteGame = this.copy(id=newId)
 
   def isCorrect(targetScore: Int): Boolean ={
     if(pointA==targetScore){

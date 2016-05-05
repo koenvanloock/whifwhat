@@ -16,13 +16,13 @@ class SiteGameServiceTest extends PlaySpec{
 
 
     "create a game, it recieves an id" in {
-      val siteGame = Await.result(siteGameService.create(SiteGame(None,"1",15,21)), DEFAULT_DURATION)
-        siteGame.get.id.get.length mustBe 36
+      val siteGame = Await.result(siteGameService.create(SiteGame("1","1",15,21,1)), DEFAULT_DURATION)
+        siteGame.get.id.length mustBe 36
     }
 
     "update a series" in {
-      val createdTournamentSeries = Await.result(siteGameService.create(SiteGame(None,"1",15,21)), DEFAULT_DURATION)
-      val series = Await.result(siteGameService.update(SiteGame(None,"1",18,21)), DEFAULT_DURATION).get
+      val createdTournamentSeries = Await.result(siteGameService.create(SiteGame("1","1",15,21,1)), DEFAULT_DURATION)
+      val series = Await.result(siteGameService.update(SiteGame("1","1",18,21,1)), DEFAULT_DURATION).get
       series.pointA mustBe 18
     }
   }
