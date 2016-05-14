@@ -1,6 +1,6 @@
 package services
 
-import models.{Ranks, Player}
+import models.{Bracket, RobinPlayer, Player, Ranks}
 import org.scalatestplus.play.PlaySpec
 
 class DrawServiceTest extends PlaySpec{
@@ -19,31 +19,92 @@ class DrawServiceTest extends PlaySpec{
     )
 
     "draw 1 sorted robins" in {
-      val drawnGroups = drawService.drawRobins(players,1,21,2)
-      println("robinGroup "+ drawnGroups)
-      drawnGroups.length mustBe 1
-      drawnGroups.head.robinPlayers.length mustBe 9
-      drawnGroups.head.robinMatches.length mustBe 36
+      val drawnGroups = drawService.drawSortedRobins(players,1,21,2).get
+      drawnGroups.robinList.length mustBe 1
+      drawnGroups.robinList.head.robinPlayers.length mustBe 9
+      drawnGroups.robinList.head.robinMatches.length mustBe 36
     }
 
     "draw 2 sorted robins" in {
-      val drawnGroups = drawService.drawRobins(players,2,21,2)
-      drawnGroups.length mustBe 2
-      drawnGroups.head.robinPlayers.length mustBe 5
-      drawnGroups.head.robinMatches.length mustBe 10
+      val drawnGroups = drawService.drawSortedRobins(players,2,21,2).get
+      drawnGroups.robinList.length mustBe 2
+      drawnGroups.robinList.head.robinPlayers.length mustBe 5
+      drawnGroups.robinList.head.robinMatches.length mustBe 10
 
-      drawnGroups.last.robinPlayers.length mustBe 4
-      drawnGroups.last.robinMatches.length mustBe 6
+      drawnGroups.robinList.last.robinPlayers.length mustBe 4
+      drawnGroups.robinList.last.robinMatches.length mustBe 6
     }
 
     "draw 3 sorted robins" in {
-      val drawnGroups = drawService.drawRobins(players,3,21,2)
-      drawnGroups.length mustBe 3
-      drawnGroups.head.robinPlayers.length mustBe 3
-      drawnGroups.head.robinMatches.length mustBe 3
+      val drawnGroups = drawService.drawSortedRobins(players,3,21,2).get
+      drawnGroups.robinList.length mustBe 3
+      drawnGroups.robinList.head.robinPlayers.length mustBe 3
+      drawnGroups.robinList.head.robinMatches.length mustBe 3
 
-      drawnGroups.last.robinPlayers.length mustBe 3
-      drawnGroups.last.robinMatches.length mustBe 3
+      drawnGroups.robinList.last.robinPlayers.length mustBe 3
+      drawnGroups.robinList.last.robinMatches.length mustBe 3
+    }
+
+    "draw 0 sorted robins with 5 as numberOfRobins" in {
+       drawService.drawSortedRobins(players,5,21,2) mustBe None
+    }
+
+    "draw 0 sorted robins with 0 as numberOfRobins" in {
+      drawService.drawSortedRobins(players,0,21,2) mustBe None
+    }
+
+    "the ranked random sorts the players by rank and distributes them across the first places in all groups" in{
+      val test = drawService.drawRobins(players, 3,21,2, DrawTypes.RankedRandomOrder).get
+      println(test.robinList.head.robinPlayers.mkString("\n"))
+      val firstPlacesFirstNams = test.robinList.map( robin => robin.robinPlayers.head.firstname)
+      firstPlacesFirstNams must contain("Koen")
+      firstPlacesFirstNams must contain("Aram")
+      firstPlacesFirstNams must contain("Tim")
+    }
+
+    "draw a bracket with one round (final)" in {
+      val bracket = drawService.drawBracket(players,1,2,21).get
+
+      bracket.bracketPlayers.length mustBe 2
+      bracket.bracketRounds.length mustBe 1
+      bracket.bracketRounds.head.head.playerA mustBe Some("1")
+      bracket.bracketRounds.head.head.playerB mustBe Some("2")
+    }
+
+    "draw a bracket with two rounds (semi-finals)" in {
+      val bracket = drawService.drawBracket(players,2,2,21).get
+
+      bracket.bracketPlayers.length mustBe 4
+      bracket.bracketRounds.length mustBe 2
+      bracket.bracketRounds.head.head.playerA mustBe Some("1")
+      bracket.bracketRounds.head.head.playerB mustBe Some("4")
+      bracket.bracketRounds.head.last.playerA mustBe Some("3")
+      bracket.bracketRounds.head.last.playerB mustBe Some("2")
+
+      bracket.bracketRounds.last.head.playerA mustBe None
+      bracket.bracketRounds.last.head.playerB mustBe None
+
+    }
+
+    "draw a bracket with two rounds (quarter-finals)" in {
+      val bracket = drawService.drawBracket(players,3,2,21).get
+
+      bracket.bracketPlayers.length mustBe 8
+      bracket.bracketRounds.length mustBe 3
+
+      bracket.bracketRounds.head.head.playerA mustBe Some("1")
+      bracket.bracketRounds.head.head.playerB mustBe Some("8")
+      bracket.bracketRounds.head.drop(1).head.playerA mustBe Some("5")
+      bracket.bracketRounds.head.drop(1).head.playerB mustBe Some("4")
+
+      bracket.bracketRounds.head.drop(2).head.playerA mustBe Some("3")
+      bracket.bracketRounds.head.drop(2).head.playerB mustBe Some("6")
+      bracket.bracketRounds.head.last.playerA mustBe Some("7")
+      bracket.bracketRounds.head.last.playerB mustBe Some("2")
+
+      bracket.bracketRounds.last.head.playerA mustBe None
+      bracket.bracketRounds.last.head.playerB mustBe None
+
     }
   }
 }

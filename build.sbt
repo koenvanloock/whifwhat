@@ -14,3 +14,9 @@ libraryDependencies ++= Seq(
 )
 
 resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
+
+coverageEnabled := true
+
+coverageExcludedPackages := "<empty>;Reverse.*;router.*"
+
+addCommandAlias("scoverage", {"coverage test" ; "coverageReport"})

@@ -1,7 +1,7 @@
 package services
 
 import helpers.TestHelpers._
-import models.RobinRound
+import models.SiteRobinRound
 import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await
@@ -15,7 +15,7 @@ class SeriesRoundServiceTest extends PlaySpec{
     "return a single seriesRound" in {
 
       val series = waitFor(seriesRoundService.getSeriesRound("1"))
-      series must contain(RobinRound(Some("1"),2,"1",1))
+      series must contain(SiteRobinRound("1",2,"1",1))
     }
 
     /*

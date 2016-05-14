@@ -1,11 +1,13 @@
 package services
 
-import models.TournamentSeries
+import javax.inject.Inject
+
+import models._
 
 import scala.concurrent.{Future, Awaitable}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SeriesService extends GenericAtomicCrudService[TournamentSeries]{
+class SeriesService @Inject()(drawService: DrawService) extends GenericAtomicCrudService[TournamentSeries]{
   val series=  List(
     TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
   )
@@ -17,6 +19,12 @@ class SeriesService extends GenericAtomicCrudService[TournamentSeries]{
     Future(series.filter(series => series.seriesId.contains(tournamentId)))
   }
 
+  def drawSeries(seriesRound: SeriesRound, seriesPlayers: List[Player], numberOfSetsToWin: Int, setTargetScore: Int, drawType: DrawType = DrawTypes.EnteredOrder): Option[SeriesRoundWithPlayersAndMatches] = seriesRound match {
+    case robin:SiteRobinRound => drawService.drawRobins(seriesPlayers,robin.numberOfRobins, numberOfSetsToWin, setTargetScore, drawType)
+    case bracket:SiteBracketRound => drawService.drawBracket(seriesPlayers, bracket.numberOfBracketRounds,numberOfSetsToWin, setTargetScore)
+  }
 
-
+  def advanceSeries(tournamentSeries: TournamentSeries, seriesRounds: List[SeriesRound]): TournamentSeries = {
+    if(seriesRounds.length < tournamentSeries.currentRoundNr) tournamentSeries.copy(currentRoundNr = tournamentSeries.currentRoundNr+1) else tournamentSeries
+  }
 }
