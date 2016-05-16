@@ -3,8 +3,10 @@
 # ~~~~
 
 
-GET     /players                    controllers.PlayerController.getAllPlayers
-
+GET             /players                                controllers.PlayerController.getAllPlayers
+POST            /players                                 controllers.PlayerController.insertPlayer()
+PUT             /players                                 controllers.PlayerController.updatePlayer
+DELETE          /players/:playerId                       controllers.PlayerController.deletePlayer(playerId: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

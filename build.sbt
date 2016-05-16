@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   jdbc,
   cache,
   ws,
+  "com.typesafe.play" %% "play-slick" % "1.1.1",
   "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % Test
 )
 
@@ -19,4 +20,4 @@ coverageEnabled := true
 
 coverageExcludedPackages := "<empty>;Reverse.*;router.*"
 
-addCommandAlias("scoverage", {"coverage test" ; "coverageReport"})
+addCommandAlias("scoverage", {"clean coverage test" ; "coverageReport"})

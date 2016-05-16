@@ -1,13 +1,14 @@
 package services
 
-import models.{SiteGame, SiteMatchWithGames, SiteMatch}
+import models._
 
 /**
   * @author Koen Van Loock
   * @version 1.0 12/05/2016 20:58
   */
 class MatchService {
-
+  def isMatchComplete(siteMatchWithGames: SiteMatchWithGames): Boolean = siteMatchWithGames.sets.forall(_.isCorrect(siteMatchWithGames.targetScore))
+  def isBracketMatchComplete(bracketMatchWithGames: BracketMatchWithGames): Boolean = bracketMatchWithGames.sets.forall(_.isCorrect(bracketMatchWithGames.targetScore))
 
   def calculateMatchStats(siteMatch: SiteMatchWithGames) = {
     siteMatch.copy(

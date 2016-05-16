@@ -7,7 +7,7 @@ import models._
 import scala.concurrent.{Future, Awaitable}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SeriesService @Inject()(drawService: DrawService) extends GenericAtomicCrudService[TournamentSeries]{
+class SeriesService @Inject()(drawService: DrawService, seriesRoundService: SeriesRoundService) extends GenericAtomicCrudService[TournamentSeries]{
   val series=  List(
     TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
   )

@@ -4,7 +4,7 @@ case class SiteMatch(
                       matchId: String,
                       playerA: String,
                       playerB: String,
-
+                      roundId: String,
                       handicap: Int,
                       isHandicapForB: Boolean,
                       targetScore: Int,
@@ -20,7 +20,7 @@ case class SiteMatchWithGames(
                       matchId: String,
                       playerA: String,
                       playerB: String,
-
+                      roundId: String,
                       handicap: Int,
                       isHandicapForB: Boolean,
                       targetScore: Int,

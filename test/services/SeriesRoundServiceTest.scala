@@ -1,7 +1,7 @@
 package services
 
 import helpers.TestHelpers._
-import models.SiteRobinRound
+import models._
 import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await
@@ -9,7 +9,7 @@ import scala.concurrent.Await
 
 class SeriesRoundServiceTest extends PlaySpec{
 
-  val seriesRoundService = new SeriesRoundService()
+  val seriesRoundService = new SeriesRoundService(new MatchService())
 
   "SeriesRoundService" should {
     "return a single seriesRound" in {
@@ -36,5 +36,86 @@ class SeriesRoundServiceTest extends PlaySpec{
       val series = waitFor(seriesRoundService.getSeriesRound("5"))
       series mustBe None
     }
+
+
+    "isRoundComplete of a complete robinRound returns true" in {
+      val players = List(
+        RobinPlayer("1", "1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0,0),
+        RobinPlayer("2", "1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0,0),
+        RobinPlayer("3", "1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0,0),
+        RobinPlayer("4", "1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0,0)
+      )
+
+      val matchesWithGames = List(
+        SiteMatchWithGames("1","1","2","1",6,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("2","1","3","1",3,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("3","1","4","1",7,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("4","2","3","1",3,false,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("5","2","4","1",1,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("6","3","4","1",4,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2)))
+      )
+
+      seriesRoundService.isRoundComplete(RobinRound(List(RobinGroup("1",players,matchesWithGames)))) mustBe true
+    }
+  }
+
+  "isRoundComplete of an incomplete robinRound returns false" in {
+    val players = List(
+      RobinPlayer("1", "1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0,0),
+      RobinPlayer("2", "1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0,0),
+      RobinPlayer("3", "1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0,0),
+      RobinPlayer("4", "1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0,0)
+    )
+
+    val matchesWithGames = List(
+      SiteMatchWithGames("1","1","2","1",6,true,21,2,1,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))),
+      SiteMatchWithGames("2","1","3","1",3,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("3","1","4","1",7,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("4","2","3","1",3,false,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("5","2","4","1",1,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
+      SiteMatchWithGames("6","3","4","1",4,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2)))
+    )
+
+    seriesRoundService.isRoundComplete(RobinRound(List(RobinGroup("1",players,matchesWithGames)))) mustBe false
+  }
+
+  "isRoundComplete of a complete bracket returns true" in {
+    val players = List(
+      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0),
+      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0),
+      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0),
+      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0)
+    )
+
+    val matches =
+      List(
+        List(
+          BracketMatchWithGames("1","1",1,1,"1", Some("1"), Some("4"),7,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",22,20,2))),
+          BracketMatchWithGames("2","1",1,2,"1", Some("2"), Some("3"),3,false,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,10,2)))
+        ),
+        List(BracketMatchWithGames("3","1",2,1,"1", Some("1"), Some("2"),6,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,14,2))))
+      )
+
+    seriesRoundService.isRoundComplete(Bracket("1", players, matches)) mustBe true
+  }
+
+  "isRoundComplete of an incomplete bracket returns false" in {
+    val players = List(
+      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0),
+      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0),
+      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0),
+      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0)
+    )
+
+    val matches =
+      List(
+          List(
+            BracketMatchWithGames("1","1",1,1,"1", Some("1"), Some("4"),7,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))),
+            BracketMatchWithGames("2","1",1,2,"1", Some("2"), Some("3"),3,false,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2)))
+            ),
+          List(BracketMatchWithGames("3","1",2,1,"1", Some("1"), Some("2"),6,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))))
+      )
+
+    seriesRoundService.isRoundComplete(Bracket("1", players, matches)) mustBe false
   }
 }
