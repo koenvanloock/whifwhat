@@ -1,4 +1,6 @@
-package models
+package models.player
+
+import models.Crudable
 
 /**
   * @author Koen Van Loock

@@ -1,6 +1,6 @@
 package controllers
 
-import models.{Player, Ranks}
+import models.player.Ranks
 import org.scalatestplus.play._
 import play.api.libs.json.Json
 import play.api.test._

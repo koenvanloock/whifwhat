@@ -1,6 +1,7 @@
 package services
 
-import models.SiteMatch
+
+import models.matches.SiteMatch
 
 import scala.concurrent.{Future, Awaitable}
 import scala.concurrent.ExecutionContext.Implicits.global

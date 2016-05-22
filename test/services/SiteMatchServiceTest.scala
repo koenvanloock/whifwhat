@@ -1,15 +1,11 @@
 package services
 
 import helpers.TestHelpers._
-import models.SiteMatch
+import models.matches.SiteMatch
 import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await
 
-/**
-  * @author Koen Van Loock
-  * @version 1.0 24/04/2016 0:53
-  */
 class SiteMatchServiceTest extends PlaySpec{
   val matchService = new SiteMatchService()
 

@@ -3,7 +3,7 @@ package controllers
 import java.util.UUID
 import javax.inject.Inject
 
-import models.{Rank, Player}
+import models.player.{Rank, Player}
 import play.api.libs.json.{Reads, JsPath, Json}
 import play.api.mvc.{Action, Controller}
 import services.PlayerService

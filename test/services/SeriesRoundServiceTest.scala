@@ -1,7 +1,9 @@
 package services
 
 import helpers.TestHelpers._
-import models._
+import models.{Bracket, RobinRound, RobinGroup, SiteRobinRound}
+import models.matches.{BracketMatchWithGames, SiteGame, SiteMatchWithGames}
+import models.player._
 import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await
@@ -10,6 +12,13 @@ import scala.concurrent.Await
 class SeriesRoundServiceTest extends PlaySpec{
 
   val seriesRoundService = new SeriesRoundService(new MatchService())
+  val players = List(
+    SeriesRoundPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores()),
+    SeriesRoundPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
+    SeriesRoundPlayer("3", "3","1", "Luk", "Geraets", Ranks.D6,PlayerScores()),
+    SeriesRoundPlayer("4", "4","1", "Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+  )
+
 
   "SeriesRoundService" should {
     "return a single seriesRound" in {
@@ -39,12 +48,7 @@ class SeriesRoundServiceTest extends PlaySpec{
 
 
     "isRoundComplete of a complete robinRound returns true" in {
-      val players = List(
-        RobinPlayer("1", "1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0,0),
-        RobinPlayer("2", "1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0,0),
-        RobinPlayer("3", "1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0,0),
-        RobinPlayer("4", "1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0,0)
-      )
+
 
       val matchesWithGames = List(
         SiteMatchWithGames("1","1","2","1",6,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
@@ -60,13 +64,6 @@ class SeriesRoundServiceTest extends PlaySpec{
   }
 
   "isRoundComplete of an incomplete robinRound returns false" in {
-    val players = List(
-      RobinPlayer("1", "1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0,0),
-      RobinPlayer("2", "1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0,0),
-      RobinPlayer("3", "1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0,0),
-      RobinPlayer("4", "1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0,0)
-    )
-
     val matchesWithGames = List(
       SiteMatchWithGames("1","1","2","1",6,true,21,2,1,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))),
       SiteMatchWithGames("2","1","3","1",3,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
@@ -81,10 +78,10 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   "isRoundComplete of a complete bracket returns true" in {
     val players = List(
-      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0),
-      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0),
-      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0),
-      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0)
+      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
+      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
+      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
+      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
     )
 
     val matches =
@@ -101,10 +98,10 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   "isRoundComplete of an incomplete bracket returns false" in {
     val players = List(
-      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,0,0,0,0,0,0),
-      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,0,0,0,0,0,0),
-      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,0,0,0,0,0,0),
-      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,0,0,0,0,0,0)
+      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
+      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
+      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
+      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
     )
 
     val matches =
@@ -117,5 +114,16 @@ class SeriesRoundServiceTest extends PlaySpec{
       )
 
     seriesRoundService.isRoundComplete(Bracket("1", players, matches)) mustBe false
+  }
+
+  "calculate the correct score of a player in a series" in {
+    val playerWithRoundPlayers = SeriesPlayerWithRoundPlayers(
+      SeriesPlayer("1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
+      List(
+        SeriesRoundPlayer("1","1","1","Koen", "Van Loock", Ranks.D0, PlayerScores(3,0,6,2,84,40,304044)),
+        SeriesRoundPlayer("1","1","2","Koen", "Van Loock", Ranks.D0, PlayerScores(2,1,5,2,64,40,103024))
+      ))
+
+    seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1", "1", "Koen", "Van Loock", Ranks.D0,PlayerScores(5,1,11,4,148,80,407068))
   }
 }

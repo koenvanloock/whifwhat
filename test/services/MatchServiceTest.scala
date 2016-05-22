@@ -1,6 +1,6 @@
 package services
 
-import models.{BracketMatchWithGames, SiteMatchWithGames, SiteGame}
+import models.matches.{BracketMatchWithGames, SiteMatchWithGames, SiteGame}
 import org.scalatestplus.play.PlaySpec
 
 class MatchServiceTest extends PlaySpec{

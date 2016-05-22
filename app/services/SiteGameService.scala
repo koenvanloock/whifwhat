@@ -1,6 +1,6 @@
 package services
 
-import models.SiteGame
+import models.matches.SiteGame
 
 
 class SiteGameService extends  GenericAtomicCrudService[SiteGame]{

@@ -1,6 +1,6 @@
 package utils
 
-import models.{Rank, Ranks}
+import models.player.{Rank, Ranks}
 
 
 object RankConverter {

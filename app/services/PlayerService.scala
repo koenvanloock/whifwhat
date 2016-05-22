@@ -2,7 +2,7 @@ package services
 
 import java.util.UUID
 
-import models.{Ranks, Player}
+import models.player.{Ranks, Player}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,4 +1,6 @@
-package models
+package models.matches
+
+import models.Crudable
 
 /**
   * @author Koen Van Loock

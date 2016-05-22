@@ -1,7 +1,7 @@
 package services
 
 import helpers.TestHelpers._
-import models.SiteGame
+import models.matches.SiteGame
 import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await

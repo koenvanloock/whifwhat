@@ -1,31 +1,31 @@
 package services
 
-import models.{Player, Ranks}
+import models.player.{PlayerScores, SeriesPlayer, Ranks, Player}
 import org.scalatestplus.play.PlaySpec
 
 class DrawServiceTest extends PlaySpec {
   "DrawService" should {
     val drawService = new DrawService()
-    val players = List(
-      Player("1", "Koen", "Van Loock", Ranks.D0),
-      Player("2", "Hans", "Van Bael", Ranks.E4),
-      Player("3", "Luk", "Geraets", Ranks.D6),
-      Player("4", "Lode", "Van Renterghem", Ranks.E6),
-      Player("5", "Tim", "Firquet", Ranks.C2),
-      Player("6", "Aram", "Pauwels", Ranks.B4),
-      Player("7", "Tim", "Uitdewilligen", Ranks.E0),
-      Player("8", "Matthias", "Lesuise", Ranks.D6),
-      Player("9", "Gil", "Corrujeira-Figueira", Ranks.D0)
+    val players=  List(
+      SeriesPlayer("1","1", "Koen","Van Loock", Ranks.D0, PlayerScores()),
+      SeriesPlayer("2","2", "Hans","Van Bael", Ranks.E4, PlayerScores() ),
+      SeriesPlayer("3","3", "Luk","Geraets", Ranks.D6, PlayerScores() ),
+      SeriesPlayer("4","4", "Lode","Van Renterghem", Ranks.E6, PlayerScores()),
+      SeriesPlayer("5","5", "Tim","Firquet", Ranks.C2, PlayerScores()),
+      SeriesPlayer("6","6", "Aram","Pauwels", Ranks.B4, PlayerScores()),
+      SeriesPlayer("7","7", "Tim","Uitdewilligen", Ranks.E0, PlayerScores()),
+      SeriesPlayer("8","8", "Matthias","Lesuise", Ranks.D6, PlayerScores()),
+      SeriesPlayer("9","9", "Gil","Corrujeira-Figueira", Ranks.D0, PlayerScores())
     )
 
     val extendedPlayers = players ::: List(
-      Player("10", "Timothy", "Donckers", Ranks.D4),
-      Player("11", "Ben", "Kooyman", Ranks.Ng),
-      Player("12", "Arno", "Sels", Ranks.F),
-      Player("13", "Sette", "Van Hoof", Ranks.Rec),
-      Player("14", "Ben", "Verellen", Ranks.Rec),
-      Player("15", "Noa", "Verellen", Ranks.Rec),
-      Player("16", "Sterre", "Roos", Ranks.E4))
+      SeriesPlayer("10","10", "Timothy", "Donckers", Ranks.D4, PlayerScores()),
+      SeriesPlayer("11","11", "Ben", "Kooyman", Ranks.Ng, PlayerScores()),
+      SeriesPlayer("12","12", "Arno", "Sels", Ranks.F, PlayerScores()),
+      SeriesPlayer("13","13", "Sette", "Van Hoof", Ranks.Rec, PlayerScores()),
+      SeriesPlayer("14","14", "Ben", "Verellen", Ranks.Rec, PlayerScores()),
+      SeriesPlayer("15","15", "Noa", "Verellen", Ranks.Rec, PlayerScores()),
+      SeriesPlayer("16","16", "Sterre", "Roos", Ranks.E4, PlayerScores()))
 
     "draw 1 sorted robins" in {
       val drawnGroups = drawService.drawSortedRobins(players, 1, 21, 2).get

@@ -1,6 +1,6 @@
 package services
 
-import models.{Ranks, Player}
+import models.player.{Ranks, Player}
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
 

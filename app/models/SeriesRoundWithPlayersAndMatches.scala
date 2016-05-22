@@ -1,5 +1,8 @@
 package models
 
+import models.matches.BracketMatchWithGames
+import models.player.BracketPlayer
+
 /**
   * @author Koen Van Loock
   * @version 1.0 8/05/2016 20:31
