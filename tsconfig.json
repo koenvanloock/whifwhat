@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "isolatedModules": false,
+    "jsx": "react",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": false,
+    "noImplicitAny": false,
+    "removeComments": true,
+    "noLib": false,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true
+  },
+  "filesGlob": [
+    "**/*.ts",
+    "**/*.tsx",
+    "!node_modules/**",
+    "!target/**",
+    "!project/**"
+  ],
+  "files": [
+    "public/javascripts/models/Alert.ts",
+    "public/javascripts/models/Tournament.ts",
+
+    "public/javascripts/services/authService.ts",
+    "public/javascripts/services/alertService.ts",
+
+    "public/javascripts/services/LoginRegisterService.ts",
+    "public/javascripts/services/TournamentService.ts",
+
+    "public/javascripts/controllers/LoginController.ts",
+    "public/javascripts/controllers/CreateTournamentController.ts",
+    "public/javascripts/controllers/TournamentListController.ts",
+    "public/javascripts/controllers/TitleScreenController.ts",
+
+    "typings/angular-jwt/angular-jwt.d.ts",
+    "typings/angularjs/angular-cookies.d.ts",
+    "typings/angularjs/angular-resource.d.ts",
+    "typings/angularjs/angular-route.d.ts",
+    "typings/angularjs/angular.d.ts",
+    "typings/jquery/jquery.d.ts",
+    "typings/tsd.d.ts"
+  ]
+}

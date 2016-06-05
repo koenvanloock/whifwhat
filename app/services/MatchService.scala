@@ -22,6 +22,8 @@ class MatchService {
   def isForA(targetScore: Int): (SiteGame) => Boolean = game => game.isCorrect(targetScore) && game.pointA > game.pointB
   def isForB(targetScore: Int): (SiteGame) => Boolean = game => game.isCorrect(targetScore) && game.pointB > game.pointA
 
+
+
   private def calculateSetsForPlayer(siteMatchWithGames: SiteMatchWithGames, playerChar: Char): Int = {
     playerChar match{
       case 'A' => siteMatchWithGames.sets.count(isForA(siteMatchWithGames.targetScore))

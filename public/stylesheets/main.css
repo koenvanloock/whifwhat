@@ -1,0 +1,36 @@
+body{
+    background: url("../images/background.jpg");
+}
+
+.title{
+    color: #25d8ff;
+}
+
+.left-panel{
+    height: 100%;
+    background: rgba(80, 80, 80, .5);
+    float: left;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    width: 200px;
+    position: fixed;
+    overflow: auto;
+}
+
+.navList{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+
+}
+
+.navElement{
+    font-weight: bold;
+}
+
+.viewField{
+    margin-left: 220px;
+}

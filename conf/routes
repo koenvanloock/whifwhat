@@ -8,6 +8,13 @@ POST            /players                                 controllers.PlayerContr
 PUT             /players                                 controllers.PlayerController.updatePlayer
 DELETE          /players/:playerId                       controllers.PlayerController.deletePlayer(playerId: String)
 
+GET             /tournaments/:tournamentId                  controllers.TournamentController.getTournamentById(tournamentId: String)
+GET             /tournaments                                controllers.TournamentController.getAllTournaments
+POST            /tournaments                                controllers.TournamentController.createTournament()
+
+POST            /login                                      controllers.LoginController.login
+
+GET             /                                           controllers.ManagerController.showMangager
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

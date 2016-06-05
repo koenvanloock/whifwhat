@@ -1,0 +1,15 @@
+<div>
+    <md-toolbar><h2 style="margin-left: 20px">Kies een tornooi</h2></md-toolbar>
+    <md-card>
+    <table class="md-whiteframe-z2" style="margin: 20px">
+        <tr>
+            <th>Tornooi</th>
+            <th>Edit</th>
+        </tr>
+        <tr ng-repeat="tournament in tournamentListCtrl.tournaments">
+            <td>{{tournament.tournamentName}}</td>
+            <td><a href="{{'#/tournament/'+ tournament.tournamentId + '/series'}}">bekijk</a></td>
+        </tr>
+    </table>
+    </md-card>
+</div>

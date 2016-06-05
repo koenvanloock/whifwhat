@@ -126,4 +126,25 @@ class SeriesRoundServiceTest extends PlaySpec{
 
     seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1", "1", "Koen", "Van Loock", Ranks.D0,PlayerScores(5,1,11,4,148,80,407068))
   }
+
+  "calculate the roundScore of a winning player with a matchUpdate" in {
+    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
+      SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 2,1, List(SiteGame("1", "1", 21,0, 1), SiteGame("2", "1", 15,21, 2),SiteGame("3", "1", 21,19, 3))),
+      SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 2,0, List(SiteGame("4", "2", 21,15, 1), SiteGame("5", "2", 23,21, 2)))
+    )) mustBe SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(2,0,4,1,101,76,20402))
+  }
+
+  "calculate the roundScore of a losing player with a matchUpdate" in {
+    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
+      SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 0,2, List(SiteGame("1", "1", 0,21, 1), SiteGame("2", "1", 9,21, 2))),
+      SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 1,2, List(SiteGame("3", "2", 21,23, 1), SiteGame("4", "2", 21,16, 2), SiteGame("5", "2", 19,21, 2)))
+    )) mustBe SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(0,2,1,4,70,102,51))
+  }
+
+  "calculate wins for playerB with a matchUpdate" in {
+    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("2","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
+    SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 1,2, List(SiteGame("1", "1", 12,21, 1),SiteGame("2", "1", 21,0, 2), SiteGame("3", "1", 9,21, 3))),
+    SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 1,2, List(SiteGame("4", "2", 21,23, 1), SiteGame("5", "2", 21,16, 2), SiteGame("6", "2", 19,21, 2)))
+  )) mustBe SeriesRoundPlayer("2","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(1,0,2,1,42,42,10201))
+  }
 }

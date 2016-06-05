@@ -1,9 +1,7 @@
 package models
 
-/**
-  * @author Koen Van Loock
-  * @version 1.0 23/04/2016 23:37
-  */
+import slick.jdbc.GetResult
+
 case class TournamentSeries(
                              seriesId: String,
                              seriesName: String,
@@ -15,6 +13,7 @@ case class TournamentSeries(
                              showReferees: Boolean,
                              currentRoundNr: Int,
                              tournamentId: String) extends Crudable[TournamentSeries]{
-  override def getId: String = this.seriesId
-  override def setId(newId: String): TournamentSeries = this.copy(seriesId =newId)
+  override def getId(tournamentSeries: TournamentSeries): String = tournamentSeries.seriesId
+
+  override implicit val getResult: GetResult[TournamentSeries] = GetResult(r => TournamentSeries(r.<<, r.<<,r.<<, r.<<,r.<<, r.<<,r.<<, r.<<,r.<<, r.<<))
 }

@@ -13,7 +13,7 @@ abstract class GenericAtomicCrudService[T <: Crudable[T]] {
   def create(crudable:  T) = {
     val newId = UUID.randomUUID().toString
     //create in db
-    Future(Some(crudable.setId(newId)))
+    Future(Some(crudable))
   }
 
   def update(crudable: T): Future[Option[T]] = {

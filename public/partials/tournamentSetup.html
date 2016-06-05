@@ -1,0 +1,48 @@
+<div layout="row">
+    <md-content  style="background: none">
+        <md-card layout="center center">
+            <form>
+                <md-content layout-padding layout="row" layout-sm="column">
+
+
+                    <div layout layout-sm="column" >
+                        <md-input-container flex layout-padding>
+                            <label>Tornooinaam</label>
+                            <input ng-model="createTournamentCtrl.name">
+                        </md-input-container>
+                        <md-input-container flex layout-padding>
+                            <label>Tornooidatum</label>
+                            <input ng-model="createTournamentCtrl.tournamentDate" type="date">
+                        </md-input-container>
+                    </div>
+                </md-content>
+
+                <div layout="row" layout-padding>
+                    <div flex>
+                        <md-checkbox ng-model="createTournamentCtrl.hasMultipleSeries" aria-label="Verschillende reeksen">
+                            Verschillende reeksen
+                        </md-checkbox>
+                    </div>
+                </div>
+
+                <div layout="column" layout-padding ng-show="createTournamentCtrl.hasMultipleSeries">
+                    <md-select ng-model="createTournamentCtrl.maximumNumberOfSeriesEntries" layout-padding>
+                        <md-select-label>{{ maximumNumberOfSeriesEntries ? "Max. " + maximumNumberOfSeriesEntries+ " reeksdeelnames" : 'max. reeksInschrijvingen' }}</md-select-label>
+                        <md-option ng-repeat="nr in createTournamentCtrl.numberList" value={{nr}}>{{"max. in " + nr+ " reeksen deelnemen"}}</md-option>
+                    </md-select>
+                </div>
+
+                <div layout="row" layout-padding>
+                    <div flex="50">
+                        <md-checkbox ng-model="createTournamentCtrl.showClub" aria-label="Toon club">
+                            Toon club
+                        </md-checkbox>
+                    </div>
+                </div>
+
+                <md-button layout-padding class="md-raised md-primary" ng-click="createTournamentCtrl.createTournament()">Maak tornooi
+                </md-button>
+            </form>
+        </md-card>
+    </md-content>
+</div>

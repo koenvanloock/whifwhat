@@ -1,20 +1,59 @@
-@*
- * This template takes a single argument, a String containing a
- * message to display.
- *@
-@(message: String)
+<!DOCTYPE html>
+<html lang="en" ng-app="tournamentManager">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+    <title>Whif-Wut</title>
+    <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
+        <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/font-awesome/css/font-awesome.min.css")">
+        <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/angular-material/angular-material.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+    </head>
+    <body >
+            <div style="padding:20px;">
+                <h1 class="title">Whif-What</h1>
 
-@*
- * Call the `main` template with two arguments. The first
- * argument is a `String` with the title of the page, the second
- * argument is an `Html` object containing the body of the page.
- *@
-@main("Welcome to Play") {
+            <div class="left-panel" ng-controller="TitleScreenController as titleScreenCtrl" ng-show="titleScreenCtrl.hasUser()">
+                <ul class="navList">
+                    <li class="navListItem" ><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentWizard()">Maak tornooi</md-button></li>
+                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentList()">Laad tornooi</md-button></li>
+                </ul>
 
-    @*
-     * Get an `Html` object by calling the built-in Play welcome
-     * template and passing a `String` message.
-     *@
-    @play20.welcome(message, style = "Scala")
+                <section class="user">
 
-}
+                    <i class="fa fa-user"></i>
+                    <div>
+                        <md-button ng-click="titleScreenCtrl.logout()">{{titleScreenCtrl.currentUser.username}} Afmelden</md-button>
+                    </div>
+                </section>
+            </div>
+
+
+            </div>
+
+        <div ng-view class="viewField"></div>
+
+        <script src="@routes.Assets.versioned("bower_components/angular/angular.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-route/angular-route.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-jwt/dist/angular-jwt.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-cookies/angular-cookies.min.js")"></script>
+
+        <script src="@routes.Assets.versioned("bower_components/angular-aria/angular-aria.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-animate/angular-animate.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-material/angular-material.js")"></script>
+
+        <script src="@routes.Assets.versioned("javascripts/tournamentManager.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/routes.js")"></script>
+
+
+        <script src="@routes.Assets.versioned("javascripts/controllers/LoginController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/CreateTournamentController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/TitleScreenController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/TournamentListController.js")"></script>
+
+        <script src="@routes.Assets.versioned("javascripts/services/LoginRegisterService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/services/authService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/services/alertService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/services/TournamentService.js")"></script>
+
+    </body>
+</html>

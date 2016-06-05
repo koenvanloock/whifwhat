@@ -12,8 +12,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class TournamentService extends GenericAtomicCrudService[Tournament]{
   implicit val playerObject = Player
 
+
   val tournaments = List(
-    Tournament(Some("1"),"Kapels Kampioenschap", LocalDate.of(2016,9,8),2,hasMultipleSeries = true,showClub = true)
+    Tournament("1","Kapels Kampioenschap", LocalDate.of(2016,9,8),2,hasMultipleSeries = true,showClub = true)
   )
 
   def getTournament(tournamentId: String): Future[Option[Tournament]] = Future(tournaments.find(tournament => tournament.tournamentId.contains(tournamentId)))

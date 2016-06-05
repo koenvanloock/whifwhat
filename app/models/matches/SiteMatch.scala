@@ -1,6 +1,7 @@
 package models.matches
 
 import models.Crudable
+import slick.jdbc.GetResult
 
 
 case class SiteMatch(
@@ -14,7 +15,6 @@ case class SiteMatch(
                       numberOfSetsToWin: Int,
                       wonSetsA: Int,
                       wonSetsB: Int) extends Crudable[SiteMatch]{
-  override def getId: String = matchId
-
-  override def setId(newId: String): SiteMatch = this.copy(matchId = newId)
+  override def getId(siteMatch: SiteMatch): String = siteMatch.matchId
+  override implicit val getResult: GetResult[SiteMatch] = GetResult(r => SiteMatch(r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<))
 }
