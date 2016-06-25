@@ -24,17 +24,31 @@
   "files": [
     "public/javascripts/models/Alert.ts",
     "public/javascripts/models/Tournament.ts",
+    "public/javascripts/models/Series.ts",
+    "public/javascripts/models/SeriesRound.ts",
+    "public/javascripts/models/Player.ts",
+    "public/javascripts/models/Rank.ts",
+
 
     "public/javascripts/services/authService.ts",
     "public/javascripts/services/alertService.ts",
 
     "public/javascripts/services/LoginRegisterService.ts",
     "public/javascripts/services/TournamentService.ts",
+    "public/javascripts/services/SeriesService.ts",
+    "public/javascripts/services/SeriesRoundService.ts",
+    "public/javascripts/services/PlayerService.ts",
 
     "public/javascripts/controllers/LoginController.ts",
     "public/javascripts/controllers/CreateTournamentController.ts",
+    "public/javascripts/controllers/RoundElementController.ts",
+    "public/javascripts/controllers/SeriesRoundSetupController.ts",
+    "public/javascripts/controllers/SeriesSetupController.ts",
+    "public/javascripts/controllers/CreateSeriesController.ts",
+    "public/javascripts/controllers/PlayerSubscriptionController.ts",
     "public/javascripts/controllers/TournamentListController.ts",
     "public/javascripts/controllers/TitleScreenController.ts",
+    "public/javascripts/controllers/PlayerController.ts",
 
     "typings/angular-jwt/angular-jwt.d.ts",
     "typings/angularjs/angular-cookies.d.ts",

@@ -6,11 +6,14 @@ import javax.inject.Inject
 import models._
 import models.matches.{SiteMatchWithGames, SiteMatch}
 import models.player.{SeriesRoundPlayer, SeriesPlayerWithRoundPlayers, PlayerScores, SeriesPlayer}
+import repositories.SeriesRoundRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SeriesRoundService @Inject()(matchService: MatchService) extends GenericAtomicCrudService[GenericSeriesRound] {
+class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
+
+  def getRoundsOfSeries(seriesId: String) = seriesRoundRepository.retrieveAllByField("SERIES_ID", seriesId)
 
   def calculatePlayerScore: (SeriesPlayerWithRoundPlayers) => SeriesPlayer = {
     seriesPlayerWithRoundPlayers =>

@@ -1,11 +1,12 @@
 module TournamentManagement{
-   export class Tournament{
-       constructor(
-       private tournamentName: string,
-       private tournamentDate: Date,
-       private hasMultipleSeries: boolean,
-       private maximumNumberOfSeriesEntries: number,
-       private showClub: boolean){}
+   export interface Tournament{
+       tournamentId: string;
+       tournamentName: string;
+       tournamentDate: Date;
+       hasMultipleSeries: boolean;
+       maximumNumberOfSeriesEntries: number;
+       showClub: boolean;
+       series?: Array<Series>
 
 
    }

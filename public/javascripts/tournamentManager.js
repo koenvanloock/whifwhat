@@ -17,9 +17,27 @@ angular.module("managerServices", [])
     url: window.location.origin
 });
 
+tournamentmanager.directive("tournamentOverview", function () {
+    return {
+        restrict: 'E',
+        scope: {tournament: '='},
+        templateUrl: "assets/directives/tournamentOverview.html"
+    }
+});
+
+tournamentmanager.directive("seriesRoundSetup", function(){
+    return{
+        restrict: 'E',
+        scope: {round: '='},
+        templateUrl: "assets/directives/SeriesRoundSetup.html",
+        controller: "roundElementController",
+        controllerAs: "ctrl"
+    }
+});
+
 tournamentmanager.config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
-        .primaryPalette('grey')
-        .accentPalette('teal')
+        .primaryPalette('teal')
+        .accentPalette('orange')
         .dark();
 });

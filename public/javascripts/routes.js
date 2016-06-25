@@ -18,6 +18,28 @@ angular.module('tournamentManager')
                 controllerAs: 'createTournamentCtrl',
                 requiresLogin: true
             })
+            .when('/tournament/:tournamentId/seriesSetup', {
+                templateUrl: "assets/partials/createSeries.html",
+                controller: 'SeriesSetupController',
+                controllerAs: 'seriesSetupCtrl',
+                requiresLogin: true
+            })
+            .when('/tournament/:tournamentId/playerSubscription', {
+                templateUrl: "assets/partials/playerSubscription.html",
+                controller: 'PlayerSubscriptionController',
+                controllerAs: 'playerSubscrCtrl',
+                access: {
+                    requiresLogin: true
+                }
+            })
+            .when('/tournament/:tournamentId/roundsSetup', {
+                templateUrl: "assets/partials/seriesRoundSetup.html",
+                controller: 'SeriesRoundSetupController',
+                controllerAs: 'roundCtrl',
+                access: {
+                    requiresLogin: true
+                }
+            })
             .when('/tournamentList', {
                 templateUrl: "assets/partials/tournamentList.html",
                 controller: 'TournamentListController',

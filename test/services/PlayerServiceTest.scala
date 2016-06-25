@@ -1,13 +1,19 @@
 package services
 
-import models.player.{Ranks, Player}
+import models.player.{SeriesPlayerWithRoundPlayers, Ranks, Player}
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.{SeriesRepository, SeriesPlayerRepository}
 
 import scala.concurrent.Await
 
 class PlayerServiceTest extends PlaySpec {
-  val playerService = new PlayerService()
+  val appBuilder = new GuiceApplicationBuilder().build()
+  val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
+  val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+
+  val playerService = new PlayerService(seriesPlayerRepository, seriesRepository)
 
   "PlayerService" should{
     "return a list of players" in {

@@ -4,11 +4,12 @@ import javax.inject.Inject
 
 import models._
 import models.player.{SeriesPlayerWithRoundPlayers, SeriesPlayer, Player}
+import repositories.SeriesRepository
 
 import scala.concurrent.{Future, Awaitable}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SeriesService @Inject()(drawService: DrawService, seriesRoundService: SeriesRoundService) extends GenericAtomicCrudService[TournamentSeries]{
+class SeriesService @Inject()(drawService: DrawService, seriesRoundService: SeriesRoundService){
   val series=  List(
     TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
   )

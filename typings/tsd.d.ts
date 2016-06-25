@@ -3,3 +3,4 @@
 /// <reference path="angularjs/angular-route.d.ts" />
 /// <reference path="angularjs/angular-cookies.d.ts" />
 /// <reference path="angular-jwt/angular-jwt.d.ts" />
+/// <reference path="angular-material/angular-material.d.ts" />

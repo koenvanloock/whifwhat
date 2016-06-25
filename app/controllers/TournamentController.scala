@@ -4,10 +4,10 @@ import javax.inject.Inject
 
 
 import com.typesafe.scalalogging.StrictLogging
-import models.{TournamentResultModel, Tournament}
+import models.{SeriesWithPlayers, TournamentWithSeries, TournamentResultModel, Tournament}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
-import repositories.TournamentRepository
+import repositories.{SeriesPlayerRepository, SeriesRepository, TournamentRepository}
 import services.TournamentService
 import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
@@ -15,7 +15,7 @@ import utils.JsonUtils.ListWrites._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TournamentController @Inject()(tournamentRepository: TournamentRepository) extends Controller with StrictLogging{
+class TournamentController @Inject()(tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository) extends Controller with StrictLogging{
 
  val tournamentWrites = Json.format[Tournament]
 
@@ -28,9 +28,16 @@ class TournamentController @Inject()(tournamentRepository: TournamentRepository)
   }
 
   def getTournamentById(tournamentId: String) = Action.async{
-    tournamentRepository.retrieveById(tournamentId).map{
-      case Some(tournament) => Ok(Json.toJson(tournament)(tournamentWrites))
-      case _ => NotFound
+    tournamentRepository.retrieveById(tournamentId).flatMap{
+      case Some(tournament) => seriesRepository.retrieveAll().flatMap { seriesList =>
+        Future.sequence{seriesList.map{ series =>
+          seriesPlayerRepository.retrieveAllSeriesPlayers(series.seriesId).map{ seriesPlayers =>
+              SeriesWithPlayers(series.seriesId, series.seriesName, series.seriesColor, series.numberOfSetsToWin, series.setTargetScore,series.playingWithHandicaps, series.extraHandicapForRecs, series.showReferees, series.currentRoundNr, seriesPlayers,series.tournamentId)
+          }
+        }
+      }.map{ seriesWithPlayerList => Ok(Json.toJson(TournamentWithSeries(tournament, seriesWithPlayerList))(JsonUtils.tournamentWithSeriesWrites))}
+      }
+      case _ => Future(NotFound)
     }
   }
 

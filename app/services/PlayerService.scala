@@ -1,13 +1,32 @@
 package services
 
 import java.util.UUID
+import javax.inject.Inject
 
-import models.player.{Ranks, Player}
+import com.typesafe.scalalogging.LazyLogging
+import models.player.{SeriesPlayer, Ranks, Player}
+import repositories.{SeriesRepository, SeriesPlayerRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PlayerService extends GenericAtomicCrudService[Player]{
+class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, seriesRepository: SeriesRepository) extends GenericAtomicCrudService[Player] with LazyLogging{
+  def getSeriesOfPlayer(playerId: String, tournamentId: String) =
+    seriesRepository.retrieveAllByField("TOURNAMENT_ID", tournamentId).flatMap{ seriesList =>
+      Future.sequence(seriesList.map { series =>
+        seriesPlayerRepository.getSubscriptionsOfPlayerInTournament(playerId, series.seriesId).map( subscriptions => if(subscriptions.isEmpty) None else Some(series))
+      })
+    }.map(_.flatten)
+
+  def deleteSubscriptions(seriesId: String, playerId: String): Future[Int] = { seriesPlayerRepository.deleteSubscriptions(seriesId, playerId).map{ numberOfDeletedRows =>
+      println(s"subscriptions deleted for $seriesId: "+numberOfDeletedRows.toString)
+      numberOfDeletedRows
+  }}
+
+  def subscribe: (SeriesPlayer) => Future[Option[SeriesPlayer]] = seriesPlayer => seriesPlayerRepository.subscribe(seriesPlayer)
+
+  def getSeriesPlayers(seriesId: String) = seriesPlayerRepository.getAllSeriesPlayers(seriesId)
+
 
   val players =List(
     Player("1", "Koen","Van Loock", Ranks.D0 ),

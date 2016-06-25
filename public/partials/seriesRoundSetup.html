@@ -1,0 +1,32 @@
+<md-toolbar layout="row">
+    <h2>{{tournament.tournamentName}} Rondes instellen voor</h2>
+</md-toolbar>
+
+<md-toolbar style="margin: 10px 0" ng-repeat="series in roundCtrl.seriesList" layout="column">
+   <div layout="row" class="md-padding">
+       <md-button class="md-icon-button" aria-label="open/close pool" ng-click="roundCtrl.toggleOpenClosed($index)" style="margin-top:15px;">
+           <md-icon md-font-icon="fa fa-caret-right fa-2x" ng-if="roundCtrl.isClosed($index)" ></md-icon>
+           <md-icon md-font-icon="fa fa-caret-down fa-2x" ng-if="!roundCtrl.isClosed($index)"></md-icon>
+       </md-button>
+
+        <h2>{{series.seriesName}}</h2>
+
+        <md-button class="md-fab" aria-label="add series" ng-click="roundCtrl.createSeriesRound($index)" style="margin-top:15px;">
+            <md-icon md-font-icon="fa fa-plus fa-2x"></md-icon>
+        </md-button>
+   </div>
+
+    <div ng-hide="roundCtrl.isClosed($index)" flex>
+        <div flex></div>
+        <series-round-setup ng-repeat="round in series.rounds track by $index" round="round" flex="90"></series-round-setup>
+    </div>
+</md-toolbar>
+
+<md-button class="blue-button" ng-click="roundCtrl.gotoMenu()">Setup voltooien</md-button>
+
+<md-button class="md-fab md-fab-bottom-left" aria-label="subscribe players" ng-click="roundCtrl.gotoPlayerSubscription()">
+    <md-icon md-font-icon="fa fa-chevron-left fa-2x"></md-icon>
+</md-button>
+
+
+

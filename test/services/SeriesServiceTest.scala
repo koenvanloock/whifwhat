@@ -11,15 +11,15 @@ import scala.concurrent.Await
 class SeriesServiceTest extends PlaySpec{
 
   val players=  List(
-    SeriesPlayer("1","1", "Koen","Van Loock", Ranks.D0, PlayerScores()),
-    SeriesPlayer("2","2", "Hans","Van Bael", Ranks.E4, PlayerScores() ),
-    SeriesPlayer("3","3", "Luk","Geraets", Ranks.D6, PlayerScores() ),
-    SeriesPlayer("4","4", "Lode","Van Renterghem", Ranks.E6, PlayerScores()),
-    SeriesPlayer("5","5", "Tim","Firquet", Ranks.C2, PlayerScores()),
-    SeriesPlayer("6","6", "Aram","Pauwels", Ranks.B4, PlayerScores()),
-    SeriesPlayer("7","7", "Tim","Uitdewilligen", Ranks.E0, PlayerScores()),
-    SeriesPlayer("8","8", "Matthias","Lesuise", Ranks.D6, PlayerScores()),
-    SeriesPlayer("9","9", "Gil","Corrujeira-Figueira", Ranks.D0, PlayerScores())
+    SeriesPlayer("1","1","1", "Koen","Van Loock", Ranks.D0, PlayerScores()),
+    SeriesPlayer("2","2","1", "Hans","Van Bael", Ranks.E4, PlayerScores() ),
+    SeriesPlayer("3","3","1", "Luk","Geraets", Ranks.D6, PlayerScores() ),
+    SeriesPlayer("4","4","1", "Lode","Van Renterghem", Ranks.E6, PlayerScores()),
+    SeriesPlayer("5","5","1", "Tim","Firquet", Ranks.C2, PlayerScores()),
+    SeriesPlayer("6","6","1", "Aram","Pauwels", Ranks.B4, PlayerScores()),
+    SeriesPlayer("7","7","1", "Tim","Uitdewilligen", Ranks.E0, PlayerScores()),
+    SeriesPlayer("8","8","1", "Matthias","Lesuise", Ranks.D6, PlayerScores()),
+    SeriesPlayer("9","9","1", "Gil","Corrujeira-Figueira", Ranks.D0, PlayerScores())
   )
   val seriesService = new SeriesService(new DrawService, new SeriesRoundService(new MatchService))
 
@@ -28,23 +28,6 @@ class SeriesServiceTest extends PlaySpec{
 
       val series = waitFor(seriesService.getTournamentSeriesOfTournament("1"))
       series must contain(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1"))
-    }
-
-    "create a series, he/she recieves an id" in {
-      val series = Await.result(seriesService.create(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      series.get.seriesId.length mustBe 36
-    }
-
-    "update a series" in {
-      val createdTournamentSeries = Await.result(seriesService.create(TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      val series = Await.result(seriesService.update(TournamentSeries("1", "Open zonder voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION).get
-      series.seriesName mustBe "Open zonder voorgift"
-    }
-
-    "delete a series" in {
-      waitFor(seriesService.delete("2"))
-      val series = waitFor(seriesService.getTournamentSeries("2"))
-      series mustBe None
     }
 
     "draw a series" in {
@@ -101,35 +84,35 @@ class SeriesServiceTest extends PlaySpec{
 
     seriesService.calculateSeriesScores(List(
       SeriesPlayerWithRoundPlayers(
-        SeriesPlayer("1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
+        SeriesPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
         List(
           SeriesRoundPlayer("1","1","1","Koen", "Van Loock", Ranks.D0, PlayerScores(3,0,6,2,84,40,304044)),
           SeriesRoundPlayer("1","1","2","Koen", "Van Loock", Ranks.D0, PlayerScores(2,1,5,2,64,40,103024))
         )),
       SeriesPlayerWithRoundPlayers(
-        SeriesPlayer("2", "2", "Hans", "Van Bael", Ranks.E4, PlayerScores()),
+        SeriesPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4, PlayerScores()),
         List(
           SeriesRoundPlayer("2","2","1", "Hans", "Van Bael", Ranks.E4, PlayerScores(3,0,6,2,84,40,304044)),
           SeriesRoundPlayer("2","2","2", "Hans", "Van Bael", Ranks.E4, PlayerScores(2,1,5,2,64,40,103024))
         )),
       SeriesPlayerWithRoundPlayers(
-        SeriesPlayer("3", "3", "Nicky", "Hoste", Ranks.E4, PlayerScores()),
+        SeriesPlayer("3", "3","1", "Nicky", "Hoste", Ranks.E4, PlayerScores()),
         List(
           SeriesRoundPlayer("3","3","1","Nicky", "Hoste", Ranks.E4, PlayerScores(3,0,6,2,84,40,304044)),
           SeriesRoundPlayer("3","3","2","Nicky", "Hoste", Ranks.E4, PlayerScores(2,1,5,2,64,40,103024))
         )),
       SeriesPlayerWithRoundPlayers(
-        SeriesPlayer("4", "4", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores()),
+        SeriesPlayer("4", "4","1", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores()),
         List(
           SeriesRoundPlayer("4","4","1","Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores(3,0,6,2,84,40,304044)),
           SeriesRoundPlayer("4","4","2","Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores(2,1,5,2,64,40,103024))
         ))
 
     )) mustBe List(
-      SeriesPlayer("1", "1", "Koen", "Van Loock", Ranks.D0,PlayerScores(5,1,11,4,148,80,407068)),
-      SeriesPlayer("2", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores(5,1,11,4,148,80,407068)),
-      SeriesPlayer("3", "3", "Nicky", "Hoste", Ranks.E4,PlayerScores(5,1,11,4,148,80,407068)),
-      SeriesPlayer("4", "4", "Gil", "Corujeira-Figueira", Ranks.E2,PlayerScores(5,1,11,4,148,80,407068)))
+      SeriesPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores(5,1,11,4,148,80,407068)),
+      SeriesPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4,PlayerScores(5,1,11,4,148,80,407068)),
+      SeriesPlayer("3", "3","1", "Nicky", "Hoste", Ranks.E4,PlayerScores(5,1,11,4,148,80,407068)),
+      SeriesPlayer("4", "4","1", "Gil", "Corujeira-Figueira", Ranks.E2,PlayerScores(5,1,11,4,148,80,407068)))
   }
 
 

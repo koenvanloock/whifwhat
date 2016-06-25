@@ -15,15 +15,15 @@ module TournamentManagement{
         }
 
         createTournament(){
-            this.tournamentService.addTournament(this.name,this.tournamentDate, this.hasMultipleSeries, this.maximumNumberOfSeriesEntries, this.showClub)
-            .success( (tournament: any) => {
-                this.tournamentService.getTournament(tournament.tournamentId).then( function(result){
-                    var selectedTournament = result.data;
+            this.tournamentService.addTournament(this.name,this.tournamentDate, this.hasMultipleSeries, this.maximumNumberOfSeriesEntries, this.showClub).then(
+                (tournament: any) => {
+                this.tournamentService.getTournament(tournament.tournamentId).then( (result) =>{
+                    var selectedTournament: any = result.data;
                     this.tournamentService.setCurrentTournament(selectedTournament);
-                    this.$location.path('/tournament/' + tournament.tournamentId + "/seriesSetup");
+                    this.$location.path('/tournament/' + selectedTournament.tournamentId + "/seriesSetup");
                 });
-
-            })};
+            })
+        }
     }
 
     angular.module("managerControllers").controller("CreateTournamentController", CreateTournamentController);

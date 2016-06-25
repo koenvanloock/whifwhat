@@ -16,7 +16,7 @@ module TournamentManagement {
                     'hasMultipleSeries': hasMultiple ? hasMultiple : false,
                     'maximumNumberOfSeriesEntries': parseInt(maxEntries) ? parseInt(maxEntries) : 1,
                     'showClub': showClub ? showClub : false
-                })
+                });
         }
 
         getTournament(id) {
@@ -28,12 +28,15 @@ module TournamentManagement {
         }
 
         getDate(date: Date){
-
             return { day: date.getDate(), month: date.getMonth()+1, year:date.getFullYear()};
         }
 
         setCurrentTournament(tournament: Tournament){
             this.selectedTournament = tournament;
+        }
+
+        getCurrentTournament(){
+            return this.selectedTournament;
         }
     }
 

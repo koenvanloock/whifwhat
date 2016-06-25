@@ -1,0 +1,19 @@
+<section>
+    <div class="md-whiteframe-z2 seriesBox" ng-repeat="tournamentSeries in tournament.series" flex="33" style="background: grey;">
+        <md-toolbar>{{tournamentSeries.seriesName}} ( {{tournamentSeries.seriesPlayers.data.length + " spelers"}} )</md-toolbar>
+        <h2>Reeksspelers</h2>
+        <table>
+            <tr>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Klassement</th>
+            </tr>
+            <tr ng-repeat="seriesPlayer in tournamentSeries.seriesPlayers.data">
+                <td>{{seriesPlayer.firstname}}</td>
+                <td>{{seriesPlayer.lastname}}</td>
+                <td>{{seriesPlayer.rank.name}}</td>
+
+            </tr>
+        </table>
+    </div>
+</section>

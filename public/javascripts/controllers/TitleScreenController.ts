@@ -1,17 +1,17 @@
 module TournamentManagement {
     import ILocationService = angular.ILocationService;
+    import IScope = angular.IScope;
     class TitleScreenController{
-        static $inject = ["$location", "authService"];
+        static $inject = ["$location", "authService", "$scope"];
         currentUser: AuthUser;
 
-        constructor(private $location: ILocationService, private authservice: AuthService){
-            if(authservice.isAuthenticated()){
-                this.currentUser = authservice.currentAuthUser;
-            }
+        constructor(private $location: ILocationService, private authservice: AuthService, private $scope: IScope){
+            this.$scope.$watch(() => authservice.currentAuthUser, (newVal, oldVal) => {if(newVal != oldVal){this.currentUser = newVal}} );
+            authservice.isAuthenticated();
         }
 
         hasUser(){
-            return this.currentUser != undefined;
+            return this.authservice.getCurrentAuthUser()!=undefined;
         }
 
         logout(){

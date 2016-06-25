@@ -58,7 +58,7 @@ module TournamentManagement {
         logout() {
             console.log("in de service logout");
             this.$cookies.remove('auth_token');
-            this.currentAuthUser = undefined;
+            this.currentAuthUser = null;
             //this.alertService.alerts = [];
             this.$location.path("/login");
         }

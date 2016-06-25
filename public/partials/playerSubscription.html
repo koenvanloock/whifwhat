@@ -1,0 +1,112 @@
+<md-toolbar>
+<h2 style="margin: 20px">{{playerSubscrCtrl.tournament.tournamentName}} ( {{playerSubscrCtrl.calculateTournamentPlayers() + " inschrijvingen"}} )</h2>
+</md-toolbar>
+<div class="md-padding">
+
+    <section class="md-whiteframe-z2" style="margin-bottom: 10px">
+        <md-autocomplete
+                ng-disabled="playerSubscrCtrl.playerSelection.isDisabled"
+                md-no-cache="playerSubscrCtrl.playerSelection.noCache"
+                md-selected-item="playerSubscrCtrl.playerSelection.selectedItem"
+                md-selected-item-change="playerSubscrCtrl.getSeriesSubscriptions()"
+                md-search-text="playerSubscrCtrl.playerSelection.searchText"
+                md-items="item in playerSubscrCtrl.querySearch(playerSubscrCtrl.playerSelection.searchText)"
+                md-item-text="item.firstname+' '+item.lastname+'\t'+item.rank.name"
+                md-min-length="0"
+                placeholder="Zoek een speler">
+            <md-item-template>
+                <span md-highlight-text="playerSubscrCtrl.playerSelection.searchText" md-highlight-flags="^i">{{item.firstname + " " + item.lastname}}</span>
+            </md-item-template>
+            <md-not-found>
+                No matches found for "{{playerSubscrCtrl.playerSelection.searchText}}".
+            </md-not-found>
+        </md-autocomplete>
+
+        <div ng-show="playerSubscrCtrl.playerSelection.selectedItem" style="background: grey">
+            <div layout="row" style="color: #ffffff; padding-left: 20px">
+                <h2 class="md-primary" layout-align="center center" flex="90">{{playerSubscrCtrl.playerSelection.selectedItem.firstname + " " +
+                    playerSubscrCtrl.playerSelection.selectedItem.lastname}} <span ng-show="playerSubscrCtrl.subscriptionList.length > 0">(deze speler is al ingeschreven in {{playerSubscrCtrl.subscriptionList}})</span></h2>
+
+                <h2 layout-align="center center" flex="20">{{playerSubscrCtrl.ranks[playerSubscrCtrl.playerSelection.selectedItem.rank.value].rankName}}</h2>
+            </div>
+            <div layout="row">
+                <md-select ng-repeat="nr in playerSubscrCtrl.numberOfSeriesEntries track by $index"
+                           ng-model="playerSubscrCtrl.subscription.seriesSubscriptions[$index]" placeholder="Kies een reeks" flex="33"
+                           ng-model-options="{trackBy: '$value.seriesId'}"
+                           layout-align="center center">
+                    <md-option ng-repeat="seriesToSubscribe in playerSubscrCtrl.seriesSubscriptions"
+                               ng-value="seriesToSubscribe">
+                        {{seriesToSubscribe.seriesName}}
+                    </md-option>
+                </md-select>
+            </div>
+            <md-button ng-click="playerSubscrCtrl.enterPlayer()">Schrijf speler in</md-button>
+        </div>
+    </section>
+
+    <tournament-overview tournament="playerSubscrCtrl.tournament"></tournament-overview>
+
+    <md-sidenav class="md-sidenav-right md-whiteframe-z2" md-component-id="right">
+    <section ng-controller="PlayerController">
+        <h2>Spelers in de database</h2>
+        <table>
+            <tr>
+                <th>Voornaam</th>
+                <th>Achternaam</th>
+                <th>Klassement</th>
+                <th>Acties</th>
+            </tr>
+            <tr ng-repeat="player in allPlayers">
+                <td>{{player.firstname}}</td>
+                <td>{{player.lastname}}</td>
+                <td>{{ranks[player.rank.value].name}}</td>
+                <td>
+                    <md-button class="md-fab md-primary" aria-label="edit player" ng-click="startEditPlayer($index)">
+                        <md-icon><i class="fa fa-edit"></i></md-icon>
+                    </md-button>
+                    <md-button class="md-fab md-primary" aria-label="edit player" ng-click="deletePlayer($index)">
+                        <md-icon><i class="fa fa-trash"></i></md-icon>
+                    </md-button>
+                </td>
+            </tr>
+        </table>
+
+
+
+        <div layout layout="row">
+
+            <md-input-container flex>
+                <label>Voornaam</label>
+                <input ng-model="playerToEdit.firstname"/>
+            </md-input-container>
+
+            <md-input-container flex>
+                <label>Achternaam</label>
+                <input ng-model="playerToEdit.lastname"/>
+            </md-input-container>
+
+            <md-select ng-model="playerToEdit.rank.value" placeholder="Klassement" flex="20">
+                <md-option ng-repeat="rank in ranks"
+                           value={{rank.value}}>
+                    {{rank.name}}
+                </md-option>
+            </md-select>
+            <md-button class="md-fab md-primary" ng-show="inserting" ng-click="addPlayer()"
+                       style="font-size: 28px; font-weight:  bold" aria-label="add player">+
+            </md-button>
+            <md-button class="md-fab md-primary" ng-show="editing" ng-click="editPlayer()" aria-label="update player">
+                <md-icon><i class="fa fa-save"></i></md-icon>
+            </md-button>
+        </div>
+    </section>
+    </md-sidenav>
+
+
+    <md-button class="md-fab md-fab-bottom-right" aria-label="subscribe players" ng-click="playerSubscrCtrl.gotoRoundsSetup()">
+        <md-icon md-font-icon="fa fa-chevron-right fa-2x"></md-icon>
+    </md-button>
+
+    <md-button class="md-fab md-fab-bottom-left" aria-label="add series" ng-click="playerSubscrCtrl.gotoSeriesSetup()">
+        <md-icon md-font-icon="fa fa-chevron-left fa-2x"></md-icon>
+    </md-button>
+</div>

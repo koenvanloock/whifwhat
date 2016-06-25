@@ -13,6 +13,8 @@ case class Tournament(tournamentId: String, tournamentName: String, tournamentDa
   override implicit val getResult: GetResult[Tournament] = GetResult(r => Tournament(r.<<,r.<<,r.nextDate().toLocalDate,r.<<,r.<<,r.<<))
 }
 
+case class TournamentWithSeries(tournament: Tournament, series: List[SeriesWithPlayers])
+
 object TournamentResultModel{
   implicit object TournamentIsCrudable extends Crudable[Tournament]{
     override def getId(crudable: Tournament): String = crudable.tournamentId
