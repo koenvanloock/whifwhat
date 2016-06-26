@@ -20,7 +20,7 @@ class SiteMatchServiceTest extends PlaySpec{
     "create a match, it recieves an id" in {
 
       val siteMatch =  Await.result(matchService.create(SiteMatch("1","1","2","1",3,true,21,2,0,0)),DEFAULT_DURATION)
-      siteMatch.get.matchId.length mustBe 36
+      siteMatch.get.matchId.length mustBe 1
     }
 
     "update a match" in {

@@ -13,7 +13,16 @@ import scala.concurrent.Future
 
 class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
 
+  def convertRoundToGeneric(seriesRound: SeriesRound): GenericSeriesRound = seriesRound match {
+    case robin  : SiteRobinRound   => GenericSeriesRound(robin.seriesRoundId,None, Some(robin.numberOfRobinGroups), "R",robin.seriesId, robin.roundNr)
+    case bracket: SiteBracketRound => GenericSeriesRound(bracket.seriesRoundId, Some(bracket.numberOfBracketRounds), None, "B", bracket.seriesId, bracket.roundNr)
+  }
+
+  def updateSeriesRound(seriesRound: SeriesRound) = seriesRoundRepository.update(convertRoundToGeneric(seriesRound))
+
+
   def getRoundsOfSeries(seriesId: String) = seriesRoundRepository.retrieveAllByField("SERIES_ID", seriesId)
+  def delete(seriesRoundId: String) = seriesRoundRepository.delete(seriesRoundId)
 
   def calculatePlayerScore: (SeriesPlayerWithRoundPlayers) => SeriesPlayer = {
     seriesPlayerWithRoundPlayers =>

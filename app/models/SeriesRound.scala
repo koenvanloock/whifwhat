@@ -9,7 +9,7 @@ sealed trait SeriesRound{
 case class SiteBracketRound(seriesRoundId: String, numberOfBracketRounds: Int, seriesId: String, roundNr: Int) extends SeriesRound {
   override def getId = seriesRoundId
 }
-case class SiteRobinRound(seriesRoundId: String, numberOfRobins: Int, seriesId: String, roundNr: Int) extends SeriesRound {
+case class SiteRobinRound(seriesRoundId: String, numberOfRobinGroups: Int, seriesId: String, roundNr: Int) extends SeriesRound {
   override def getId: String = seriesRoundId
 }
 

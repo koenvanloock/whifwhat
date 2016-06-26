@@ -22,7 +22,7 @@ class SeriesService @Inject()(drawService: DrawService, seriesRoundService: Seri
   }
 
   def drawSeries(seriesRound: SeriesRound, seriesPlayers: List[SeriesPlayer], numberOfSetsToWin: Int, setTargetScore: Int, drawType: DrawType = DrawTypes.EnteredOrder): Option[SeriesRoundWithPlayersAndMatches] = seriesRound match {
-    case robin:SiteRobinRound => drawService.drawRobins(seriesPlayers,robin.numberOfRobins, numberOfSetsToWin, setTargetScore, drawType)
+    case robin:SiteRobinRound => drawService.drawRobins(seriesPlayers,robin.numberOfRobinGroups, numberOfSetsToWin, setTargetScore, drawType)
     case bracket:SiteBracketRound => drawService.drawBracket(seriesPlayers, bracket.numberOfBracketRounds,numberOfSetsToWin, setTargetScore)
   }
 

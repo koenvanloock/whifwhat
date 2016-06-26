@@ -32,7 +32,7 @@ module TournamentManagement {
         };
 
         isClosed(index) {
-            return closed[index];
+            return this.closed[index];
         };
 
 
@@ -43,7 +43,7 @@ module TournamentManagement {
                 numberOfBracketRounds: 0,
                 numberOfRobinGroups: 0
             };
-            closed[index] = false;
+            this.closed[index] = false;
             if (this.seriesList[index].rounds == undefined) this.seriesList[index].rounds = [];
                 this.roundService.createSeriesRound(initSeriesRound).then(function (response) {
                 this.seriesList[index].rounds.push(response.data);
@@ -59,10 +59,10 @@ module TournamentManagement {
         };
 
         selectionChanged(index) {
+            if(!this.seriesList[index].rounds || this.seriesList[index].rounds.length <1)
             this.roundService.loadRoundsOfSeries(this.seriesList[index].seriesId).then((roundList: any) => {
-                this.roundService.setRoundsOfSeries(roundList);
+                this.roundService.setRoundsOfSeries(roundList.data);
                 this.seriesList[index].rounds = this.roundService.getRoundsOfSeries();
-                roundList.data.map( (item,index) => {this.closed[index] = false;});
             });
 
         }

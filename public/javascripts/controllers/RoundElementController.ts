@@ -10,12 +10,14 @@ module TournamentManagement {
     }
 
     class RoundElementController {
+        static $inject = ["SeriesRoundService","$rootScope"];
+
         private roundTypes:Array<RoundType>;
         private numberOfRobinsList:Array<number>;
         private bracketRounds: Array<BracketRound>;
         private selectedRound: SeriesRound;
 
-        constructor() {
+        constructor(private seriesRoundService: SeriesRoundService, private $rootScope: ng.IRootScopeService) {
             this.roundTypes = [
                 {"type": "R", "name": "Pouleronde"},
                 {"type": "B", "name": "Tabel"}
@@ -29,13 +31,16 @@ module TournamentManagement {
                 {"name": "halve finales", "value": 2},
                 {"name": "finale", "value": 1}
             ];
+
+            $rootScope.$watch( () => this.selectedRound, ( newval: any, oldval) => {
+                if(newval!= undefined){ this.selectType(newval.roundType)}} );
         }
 
 
         showSeriesRoundType() {
-            if (this.selectedRound.roundType == "R") {
+            if (this.selectedRound.roundType.type == "R") {
                 return this.roundTypes[0];
-            } else if (this.selectedRound.roundType == "B") {
+            } else if (this.selectedRound.roundType.type == "B") {
                 return this.roundTypes[1];
             } else {
                 return {};
@@ -61,19 +66,28 @@ module TournamentManagement {
             }
         };
 
-        updateRound(round) {
+        selectType(roundType: string){
+
+            this.roundTypes.map( (type) => {
+                if(type.type === roundType)
+                this.selectedRound.roundType = type;
+            });
+
+        }
+
+        updateRound() {
             var roundToUpdate = {
-                roundType: round.roundType.type,
-                seriesRoundId: round.seriesRoundId,
-                numberOfBracketRounds: 0,
-                numberOfRobinGroups: 0,
-                seriesId: round.seriesId,
-                roundNr: round.roundNr
+                roundType: this.selectedRound.roundType.type,
+                seriesRoundId: this.selectedRound.seriesRoundId,
+                numberOfBracketRounds: this.selectedRound.numberOfBracketRounds ? parseInt(this.selectedRound.numberOfBracketRounds) : 0,
+                numberOfRobinGroups: this.selectedRound.numberOfRobinGroups ? parseInt(this.selectedRound.numberOfRobinGroups.toString()) : 0,
+                seriesId: this.selectedRound.seriesId,
+                roundNr: this.selectedRound.roundNr
             };
-            seriesRoundService.updateSeriesRound(roundToUpdate).then(
-                function (result) {
-                    $scope.round = {
-                        roundType: (result.data.roundType.type != undefined || result.data.roundType == "B") ? $scope.roundTypes[1] : $scope.roundTypes[0],
+            this.seriesRoundService.updateSeriesRound(roundToUpdate).then(
+                (result: any) => {
+                    this.selectedRound = {
+                        roundType: (result.data.roundType.type != undefined || result.data.roundType.type == "B") ? this.roundTypes[1] : this.roundTypes[0],
                         seriesRoundId: result.data.seriesRoundId,
                         numberOfBracketRounds: result.data.numberOfBracketRounds,
                         numberOfRobinGroups: result.data.numberOfRobins,
@@ -85,19 +99,19 @@ module TournamentManagement {
 
 
         showMoveUp() {
-            return $scope.round.roundNr > 1;
+            return (this.selectedRound && this.selectedRound.roundNr) ? this.selectedRound.roundNr > 1 : false;
         };
 
         showMoveDown() {
-            return $scope.round.roundNr < seriesRoundService.getRoundCount();
+            return (this.selectedRound && this.selectedRound.roundNr) ? this.selectedRound.roundNr < this.seriesRoundService.getRoundCount() : false;
         };
 
         moveSeriesRoundUp() {
-            seriesRoundService.moveSeriesUp($scope.round);
+            this.seriesRoundService.moveSeriesUp(this.selectedRound);
         };
 
         moveSeriesRoundDown() {
-            seriesRoundService.moveSeriesDown($scope.round);
+            this.seriesRoundService.moveSeriesDown(this.selectedRound);
         }
 
 

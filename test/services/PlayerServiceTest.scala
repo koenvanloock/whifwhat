@@ -26,7 +26,7 @@ class PlayerServiceTest extends PlaySpec {
     "create a player, he/she recieves an id" in {
 
       val player =  Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)),DEFAULT_DURATION)
-        player.get.playerId.length mustBe 36
+        player.get.playerId.length mustBe 1
     }
 
     "update a player" in {

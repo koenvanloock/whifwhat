@@ -22,6 +22,7 @@ POST          /series                           controllers.SeriesController.cre
 PUT           /series/:seriesId                 controllers.SeriesController.updateSeries(seriesId: String)
 
 GET           /seriesrounds/:seriesId           controllers.SeriesRoundController.getRoundsOfSeries(seriesId: String)
+PUT           /seriesrounds                     controllers.SeriesRoundController.updateSeriesRound
 
 POST          /login                            controllers.LoginController.login
 

@@ -5,13 +5,17 @@ import models.{Bracket, RobinRound, RobinGroup, SiteRobinRound}
 import models.matches.{BracketMatchWithGames, SiteGame, SiteMatchWithGames}
 import models.player._
 import org.scalatestplus.play.PlaySpec
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.SeriesRoundRepository
 
 import scala.concurrent.Await
 
 
 class SeriesRoundServiceTest extends PlaySpec{
 
-  val seriesRoundService = new SeriesRoundService(new MatchService())
+  val appBuilder = new GuiceApplicationBuilder().build()
+  val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
+  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository)
   val players = List(
     SeriesRoundPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores()),
     SeriesRoundPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4,PlayerScores()),

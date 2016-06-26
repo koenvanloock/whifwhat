@@ -12,4 +12,6 @@ import models.tablemodels.GenericSeriesRoundTableModel._
 
 class SeriesRoundRepository @Inject()(@NamedDatabase("default") override protected val dbConfigProvider: DatabaseConfigProvider) extends GenericRepo[GenericSeriesRound, GenericSeriesRoundTable](dbConfigProvider = dbConfigProvider)("SERIES_ROUNDS"){
   override def query: driver.api.TableQuery[GenericSeriesRoundTable] = TableQuery[GenericSeriesRoundTable]
+
+
 }

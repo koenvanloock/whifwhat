@@ -8,11 +8,11 @@ module TournamentManagement {
         }
 
         createSeriesRound(seriesRoundJson) {
-            return this.$http.post(this.base.url + "/seriesround", seriesRoundJson)
+            return this.$http.post(this.base.url + "/seriesrounds", seriesRoundJson)
         }
 
         updateSeriesRound(seriesRoundJson) {
-            return this.$http.put(this.base.url + "/seriesround", seriesRoundJson)
+            return this.$http.put(this.base.url + "/seriesrounds", seriesRoundJson)
         }
 
         loadRoundsOfSeries(seriesId) {

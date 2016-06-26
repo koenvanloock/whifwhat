@@ -17,7 +17,7 @@ class SiteGameServiceTest extends PlaySpec{
 
     "create a game, it recieves an id" in {
       val siteGame = Await.result(siteGameService.create(SiteGame("1","1",15,21,1)), DEFAULT_DURATION)
-        siteGame.get.id.length mustBe 36
+        siteGame.get.id.length mustBe 1
     }
 
     "update a series" in {

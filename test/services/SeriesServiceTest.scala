@@ -5,6 +5,8 @@ import models.matches.{SiteGame, SiteMatchWithGames, SiteMatch}
 import models.player._
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.SeriesRoundRepository
 
 import scala.concurrent.Await
 
@@ -21,7 +23,10 @@ class SeriesServiceTest extends PlaySpec{
     SeriesPlayer("8","8","1", "Matthias","Lesuise", Ranks.D6, PlayerScores()),
     SeriesPlayer("9","9","1", "Gil","Corrujeira-Figueira", Ranks.D0, PlayerScores())
   )
-  val seriesService = new SeriesService(new DrawService, new SeriesRoundService(new MatchService))
+
+  val appBuilder = new GuiceApplicationBuilder().build()
+  val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
+  val seriesService = new SeriesService(new DrawService, new SeriesRoundService(new MatchService, seriesRoundRepository))
 
   "TournamentSeriesService" should {
     "return a list of series of a tournament" in {
