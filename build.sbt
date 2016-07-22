@@ -10,6 +10,7 @@ libraryDependencies ++= Seq(
   cache,
   ws,
   "mysql" % "mysql-connector-java" % "5.1.39",
+  "com.h2database" % "h2" % "1.3.175",
   "com.jason-goodwin" %% "authentikat-jwt" % "0.4.1",
   "org.mindrot" % "jbcrypt" % "0.3m",
   "com.typesafe.play" %% "play-slick" % "2.0.0",
@@ -25,3 +26,5 @@ coverageExcludedPackages := "<empty>;Reverse.*;router.*;views.*"
 addCommandAlias("scoverage", {
   "clean coverage test"; "coverageReport"
 })
+
+javaOptions in Test += "-Dconfig.resource=test.conf"

@@ -6,7 +6,7 @@ import models.matches.{BracketMatchWithGames, SiteGame, SiteMatchWithGames}
 import models.player._
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.SeriesRoundRepository
+import repositories.{RoundPlayerRepository, Schema, SeriesRoundRepository}
 
 import scala.concurrent.Await
 
@@ -15,7 +15,11 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
-  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository)
+  val roundPlayerRepository = appBuilder.injector.instanceOf[RoundPlayerRepository]
+  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository, roundPlayerRepository)
+  val schema = appBuilder.injector.instanceOf[Schema]
+  schema.initSchema()
+
   val players = List(
     SeriesRoundPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores()),
     SeriesRoundPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
@@ -82,10 +86,10 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   "isRoundComplete of a complete bracket returns true" in {
     val players = List(
-      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
-      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
-      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
-      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+      BracketPlayer("1","1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
+      BracketPlayer("2","1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
+      BracketPlayer("3","1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
+      BracketPlayer("4","1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
     )
 
     val matches =
@@ -102,10 +106,10 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   "isRoundComplete of an incomplete bracket returns false" in {
     val players = List(
-      BracketPlayer("1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
-      BracketPlayer("1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
-      BracketPlayer("1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
-      BracketPlayer("1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+      BracketPlayer("1","1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
+      BracketPlayer("2","1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
+      BracketPlayer("3","1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
+      BracketPlayer("4","1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
     )
 
     val matches =

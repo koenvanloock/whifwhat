@@ -11,5 +11,6 @@ module TournamentManagement{
         tournamentId: string,
 
         seriesPlayers?: Array<Player>;
+        rounds?: Array<SeriesRound>;
     }
 }

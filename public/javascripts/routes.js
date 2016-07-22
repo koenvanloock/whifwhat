@@ -46,6 +46,18 @@ angular.module('tournamentManager')
                 controllerAs: 'tournamentListCtrl',
                 requiresLogin: true
             })
+            .when('/playerManagement', {
+                templateUrl: "assets/partials/playerManagement.html",
+                controller: "PlayerController",
+                controllerAs: "ctrl",
+                requiresLogin: true
+            })
+            .when('/drawMenu/:tournamentId', {
+                templateUrl: "assets/partials/drawMenu.html",
+                controller: "DrawController",
+                controllerAs: "drawCtrl",
+                requiresLogin: true
+            })
             .otherwise({
                 requiresLogin: true
             });

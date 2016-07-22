@@ -12,7 +12,7 @@ module TournamentManagement{
     }
         postPlayer(player) {
         player.rank.value = parseInt(player.rank.value);
-        return this.$http.post(this.base.url + '/player', player)
+        return this.$http.post(this.base.url + '/players', player)
     }
 
         subscribePlayer(seriesPlayerList, seriesList, playerId) {
@@ -20,11 +20,11 @@ module TournamentManagement{
     }
 
         updatePlayer(player) {
-        return this.$http.put(this.base.url + "/player", player)
+        return this.$http.put(this.base.url + "/players", player)
     }
 
         deletePlayer(id) {
-        return this.$http.delete(this.base.url + '/player/' + id)
+        return this.$http.delete(this.base.url + '/players/' + id)
     }
 
         getSeriesSubscriptionsOfPlayer(playerId, tournamentId){

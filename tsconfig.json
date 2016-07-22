@@ -36,11 +36,13 @@
     "public/javascripts/services/LoginRegisterService.ts",
     "public/javascripts/services/TournamentService.ts",
     "public/javascripts/services/SeriesService.ts",
+    "public/javascripts/services/DrawService.ts",
     "public/javascripts/services/SeriesRoundService.ts",
     "public/javascripts/services/PlayerService.ts",
 
     "public/javascripts/controllers/LoginController.ts",
     "public/javascripts/controllers/CreateTournamentController.ts",
+    "public/javascripts/controllers/DrawController.ts",
     "public/javascripts/controllers/RoundElementController.ts",
     "public/javascripts/controllers/SeriesRoundSetupController.ts",
     "public/javascripts/controllers/SeriesSetupController.ts",

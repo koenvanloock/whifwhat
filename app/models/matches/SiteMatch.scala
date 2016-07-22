@@ -14,7 +14,11 @@ case class SiteMatch(
                       targetScore: Int,
                       numberOfSetsToWin: Int,
                       wonSetsA: Int,
-                      wonSetsB: Int) extends Crudable[SiteMatch]{
-  override def getId(siteMatch: SiteMatch): String = siteMatch.matchId
-  override implicit val getResult: GetResult[SiteMatch] = GetResult(r => SiteMatch(r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<))
+                      wonSetsB: Int)
+
+object MatchEvidence{
+  implicit object MatchIsCrudable extends Crudable[SiteMatch]{
+    override def getId(crudable: SiteMatch): String = crudable.matchId
+    override implicit val getResult: GetResult[SiteMatch] = GetResult(r => SiteMatch(r.<<,r.<<,r.<<,r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<))
+  }
 }

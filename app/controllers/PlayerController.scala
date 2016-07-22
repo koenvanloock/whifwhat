@@ -102,4 +102,20 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     }
   }
 
+  /* handle manually for now, just enter path at player create/update
+  def uploadPlayerImage = Action.async { request =>
+    request.body.asMultipartFormData
+      .flatMap { multiPart =>
+        multiPart.file("uploadFile").map { filePart =>
+         /* val path: String = saveFileToImageFolder(filePart)
+          filePart.contentType match {
+            case Some("text/csv") => parseCsvFile(fileEntity, entityId, path, delimiter, request)
+            case _ =>
+              deleteFile(path)*/
+              Future(Ok)
+          }
+      }.getOrElse(Future(BadRequest))
+  }*/
+
+
 }

@@ -1,7 +1,8 @@
 module TournamentManagement{
+    import ITimeoutService = angular.ITimeoutService;
     class PlayerController{
 
-        static $inject = ["PlayerService"];
+        static $inject = ["PlayerService", "Upload","$timeout", "base"];
 
         private ranks= [];
         private inserting: boolean;
@@ -16,11 +17,14 @@ module TournamentManagement{
             'rank': null
         };
 
+        private result: any;
+        private errorMsg: string;
+        private progress: number;
 
 
-        constructor(private playerService: PlayerService){
+        constructor(private playerService: PlayerService, private Upload: any, private $timeout: ITimeoutService, private base: any){
+            this.inserting = true;
             this.allPlayers = [];
-            var allPlayers = this.allPlayers;
             playerService.getRanks().then(
                 (result: any) => {
                     result.data.map( (x) => {
@@ -30,18 +34,17 @@ module TournamentManagement{
             );
 
             playerService.getAllPlayers().then(
-                function (result: any) {
+                (result: any) => {
                     result.data.map((player) => {
-                        allPlayers.push({
+                        this.allPlayers.push({
                             'playerId': player.playerId,
                             'firstname': player.firstname,
                             'lastname': player.lastname,
-                            'rank': player.rank
+                            'rank': player.rank,
+                            'imagepath': player.imagepath
                         });
-
                     });
                 });
-
         }
 
 
@@ -58,6 +61,7 @@ module TournamentManagement{
                 "playerId": this.allPlayers[playerindex].playerId,
                 "firstname": this.allPlayers[playerindex].firstname,
                 "lastname": this.allPlayers[playerindex].lastname,
+                "imagepath": this.allPlayers[playerindex].imagepath,
                 "rank": {
                     "value": this.allPlayers[playerindex].rank.value,
                     "name": this.allPlayers[playerindex].rank.name
@@ -92,7 +96,28 @@ module TournamentManagement{
         this.playerService.deletePlayer(playerToDelete.playerId).then(()=>{
             this.allPlayers.splice(playerIndex, 1);
         })
-    };
+        };
+
+        upload(dataUrl: string, name: string, size: number){
+            var uploadDatablobfunc = this.Upload.urlToBlob;
+            this.Upload.upload({
+            url: this.base.url + "/uploadimage",
+            data: { file: uploadDatablobfunc(dataUrl)}
+            }).then(
+
+                (response) => {
+                this.$timeout( () => {
+                    this.result = response.data;
+                });
+                },
+                (response) => {if (response.status > 0) this.errorMsg = response.status + ': ' + response.data;
+                },
+                (evt: any) => {
+                    this.progress = parseInt((100.0 * evt.loaded / evt.total)+'')
+                }
+            )
+        }
+
     }
 
     angular.module("managerControllers").controller("PlayerController", PlayerController)

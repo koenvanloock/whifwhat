@@ -6,6 +6,7 @@
     <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/font-awesome/css/font-awesome.min.css")">
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/angular-material/angular-material.css")">
+        <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/ng-img-crop/compile/minified/ng-img-crop.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
     </head>
     <body >
@@ -16,6 +17,7 @@
                 <ul class="navList">
                     <li class="navListItem" ><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentWizard()">Maak tornooi</md-button></li>
                     <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentList()">Laad tornooi</md-button></li>
+                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoPlayerManagement()">Beheer spelers</md-button></li>
                 </ul>
 
                 <section class="user">
@@ -40,6 +42,8 @@
         <script src="@routes.Assets.versioned("bower_components/angular-aria/angular-aria.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/angular-animate/angular-animate.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/angular-material/angular-material.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/ng-file-upload/ng-file-upload.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/ng-img-crop/compile/minified/ng-img-crop.js")"></script>
 
         <script src="@routes.Assets.versioned("javascripts/tournamentManager.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/routes.js")"></script>
@@ -47,6 +51,7 @@
 
         <script src="@routes.Assets.versioned("javascripts/controllers/LoginController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/CreateTournamentController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/DrawController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/SeriesSetupController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/SeriesRoundSetupController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/RoundElementController.js")"></script>
@@ -61,6 +66,7 @@
         <script src="@routes.Assets.versioned("javascripts/services/authService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/alertService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/PlayerService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/services/DrawService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/TournamentService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesRoundService.js")"></script>

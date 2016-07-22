@@ -4,6 +4,7 @@ module TournamentManagement{
         firstname: string;
         lastname: string;
         rank: Rank;
+        imagepath?: string;
 
 
     }

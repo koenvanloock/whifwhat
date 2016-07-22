@@ -2,10 +2,17 @@ package services
 
 import models.player.{PlayerScores, SeriesPlayer, Ranks, Player}
 import org.scalatestplus.play.PlaySpec
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.{SeriesRoundRepository, SeriesRepository, SeriesPlayerRepository}
 
 class DrawServiceTest extends PlaySpec {
   "DrawService" should {
-    val drawService = new DrawService()
+    val appBuilder = new GuiceApplicationBuilder().build()
+    val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
+    val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
+    val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+    val matchService = new MatchService
+    val drawService = new DrawService
     val players=  List(
       SeriesPlayer("1","1","1", "Koen","Van Loock", Ranks.D0, PlayerScores()),
       SeriesPlayer("2","2","1", "Hans","Van Bael", Ranks.E4, PlayerScores() ),
@@ -64,7 +71,6 @@ class DrawServiceTest extends PlaySpec {
 
     "the ranked random sorts the players by rank and distributes them across the first places in all groups" in {
       val test = drawService.drawRobins(players, 3, 21, 2, DrawTypes.RankedRandomOrder).get
-      println(test.robinList.head.robinPlayers.mkString("\n"))
       val firstPlacesFirstNams = test.robinList.map(robin => robin.robinPlayers.head.firstname)
       firstPlacesFirstNams must contain("Koen")
       firstPlacesFirstNams must contain("Aram")

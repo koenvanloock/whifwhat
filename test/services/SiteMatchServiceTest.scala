@@ -3,11 +3,15 @@ package services
 import helpers.TestHelpers._
 import models.matches.SiteMatch
 import org.scalatestplus.play.PlaySpec
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.MatchRepository
 
 import scala.concurrent.Await
 
 class SiteMatchServiceTest extends PlaySpec{
-  val matchService = new SiteMatchService()
+  val appBuilder = new GuiceApplicationBuilder().build()
+  val matchRepository = appBuilder.injector.instanceOf[MatchRepository]
+  val matchService = new SiteMatchService(matchRepository)
 
   "MatchService" should{
     "return a match by id" in {

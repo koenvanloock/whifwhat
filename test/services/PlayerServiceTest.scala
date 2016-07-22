@@ -1,10 +1,10 @@
 package services
 
-import models.player.{SeriesPlayerWithRoundPlayers, Ranks, Player}
+import models.player.{Ranks, Player}
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{SeriesRepository, SeriesPlayerRepository}
+import repositories.{Schema, PlayerRepository, SeriesRepository, SeriesPlayerRepository}
 
 import scala.concurrent.Await
 
@@ -12,8 +12,13 @@ class PlayerServiceTest extends PlaySpec {
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
   val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+  val playerRepository = appBuilder.injector.instanceOf[PlayerRepository]
+  val schema = appBuilder.injector.instanceOf[Schema]
+  schema.initSchema()
 
-  val playerService = new PlayerService(seriesPlayerRepository, seriesRepository)
+  val playerService = new PlayerService(seriesPlayerRepository, seriesRepository,playerRepository)
+  val player =  Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)),DEFAULT_DURATION)
+
 
   "PlayerService" should{
     "return a list of players" in {
@@ -25,14 +30,12 @@ class PlayerServiceTest extends PlaySpec {
 
     "create a player, he/she recieves an id" in {
 
-      val player =  Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)),DEFAULT_DURATION)
         player.get.playerId.length mustBe 1
     }
 
     "update a player" in {
-      val createdPlayer = Await.result(playerService.createPlayer(Player("6", "Aram","Pauwels", Ranks.B4)), DEFAULT_DURATION)
-      val player = Await.result(playerService.updatePlayer(Player(createdPlayer.get.playerId, "Koen","Pauwels", Ranks.B4)), DEFAULT_DURATION).get
-      player.firstname mustBe "Koen"
+      val newPlayer = Await.result(playerService.updatePlayer(Player(player.get.playerId, "Koen","Pauwels", Ranks.B4)), DEFAULT_DURATION).get
+      newPlayer.firstname mustBe "Koen"
     }
 
     "delete a player" in {

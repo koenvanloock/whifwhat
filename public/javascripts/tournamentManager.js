@@ -6,7 +6,9 @@ var tournamentmanager = angular.module("tournamentManager", [
     'ngRoute',
     'ngCookies',
     'ngMaterial',
-    'angular-jwt']);
+    'angular-jwt',
+    'ngFileUpload',
+    'ngImgCrop']);
 
 
 

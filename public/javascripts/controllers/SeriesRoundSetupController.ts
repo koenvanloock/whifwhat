@@ -6,7 +6,7 @@ module TournamentManagement {
         static $inject = ["SeriesService", "SeriesRoundService", "$location", "$routeParams", "$rootScope"];
 
         private closed = [];
-        private seriesList = [];
+        seriesList = [];
 
         constructor(private seriesService:SeriesService, private roundService: SeriesRoundService, private $location:angular.ILocationService, private $routeParams:ng.route.IRouteParamsService, private $rootScope:IRootScopeService) {
 
@@ -41,11 +41,12 @@ module TournamentManagement {
                 seriesId: this.seriesList[index].seriesId,
                 roundType: "B",
                 numberOfBracketRounds: 0,
-                numberOfRobinGroups: 0
+                numberOfRobinGroups: 0,
+                roundNr: (this.seriesList[index].rounds ? this.seriesList[index].rounds.length + 1 : 1)
             };
             this.closed[index] = false;
             if (this.seriesList[index].rounds == undefined) this.seriesList[index].rounds = [];
-                this.roundService.createSeriesRound(initSeriesRound).then(function (response) {
+                this.roundService.createSeriesRound(initSeriesRound).then((response) => {
                 this.seriesList[index].rounds.push(response.data);
             })
         };
@@ -54,8 +55,8 @@ module TournamentManagement {
             this.$location.path("/" + this.$routeParams["tournamentId"] + "/playerSubscription")
         };
 
-        gotoMenu() {
-            this.$location.path("/tournamentMenu/" + this.$routeParams["tournamentId"]);
+        gotoDrawMenu() {
+            this.$location.path("/drawMenu/" + this.$routeParams["tournamentId"]);
         };
 
         selectionChanged(index) {

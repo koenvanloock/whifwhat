@@ -10,7 +10,7 @@ import slick.lifted.TableQuery
 import scala.language.postfixOps
 
 class SeriesTable(tag: Tag) extends Table[TournamentSeries](tag, "TOURNAMENT_SERIES") {
-  def id = column[String]("SERIES_ID", O.PrimaryKey, O.Length(100))
+  def id = column[String]("ID", O.PrimaryKey, O.Length(100))
   def name = column[String]("SERIES_NAME")
   def seriesColor = column[String]("PASSWORD")
   def numberOfSetsToWin = column[Int]("NUMBER_OF_SETS_TO_WIN")

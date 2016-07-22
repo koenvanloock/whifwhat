@@ -6,16 +6,58 @@ import javax.inject.Inject
 import models._
 import models.matches.{SiteMatchWithGames, SiteMatch}
 import models.player.{SeriesRoundPlayer, SeriesPlayerWithRoundPlayers, PlayerScores, SeriesPlayer}
-import repositories.SeriesRoundRepository
+import repositories.{RoundPlayerRepository, SeriesRoundRepository}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
+class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository, roundPlayersRepository: RoundPlayerRepository) {
+
+  def saveBracket(bracket: Bracket): Future[Option[SeriesRoundWithPlayersAndMatches]] = {
+
+    //todo delete existing elements in DB !!!! (need roundNR???)
+
+     roundPlayersRepository.saveBracketPlayers(bracket.bracketPlayers).map { playerList =>
+       //todo save round
+       // save roundMatches
+        //todo save matches
+        Some(bracket)
+     }
+
+  }
+
+
+  def saveRobin(robin: RobinRound): Future[Option[SeriesRoundWithPlayersAndMatches]] = {
+    val players = robin.robinList.flatMap(_.robinPlayers)
+    //todo delete existing elements in DB !!!! (need roundNR???)
+
+    roundPlayersRepository.saveRobinPlayers(players).map { playerList =>
+      //todo save round
+      // save roundMatch
+      //todo save matches
+      Some(robin)
+    }
+  }
+
+
+  def saveFullSeriesRound(fullSeriesRound: SeriesRoundWithPlayersAndMatches): Future[Option[SeriesRoundWithPlayersAndMatches]] = fullSeriesRound match {
+    case bracket: Bracket => saveBracket(bracket)
+    case robin: RobinRound => saveRobin(robin)
+  }
+
+  def createSeriesRound(seriesRound: SeriesRound): Future[Option[GenericSeriesRound]] = seriesRoundRepository.create(convertRoundToGeneric(seriesRound))
+
 
   def convertRoundToGeneric(seriesRound: SeriesRound): GenericSeriesRound = seriesRound match {
     case robin  : SiteRobinRound   => GenericSeriesRound(robin.seriesRoundId,None, Some(robin.numberOfRobinGroups), "R",robin.seriesId, robin.roundNr)
     case bracket: SiteBracketRound => GenericSeriesRound(bracket.seriesRoundId, Some(bracket.numberOfBracketRounds), None, "B", bracket.seriesId, bracket.roundNr)
+  }
+
+  def convertGenericToRound(genericSeriesRound: GenericSeriesRound): SeriesRound ={
+    genericSeriesRound.roundType match{
+      case "R" => SiteRobinRound(genericSeriesRound.seriesRoundId, genericSeriesRound.numberOfRobins.get, genericSeriesRound.seriesId, genericSeriesRound.roundNr)
+      case "B" => SiteBracketRound(genericSeriesRound.seriesRoundId, genericSeriesRound.numberOfBracketRounds.get, genericSeriesRound.seriesId, genericSeriesRound.roundNr)
+    }
   }
 
   def updateSeriesRound(seriesRound: SeriesRound) = seriesRoundRepository.update(convertRoundToGeneric(seriesRound))

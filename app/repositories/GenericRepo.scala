@@ -104,7 +104,7 @@ abstract class GenericRepo [M: Crudable, TM<: RelationalProfile#API#Table[M]: Ta
     flatMapToOption("retrieve by field")(retrieveAllByField(fieldKey, fieldValue))
 
   def retrieveById(id: String): Future[Option[M]] =
-    flatMapToOption("retrieve by id")(retrieveAllByField("id", id))
+    flatMapToOption("retrieve by id")(retrieveAllByField("ID", id))
 
   // Update
 

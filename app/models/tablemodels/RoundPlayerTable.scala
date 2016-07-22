@@ -1,6 +1,7 @@
 package models.tablemodels
 
-import models.player.{SeriesPlayerWithScores, Rank, SeriesPlayer}
+import models.Crudable
+import models.player._
 import slick.jdbc.GetResult
 import slick.lifted.Tag
 import slick.driver.MySQLDriver.api.{TableQuery => _, _}
@@ -8,15 +9,16 @@ import slick.lifted.TableQuery
 import utils.RankConverter
 import scala.language.postfixOps
 
-class SeriesPlayerTable (tag: Tag) extends Table[SeriesPlayerWithScores](tag, "SERIES_PLAYERS") {
+class RoundPlayerTable (tag: Tag) extends Table[SeriesRoundPlayerWithScores](tag, "ROUND_PLAYERS") {
 
   implicit def rankColumnType = MappedColumnType.base[Rank, Int](
     rank => rank.value,
     rankValue => RankConverter.getRankOfInt(rankValue)
   )
-  def id = column[String]("SERIES_PLAYER_ID", O.PrimaryKey, O.Length(100))
-  def playerId = column[String]("PLAYER_ID")
-  def seriesId = column[String]("SERIES_ID")
+
+  def id = column[String]("ID", O.PrimaryKey, O.Length(50))
+  def seriesPlayerId = column[String]("SERIES_PLAYER_ID")
+  def seriesRoundId = column[String]("SERIES_ROUND_ID")
 
   def firstname = column[String]("FIRSTNAME")
   def lastname=  column[String]("LASTNAME")
@@ -33,14 +35,13 @@ class SeriesPlayerTable (tag: Tag) extends Table[SeriesPlayerWithScores](tag, "S
 
   def totalPoints = column[Int]("TOTAL_POINTS")
 
-
-
-  def * = (id, playerId, seriesId, firstname, lastname, rank, wonMatches, lostMatches, wonSets, lostSets, wonPoints, lostPoints, totalPoints) <>((SeriesPlayerWithScores.apply _).tupled, SeriesPlayerWithScores.unapply)
+  def * = (id, seriesPlayerId, seriesRoundId, firstname, lastname, rank, wonMatches, lostMatches, wonSets, lostSets, wonPoints, lostPoints, totalPoints) <>((SeriesRoundPlayerWithScores.apply _).tupled, SeriesRoundPlayerWithScores.unapply)
 }
 
-object SeriesPlayerTableTableModel {
+object RoundPlayerTableTableModel {
 
-  implicit object seriesPlayerTableEvidence extends TableModel[SeriesPlayerTable] {
-    override def getRepId(tm: SeriesPlayerTable): Rep[String] = tm.id
+  implicit object roundPlayerTableEvidence extends TableModel[RoundPlayerTable] {
+    override def getRepId(tm: RoundPlayerTable): Rep[String] = tm.id
   }
+
 }
