@@ -1,6 +1,6 @@
 module TournamentManagement{
    export interface Tournament{
-       tournamentId: string;
+       id: string;
        tournamentName: string;
        tournamentDate: Date;
        hasMultipleSeries: boolean;

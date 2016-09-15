@@ -1,10 +1,11 @@
 package services
 
 import helpers.TestHelpers._
-import models.matches.SiteMatch
+import models.matches.{SiteGame, SiteMatch}
+import models.player.{Player, Ranks}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.MatchRepository
+import repositories.mongo.MatchRepository
 
 import scala.concurrent.Await
 
@@ -13,24 +14,27 @@ class SiteMatchServiceTest extends PlaySpec{
   val matchRepository = appBuilder.injector.instanceOf[MatchRepository]
   val matchService = new SiteMatchService(matchRepository)
 
+  val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
+  val hans = Player("2", "Hans", "Van Bael", Ranks.E4)
+
   "MatchService" should{
     "return a match by id" in {
-
-      val siteMatch =  waitFor(matchService.getMatch("1"))
-      siteMatch mustBe Some(SiteMatch("1","1","2","1",3,true,21,2,0,0))
+      val createdMatch =  Await.result(matchService.create(SiteMatch("1", Some(koen), Some(hans), "1",3,true,21,2,0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3)))),DEFAULT_DURATION)
+      val siteMatch =  waitFor(matchService.getMatch(createdMatch.id)).get
+      siteMatch mustBe createdMatch
     }
 
 
     "create a match, it recieves an id" in {
 
-      val siteMatch =  Await.result(matchService.create(SiteMatch("1","1","2","1",3,true,21,2,0,0)),DEFAULT_DURATION)
-      siteMatch.get.matchId.length mustBe 1
+      val siteMatch =  Await.result(matchService.create(SiteMatch("10",Some(koen),Some(hans),"1",3,true,21,2,0,0, Nil)),DEFAULT_DURATION)
+      siteMatch.id.length mustBe 24
     }
 
     "update a match" in {
-      val createdMatch = Await.result(matchService.create(SiteMatch("2","3","1","1",3,true,21,2,0,0)), DEFAULT_DURATION).get
-      val siteMatch = Await.result(matchService.update(SiteMatch(createdMatch.matchId,"4","1","1",3,true,21,2,0,0)), DEFAULT_DURATION).get
-        siteMatch.playerA mustBe "4"
+      val createdMatch = Await.result(matchService.create(SiteMatch("2",Some(koen),Some(hans),"1",3,isHandicapForB = true,21,2,0,0, Nil)), DEFAULT_DURATION)
+      val siteMatch = Await.result(matchService.update(SiteMatch(createdMatch.id,Some(koen),Some(hans),"1",3,isHandicapForB = true,21,2,0,0, Nil)), DEFAULT_DURATION)
+        siteMatch.playerA mustBe Some(koen)
     }
 
     "delete a match" in {

@@ -11,9 +11,9 @@ module TournamentManagement{
         private allPlayers: Array<Player>;
         private editIndex = null;
         private emptyPlayer = {
-            'playerId': null,
-            'firstname': null,
-            'lastname': null,
+            'id': "",
+            'firstname': "",
+            'lastname': "",
             'rank': null
         };
 
@@ -37,7 +37,7 @@ module TournamentManagement{
                 (result: any) => {
                     result.data.map((player) => {
                         this.allPlayers.push({
-                            'playerId': player.playerId,
+                            'id': player.playerId,
                             'firstname': player.firstname,
                             'lastname': player.lastname,
                             'rank': player.rank,
@@ -48,7 +48,12 @@ module TournamentManagement{
         }
 
 
+        getRankOfValue(value: number){
+            return this.ranks.filter( rank => rank.value === value)[0];
+        }
+
         addPlayer() {
+            this.playerToEdit.rank = this.getRankOfValue(this.playerToEdit.rank.value);
          this.playerService.postPlayer(this.playerToEdit).then( (insertedPlayerResponse: any) => {
                 this.allPlayers.push(insertedPlayerResponse.data);
                 this.playerToEdit = this.emptyPlayer;
@@ -58,7 +63,7 @@ module TournamentManagement{
         startEditPlayer(playerindex){
         if(this.editIndex != playerindex) {
             this.playerToEdit = {
-                "playerId": this.allPlayers[playerindex].playerId,
+                "id": this.allPlayers[playerindex].id,
                 "firstname": this.allPlayers[playerindex].firstname,
                 "lastname": this.allPlayers[playerindex].lastname,
                 "imagepath": this.allPlayers[playerindex].imagepath,
@@ -93,7 +98,7 @@ module TournamentManagement{
 
         deletePlayer(playerIndex){
         var playerToDelete = this.allPlayers[playerIndex];
-        this.playerService.deletePlayer(playerToDelete.playerId).then(()=>{
+        this.playerService.deletePlayer(playerToDelete.id).then(()=>{
             this.allPlayers.splice(playerIndex, 1);
         })
         };

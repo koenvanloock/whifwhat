@@ -1,6 +1,6 @@
 module TournamentManagement{
     export interface Player{
-        playerId: string;
+        id: string;
         firstname: string;
         lastname: string;
         rank: Rank;

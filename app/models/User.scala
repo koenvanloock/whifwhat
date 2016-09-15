@@ -1,24 +1,43 @@
 package models
 
+import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 import slick.jdbc.GetResult
-import utils.RankConverter
 
-case class Role(roleId: String, roleName: String) extends Crudable[Role]{
-  override def getId(crudable: Role): String = crudable.roleId
+case class Role(id: String, roleName: String)
 
+  object RoleEvidence {
 
-  override implicit val getResult: GetResult[Role] = GetResult(r => Role(r.<<,r.<<)  )
-}
+    implicit object roleIsModel extends Model[Role] {
+      override def getId(m: Role): Option[String] = Some(m.id)
 
-case class User(userId: String, username: String, paswordHash: String, roleId: String) extends Crudable[User]{
-  override def getId(user: User): String = user.userId
+      override def setId(id: String)(m: Role): Role = m.copy(id = id)
 
-  override implicit val getResult: GetResult[User] = GetResult(r => User(r.<<,r.<<, r.<<,r.<<))
-}
+      override def writes(o: Role): JsObject = Json.format[Role].writes(o)
+
+      override def reads(json: JsValue): JsResult[Role] = Json.format[Role].reads(json)
+    }
+
+  }
+
+case class User(id: String, username: String, paswordHash: String, roleId: String)
+
+  object UserEvidence {
+
+    implicit object userIsModel extends Model[User] {
+      override def getId(user: User): Some[String] = Some(user.id)
+
+      override def setId(newId: String)(user: User) = user.copy(id = newId)
+
+      override def writes(o: User): JsObject = Json.format[User].writes(o)
+
+      override def reads(json: JsValue): JsResult[User] = Json.format[User].reads(json)
+    }
+
+  }
 
 object RoleResultModel{
   implicit object RoleIsCrudable extends Crudable[Role]{
-    override def getId(crudable: Role): String = crudable.roleId
+    override def getId(crudable: Role): String = crudable.id
 
     override implicit val getResult: GetResult[Role] = GetResult(r => Role(r.<<,r.<<))
   }

@@ -1,6 +1,6 @@
 module TournamentManagement{
     export interface Series{
-        seriesId: string,
+        id: string,
         seriesName: string,
         seriesColor: string,
         setTargetScore: number,
@@ -9,6 +9,7 @@ module TournamentManagement{
         extraHandicapForRecs: number,
         showReferees: boolean,
         tournamentId: string,
+        currentRoundNr: number,
 
         seriesPlayers?: Array<Player>;
         rounds?: Array<SeriesRound>;

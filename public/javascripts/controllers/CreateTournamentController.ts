@@ -20,7 +20,7 @@ module TournamentManagement{
                 this.tournamentService.getTournament(tournament.tournamentId).then( (result) =>{
                     var selectedTournament: any = result.data;
                     this.tournamentService.setCurrentTournament(selectedTournament);
-                    this.$location.path('/tournament/' + selectedTournament.tournamentId + "/seriesSetup");
+                    this.$location.path('/tournament/' + selectedTournament.id + "/seriesSetup");
                 });
             })
         }

@@ -27,8 +27,12 @@ module TournamentManagement {
             return this.$http.get(this.base.url + '/tournaments');
         }
 
+        getTwoDigitNumberString(number: number){
+            return (number <10) ? "0"+ number: number;
+        }
+
         getDate(date: Date){
-            return { day: date.getDate(), month: date.getMonth()+1, year:date.getFullYear()};
+            return  date.getFullYear() +"-"+ this.getTwoDigitNumberString(date.getMonth()+1)+"-"+ this.getTwoDigitNumberString(date.getDate());
         }
 
         setCurrentTournament(tournament: Tournament){

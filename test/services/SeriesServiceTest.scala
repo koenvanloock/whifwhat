@@ -1,36 +1,41 @@
 package services
 
 import models._
-import models.matches.{SiteGame, SiteMatchWithGames, SiteMatch}
+import models.matches.{SiteGame, SiteMatch, SiteMatchWithGames}
 import models.player._
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{RoundPlayerRepository, SeriesRepository, SeriesPlayerRepository, SeriesRoundRepository}
+import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, SeriesRoundRepository}
 
 import scala.concurrent.Await
 
 class SeriesServiceTest extends PlaySpec {
 
+  val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
+  val hans = Player("2", "Hans", "Van Bael", Ranks.E4)
+  val nicky  =Player("12", "Nicky", "Hoste", Ranks.E4)
+  val aram = Player("6", "Aram", "Paduwels", Ranks.B4)
+  val gil = Player("9", "Gil", "Corujeira-Figueira", Ranks.E2)
+
   val players = List(
-    SeriesPlayer("1", "1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
-    SeriesPlayer("2", "2", "1", "Hans", "Van Bael", Ranks.E4, PlayerScores()),
-    SeriesPlayer("3", "3", "1", "Luk", "Geraets", Ranks.D6, PlayerScores()),
-    SeriesPlayer("4", "4", "1", "Lode", "Van Renterghem", Ranks.E6, PlayerScores()),
-    SeriesPlayer("5", "5", "1", "Tim", "Firquet", Ranks.C2, PlayerScores()),
-    SeriesPlayer("6", "6", "1", "Aram", "Pauwels", Ranks.B4, PlayerScores()),
-    SeriesPlayer("7", "7", "1", "Tim", "Uitdewilligen", Ranks.E0, PlayerScores()),
-    SeriesPlayer("8", "8", "1", "Matthias", "Lesuise", Ranks.D6, PlayerScores()),
-    SeriesPlayer("9", "9", "1", "Gil", "Corrujeira-Figueira", Ranks.D0, PlayerScores())
+    SeriesPlayer("1", koen, PlayerScores()),
+    SeriesPlayer("2", hans, PlayerScores()),
+    SeriesPlayer("3", Player("3", "Luk", "Geraets", Ranks.D6), PlayerScores()),
+    SeriesPlayer("4", Player("4", "Lode", "Van Renterghem", Ranks.E6), PlayerScores()),
+    SeriesPlayer("5", Player("5", "Tim", "Firquet", Ranks.C2), PlayerScores()),
+    SeriesPlayer("6", aram, PlayerScores()),
+    SeriesPlayer("7", Player("7", "Tim", "Uitdewilligen", Ranks.E0), PlayerScores()),
+    SeriesPlayer("8", Player("8", "Matthias", "Lesuise", Ranks.D6), PlayerScores()),
+    SeriesPlayer("9", Player("9", "Gil", "Corrujeira-Figueira", Ranks.D0), PlayerScores())
   )
 
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
   val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
   val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
-  val roundPlayersRepository = appBuilder.injector.instanceOf[RoundPlayerRepository]
 
-  val seriesService = new SeriesService(new SeriesRoundService(new MatchService, seriesRoundRepository, roundPlayersRepository), seriesPlayerRepository, seriesRepository, new DrawService)
+  val seriesService = new SeriesService(new SeriesRoundService(new MatchService, seriesRoundRepository), seriesPlayerRepository, seriesRepository, new DrawService)
 
   "TournamentSeriesService" should {
     "return a list of series of a tournament" in {
@@ -65,9 +70,9 @@ class SeriesServiceTest extends PlaySpec {
       val series = TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, playingWithHandicaps = true, 0, showReferees = false, 1, "1")
       val roundList = List(
         RobinRound(List(RobinGroup("1", List(), List(
-          SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 2, 0, List(
-            SiteGame("1", "1", 21, 15, 1),
-            SiteGame("1", "1", 21, 15, 2))
+          SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
+            SiteGame(21, 15, 1),
+            SiteGame(21, 15, 2))
           ))))),
         RobinRound(List(RobinGroup("2", List(), List()))),
         Bracket("1", List(), List(List()))
@@ -93,35 +98,35 @@ class SeriesServiceTest extends PlaySpec {
 
       seriesService.calculateSeriesScores(List(
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("1", "1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
+          SeriesPlayer("1", koen, PlayerScores()),
           List(
-            SeriesRoundPlayer("1", "1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("1", "1", "2", "Koen", "Van Loock", Ranks.D0, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesRoundPlayer("1", "1", "2", koen, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesRoundPlayer("2", "3", "3", koen, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("2", "2", "1", "Hans", "Van Bael", Ranks.E4, PlayerScores()),
+          SeriesPlayer("2",hans, PlayerScores()),
           List(
-            SeriesRoundPlayer("2", "2", "1", "Hans", "Van Bael", Ranks.E4, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("2", "2", "2", "Hans", "Van Bael", Ranks.E4, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesRoundPlayer("2", "2", "1", hans, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesRoundPlayer("2", "2", "2", hans, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("3", "3", "1", "Nicky", "Hoste", Ranks.E4, PlayerScores()),
+          SeriesPlayer("3", nicky, PlayerScores()),
           List(
-            SeriesRoundPlayer("3", "3", "1", "Nicky", "Hoste", Ranks.E4, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("3", "3", "2", "Nicky", "Hoste", Ranks.E4, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesRoundPlayer("3", "3", "1", nicky, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesRoundPlayer("3", "3", "2", nicky, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("4", "4", "1", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores()),
+          SeriesPlayer("4", gil, PlayerScores()),
           List(
-            SeriesRoundPlayer("4", "4", "1", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("4", "4", "2", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesRoundPlayer("4", "4", "1", gil, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesRoundPlayer("4", "4", "2", gil, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           ))
 
       )) mustBe List(
-        SeriesPlayer("1", "1", "1", "Koen", "Van Loock", Ranks.D0, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("2", "2", "1", "Hans", "Van Bael", Ranks.E4, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("3", "3", "1", "Nicky", "Hoste", Ranks.E4, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("4", "4", "1", "Gil", "Corujeira-Figueira", Ranks.E2, PlayerScores(5, 1, 11, 4, 148, 80, 407068)))
+        SeriesPlayer("1", koen, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("2", hans, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("3", nicky, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("4", gil, PlayerScores(5, 1, 11, 4, 148, 80, 407068)))
     }
 
 

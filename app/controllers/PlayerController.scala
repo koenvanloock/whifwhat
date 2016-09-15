@@ -31,6 +31,13 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
       (JsPath \ "rank").read[Rank]
     )(Player.apply (UUID.randomUUID().toString,_,_,_))
 
+  val fullPlayerReads: Reads[Player] = (
+    (JsPath \ "id").read[String] and
+    (JsPath \ "firstname").read[String] and
+      (JsPath \ "lastname").read[String] and
+      (JsPath \ "rank").read[Rank]
+    )(Player.apply (_,_,_,_))
+
   def getAllPlayers = Action.async{
 
     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
@@ -48,8 +55,7 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     request.body.asJson.flatMap{ json =>
       json.validate[Player](playerReads).asOpt.map{  player =>
         playerService.createPlayer(player).map{
-          case Some(createdPlayer) => Created(Json.toJson(createdPlayer))
-          case _ => InternalServerError
+          createdPlayer => Created(Json.toJson(createdPlayer))
         }
       }
     }.getOrElse(Future(BadRequest))
@@ -59,8 +65,7 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     request.body.asJson.flatMap{ json =>
       json.validate[Player].asOpt.map{player =>
         playerService.updatePlayer(player).map{
-         case Some(updatedPlayer) => Ok(Json.toJson(updatedPlayer))
-         case _ => NotFound
+         updatedPlayer => Ok(Json.toJson(updatedPlayer))
         }
       }}.getOrElse(Future(BadRequest))
   }

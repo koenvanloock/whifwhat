@@ -10,7 +10,7 @@ module TournamentManagement {
         }
 
         updateSeries(series) {
-            return this.$http.put(this.base.url + "/series/" + series.seriesId, series);
+            return this.$http.put(this.base.url + "/series/" + series.id, series);
         }
 
         fetchSeriesPlayers(seriesId) {

@@ -28,6 +28,7 @@ PUT           /seriesrounds                                  controllers.SeriesR
 GET           /drawseries/:tournamentId                      controllers.DrawController.drawSeriesOfTournament(tournamentId: String)
 
 POST          /login                                         controllers.LoginController.login
+POST          /user                                          controllers.LoginController.createUser
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 

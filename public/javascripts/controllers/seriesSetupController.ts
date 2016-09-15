@@ -45,11 +45,15 @@ module TournamentManagement{
                         });
 
                         this.$mdDialog.show(dialog).then( (newSeries) => {
-                                newSeries.tournamentId = tournamentToAddSeries.tournamentId;
-                                seriesService.addSeries(newSeries);
-                                if(!tournamentToAddSeries.series) tournamentToAddSeries.series = [];
-                                tournamentToAddSeries.series.push(newSeries);
-                                console.log(this.currentTournament);
+                                newSeries.tournamentId = tournamentToAddSeries.id;
+                                if(!newSeries.extraHandicapForRecs) newSeries.extraHandicapForRecs=0;
+                                newSeries.currentRoundNr= tournamentToAddSeries.series ? tournamentToAddSeries.series.length+1 :1;
+                                seriesService.addSeries(newSeries).then( (insertedSeries) => {
+                                        if(!tournamentToAddSeries.series) tournamentToAddSeries.series = [];
+                                        tournamentToAddSeries.series.push(newSeries);
+                                        console.log(this.currentTournament);
+                                });
+
                         });
                 };
 

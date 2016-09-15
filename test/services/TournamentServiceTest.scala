@@ -7,12 +7,19 @@ import org.scalatestplus.play.PlaySpec
 
 import scala.concurrent.Await
 import helpers.TestHelpers.DEFAULT_DURATION
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.mongo.{MatchRepository, TournamentRepository}
 /**
   * @author Koen Van Loock
   * @version 1.0 23/04/2016 18:46
   */
+@RunWith(classOf[JUnitRunner])
 class TournamentServiceTest extends PlaySpec{
-  val tournamentService = new TournamentService()
+  val appBuilder = new GuiceApplicationBuilder().build()
+  val tournamentRepository = appBuilder.injector.instanceOf[TournamentRepository]
+  val tournamentService = new TournamentService(tournamentRepository)
 
   "TournamentService" should {
     "return a tournament by id" in {
@@ -22,13 +29,13 @@ class TournamentServiceTest extends PlaySpec{
 
 
     "create a tournament, it receives an id" in {
-      val tournament = Await.result(tournamentService.createTournament(Tournament("","Dubbelkampioenschap", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION).get
+      val tournament = Await.result(tournamentService.createTournament(Tournament("","Dubbelkampioenschap", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION)
       tournament.tournamentName mustBe "Dubbelkampioenschap"
     }
 
     "update a tournament" in {
-      val createdTournament = Await.result(tournamentService.createTournament(Tournament("","Dubbelkampioenschap", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION)
-      val tournament = Await.result(tournamentService.updateTournament(Tournament(createdTournament.get.tournamentId,"Klaastornooi", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION).get
+      val createdTournament = Await.result(tournamentService.createTournament(Tournament("223","Dubbelkampioenschap", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION)
+      val tournament = Await.result(tournamentService.updateTournament(Tournament(createdTournament.id,"Klaastornooi", LocalDate.of(2016,6,24),2,false,false)), DEFAULT_DURATION)
       tournament.tournamentName mustBe "Klaastornooi"
     }
 

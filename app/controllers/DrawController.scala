@@ -2,30 +2,43 @@ package controllers
 
 import javax.inject.Inject
 
-import models.matches.{SiteMatchWithGames, SiteGame, BracketMatchWithGames}
+import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
 import models.player._
 import models._
-import play.api.libs.json.{JsValue, Writes, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc.{Action, Controller}
-import services.{SeriesService, DrawService}
+import services.{DrawService, SeriesService}
+import utils.JsonUtils
+import utils.JsonUtils.ListWrites._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DrawController @Inject()(seriesService: SeriesService) extends Controller{
 
-    val matchWithGameWrites = new Writes[BracketMatchWithGames] {
-      override def writes(bracketMatchWithGames: BracketMatchWithGames): JsValue = Json.obj(
+  implicit val rankFormat = Json.format[Rank]
+  implicit val playerFormat = Json.format[Player]
+  val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
+
+    val siteMatchWrites = new Writes[SiteMatch] {
+      override def writes(siteMatch: SiteMatch) = Json.obj(
+        "id" -> siteMatch.id,
+        "playerA" -> Json.toJson(siteMatch.playerA),
+        "playerB" -> Json.toJson(siteMatch.playerB),
+        "handicap"-> siteMatch.handicap,
+        "isHandicapForB"-> siteMatch.isHandicapForB,
+        "targetScore" -> siteMatch.targetScore,
+        "numberOfSetsToWin" -> siteMatch.numberOfSetsToWin,
+        "games" -> Json.listToJson(siteMatch.games)(Json.format[SiteGame])
+      )
+    }
+
+    val bracketMatchWrites = new Writes[BracketMatch] {
+      override def writes(bracketMatchWithGames: BracketMatch): JsValue = Json.obj(
         "bracketMatchId" -> bracketMatchWithGames.bracketMatchId,
         "bracketId" -> bracketMatchWithGames.bracketId,
         "bracketRoundNr" -> bracketMatchWithGames.bracketRoundNr,
         "bracketMatchNr" -> bracketMatchWithGames.bracketMatchNr,
-        "matchId" -> bracketMatchWithGames.matchId,
-        "playerA" -> bracketMatchWithGames.playerA,
-        "playerB" -> bracketMatchWithGames.playerB,
-        "handicap" -> bracketMatchWithGames.handicap,
-        "isHandicapForB" -> bracketMatchWithGames.isHandicapForB,
-        "targetScore" -> bracketMatchWithGames.targetScore,
-        "numberOfSetsToWin" -> bracketMatchWithGames.numberOfSetsToWin,
-        "sets" -> bracketMatchWithGames.sets.map(Json.toJson(_)(Json.writes[SiteGame]))
+        "match" -> Json.toJson(bracketMatchWithGames.siteMatch)(siteMatchWrites)
       )
 
     }
@@ -37,7 +50,7 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
       override def writes(robinGroup: RobinGroup) = Json.obj(
         "robinGroupId" -> robinGroup.robinGroupId,
         "robinPlayers" -> robinGroup.robinPlayers.map(Json.toJson(_)(Json.writes[SeriesRoundPlayer])),
-        "robinMatches" -> robinGroup.robinMatches.map(Json.toJson(_)(Json.writes[SiteMatchWithGames]))
+        "robinMatches" -> Json.listToJson(robinGroup.robinMatches)(siteMatchWrites)
       )
     }
 
@@ -45,7 +58,7 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
       override def writes(o: Bracket): JsValue = Json.obj(
         "bracketId" -> o.bracketId,
         "bracketPlayers" -> Json.toJson(o.bracketPlayers.map(Json.toJson(_)(Json.writes[BracketPlayer]))),
-        "bracketRounds" -> Json.toJson(o.bracketRounds.map(round => Json.toJson(round.map(Json.toJson(_)(matchWithGameWrites)))))
+        "bracketRounds" -> Json.toJson(o.bracketRounds.map(round => Json.toJson(round.map(Json.toJson(_)(bracketMatchWrites)))))
       )
     }
 

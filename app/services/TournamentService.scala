@@ -1,15 +1,18 @@
 package services
 
 import java.time.LocalDate
+import javax.inject.Inject
 
 import models.Tournament
 import models.player.Player
+import play.api.libs.json.{JsValue, Json, Writes}
+import repositories.mongo.TournamentRepository
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
-class TournamentService extends GenericAtomicCrudService[Tournament]{
+class TournamentService @Inject()(tournamentRepository: TournamentRepository){
   implicit val playerObject = Player
 
 
@@ -17,10 +20,10 @@ class TournamentService extends GenericAtomicCrudService[Tournament]{
     Tournament("1","Kapels Kampioenschap", LocalDate.of(2016,9,8),2,hasMultipleSeries = true,showClub = true)
   )
 
-  def getTournament(tournamentId: String): Future[Option[Tournament]] = Future(tournaments.find(tournament => tournament.tournamentId.contains(tournamentId)))
+  def getTournament(tournamentId: String): Future[Option[Tournament]] = Future(tournaments.find(tournament => tournament.id.contains(tournamentId)))
 
-  def createTournament(tournament: Tournament): Future[Option[Tournament]] = super.create(tournament)
-  def updateTournament(tournament: Tournament): Future[Option[Tournament]] = super.update(tournament)
-  def deleteTournament(tournamentId: String): Future[Option[String]] = super.delete(tournamentId)
+  def createTournament(tournament: Tournament): Future[Tournament] = tournamentRepository.create(tournament)
+  def updateTournament(tournament: Tournament): Future[Tournament] = tournamentRepository.update(tournament)
+  def deleteTournament(tournamentId: String): Future[Unit] = tournamentRepository.delete(tournamentId)
 
 }

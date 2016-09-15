@@ -1,38 +1,34 @@
 package services
 
-import models.player.{PlayerScores, SeriesPlayer, Ranks, Player}
+import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatestplus.play.PlaySpec
-import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{SeriesRoundRepository, SeriesRepository, SeriesPlayerRepository}
 
+@RunWith(classOf[JUnitRunner])
 class DrawServiceTest extends PlaySpec {
   "DrawService" should {
-    val appBuilder = new GuiceApplicationBuilder().build()
-    val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
-    val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
-    val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
-    val matchService = new MatchService
     val drawService = new DrawService
     val players=  List(
-      SeriesPlayer("1","1","1", "Koen","Van Loock", Ranks.D0, PlayerScores()),
-      SeriesPlayer("2","2","1", "Hans","Van Bael", Ranks.E4, PlayerScores() ),
-      SeriesPlayer("3","3","1", "Luk","Geraets", Ranks.D6, PlayerScores() ),
-      SeriesPlayer("4","4","1", "Lode","Van Renterghem", Ranks.E6, PlayerScores()),
-      SeriesPlayer("5","5","1", "Tim","Firquet", Ranks.C2, PlayerScores()),
-      SeriesPlayer("6","6","1", "Aram","Pauwels", Ranks.B4, PlayerScores()),
-      SeriesPlayer("7","7","1", "Tim","Uitdewilligen", Ranks.E0, PlayerScores()),
-      SeriesPlayer("8","8","1", "Matthias","Lesuise", Ranks.D6, PlayerScores()),
-      SeriesPlayer("9","9","1", "Gil","Corrujeira-Figueira", Ranks.D0, PlayerScores())
+      SeriesPlayer("1", Player("1","Koen","Van Loock", Ranks.D0), PlayerScores()),
+      SeriesPlayer("2", Player("2","Hans","Van Bael", Ranks.E4), PlayerScores() ),
+      SeriesPlayer("3", Player("3", "Luk","Geraets", Ranks.D6), PlayerScores() ),
+      SeriesPlayer("4", Player("4", "Lode","Van Renterghem", Ranks.E6), PlayerScores()),
+      SeriesPlayer("5", Player("5","Tim","Firquet", Ranks.C2), PlayerScores()),
+      SeriesPlayer("6", Player("6", "Aram","Pauwels", Ranks.B4), PlayerScores()),
+      SeriesPlayer("7", Player("7", "Tim","Uitdewilligen", Ranks.E0), PlayerScores()),
+      SeriesPlayer("8", Player("8", "Matthias","Lesuise", Ranks.D6), PlayerScores()),
+      SeriesPlayer("9", Player("9", "Gil","Corrujeira-Figueira", Ranks.D0), PlayerScores())
     )
 
     val extendedPlayers = players ::: List(
-      SeriesPlayer("10","10","1", "Timothy", "Donckers", Ranks.D4, PlayerScores()),
-      SeriesPlayer("11","11","1", "Ben", "Kooyman", Ranks.Ng, PlayerScores()),
-      SeriesPlayer("12","12","1", "Arno", "Sels", Ranks.F, PlayerScores()),
-      SeriesPlayer("13","13","1", "Sette", "Van Hoof", Ranks.Rec, PlayerScores()),
-      SeriesPlayer("14","14","1", "Ben", "Verellen", Ranks.Rec, PlayerScores()),
-      SeriesPlayer("15","15","1", "Noa", "Verellen", Ranks.Rec, PlayerScores()),
-      SeriesPlayer("16","16","1", "Sterre", "Roos", Ranks.E4, PlayerScores()))
+      SeriesPlayer("10", Player("10", "Timothy", "Donckers", Ranks.D4), PlayerScores()),
+      SeriesPlayer("11", Player("11", "Ben", "Kooyman", Ranks.Ng), PlayerScores()),
+      SeriesPlayer("12", Player("12", "Arno", "Sels", Ranks.F), PlayerScores()),
+      SeriesPlayer("13", Player("13", "Sette", "Van Hoof", Ranks.Rec), PlayerScores()),
+      SeriesPlayer("14", Player("14", "Ben", "Verellen", Ranks.Rec), PlayerScores()),
+      SeriesPlayer("15", Player("15", "Noa", "Verellen", Ranks.Rec), PlayerScores()),
+      SeriesPlayer("16", Player("16", "Sterre", "Roos", Ranks.E4), PlayerScores()))
 
     "draw 1 sorted robins" in {
       val drawnGroups = drawService.drawSortedRobins(players, 1, 21, 2).get
@@ -71,7 +67,7 @@ class DrawServiceTest extends PlaySpec {
 
     "the ranked random sorts the players by rank and distributes them across the first places in all groups" in {
       val test = drawService.drawRobins(players, 3, 21, 2, DrawTypes.RankedRandomOrder).get
-      val firstPlacesFirstNams = test.robinList.map(robin => robin.robinPlayers.head.firstname)
+      val firstPlacesFirstNams = test.robinList.map(robin => robin.robinPlayers.head.player.firstname)
       firstPlacesFirstNams must contain("Koen")
       firstPlacesFirstNams must contain("Aram")
       firstPlacesFirstNams must contain("Tim")
@@ -91,8 +87,8 @@ class DrawServiceTest extends PlaySpec {
 
       bracket.bracketPlayers.length mustBe 2
       bracket.bracketRounds.length mustBe 1
-      bracket.bracketRounds.head.head.playerA mustBe Some("1")
-      bracket.bracketRounds.head.head.playerB mustBe Some("2")
+      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
+      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "2"
     }
 
     "draw a bracket with two rounds (semi-finals)" in {
@@ -100,13 +96,13 @@ class DrawServiceTest extends PlaySpec {
 
       bracket.bracketPlayers.length mustBe 4
       bracket.bracketRounds.length mustBe 2
-      bracket.bracketRounds.head.head.playerA mustBe Some("1")
-      bracket.bracketRounds.head.head.playerB mustBe Some("4")
-      bracket.bracketRounds.head.last.playerA mustBe Some("3")
-      bracket.bracketRounds.head.last.playerB mustBe Some("2")
+      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
+      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "4"
+      bracket.bracketRounds.head.last.siteMatch.playerA.get.id mustBe "3"
+      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
 
-      bracket.bracketRounds.last.head.playerA mustBe None
-      bracket.bracketRounds.last.head.playerB mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
 
     }
 
@@ -116,18 +112,18 @@ class DrawServiceTest extends PlaySpec {
       bracket.bracketPlayers.length mustBe 8
       bracket.bracketRounds.length mustBe 3
 
-      bracket.bracketRounds.head.head.playerA mustBe Some("1")
-      bracket.bracketRounds.head.head.playerB mustBe Some("8")
-      bracket.bracketRounds.head.drop(1).head.playerA mustBe Some("5")
-      bracket.bracketRounds.head.drop(1).head.playerB mustBe Some("4")
+      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
+      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "8"
+      bracket.bracketRounds.head.drop(1).head.siteMatch.playerA.get.id mustBe "5"
+      bracket.bracketRounds.head.drop(1).head.siteMatch.playerB.get.id mustBe "4"
 
-      bracket.bracketRounds.head.drop(2).head.playerA mustBe Some("3")
-      bracket.bracketRounds.head.drop(2).head.playerB mustBe Some("6")
-      bracket.bracketRounds.head.last.playerA mustBe Some("7")
-      bracket.bracketRounds.head.last.playerB mustBe Some("2")
+      bracket.bracketRounds.head.drop(2).head.siteMatch.playerA.get.id mustBe "3"
+      bracket.bracketRounds.head.drop(2).head.siteMatch.playerB.get.id mustBe "6"
+      bracket.bracketRounds.head.last.siteMatch.playerA.get.id mustBe "7"
+      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
 
-      bracket.bracketRounds.last.head.playerA mustBe None
-      bracket.bracketRounds.last.head.playerB mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
 
     }
 
@@ -138,11 +134,11 @@ class DrawServiceTest extends PlaySpec {
       bracket.bracketPlayers.length mustBe 16
       bracket.bracketRounds.length mustBe 4
 
-      bracket.bracketRounds.head.head.playerA mustBe Some("1")
-      bracket.bracketRounds.head.last.playerB mustBe Some("2")
+      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
+      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
 
-      bracket.bracketRounds.last.head.playerA mustBe None
-      bracket.bracketRounds.last.head.playerB mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
+      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
 
     }
   }

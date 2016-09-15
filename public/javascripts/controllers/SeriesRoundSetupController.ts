@@ -61,7 +61,7 @@ module TournamentManagement {
 
         selectionChanged(index) {
             if(!this.seriesList[index].rounds || this.seriesList[index].rounds.length <1)
-            this.roundService.loadRoundsOfSeries(this.seriesList[index].seriesId).then((roundList: any) => {
+            this.roundService.loadRoundsOfSeries(this.seriesList[index].id).then((roundList: any) => {
                 this.roundService.setRoundsOfSeries(roundList.data);
                 this.seriesList[index].rounds = this.roundService.getRoundsOfSeries();
             });

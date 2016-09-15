@@ -1,12 +1,12 @@
 package services
 
-import models.matches.{SiteGame, BracketMatchWithGames, SiteMatchWithGames}
+import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
 
 class MatchService {
-  def isMatchComplete(siteMatchWithGames: SiteMatchWithGames): Boolean = siteMatchWithGames.sets.forall(_.isCorrect(siteMatchWithGames.targetScore))
-  def isBracketMatchComplete(bracketMatchWithGames: BracketMatchWithGames): Boolean = bracketMatchWithGames.sets.forall(_.isCorrect(bracketMatchWithGames.targetScore))
+  def isMatchComplete(siteMatch: SiteMatch): Boolean = siteMatch.games.forall(_.isCorrect(siteMatch.targetScore))
+  def isBracketMatchComplete(bracketMatchWithGames: BracketMatch): Boolean = bracketMatchWithGames.siteMatch.games.forall(_.isCorrect(bracketMatchWithGames.siteMatch.targetScore))
 
-  def calculateMatchStats(siteMatch: SiteMatchWithGames) = {
+  def calculateMatchStats(siteMatch: SiteMatch) = {
     siteMatch.copy(
       wonSetsA = calculateSetsForPlayer(siteMatch, 'A'),
       wonSetsB = calculateSetsForPlayer(siteMatch, 'B')
@@ -19,10 +19,10 @@ class MatchService {
 
 
 
-  private def calculateSetsForPlayer(siteMatchWithGames: SiteMatchWithGames, playerChar: Char): Int = {
+  private def calculateSetsForPlayer(siteMatch: SiteMatch, playerChar: Char): Int = {
     playerChar match{
-      case 'A' => siteMatchWithGames.sets.count(isForA(siteMatchWithGames.targetScore))
-      case 'B' =>siteMatchWithGames.sets.count(isForB(siteMatchWithGames.targetScore))
+      case 'A' => siteMatch.games.count(isForA(siteMatch.targetScore))
+      case 'B' =>siteMatch.games.count(isForB(siteMatch.targetScore))
     }
   }
 }

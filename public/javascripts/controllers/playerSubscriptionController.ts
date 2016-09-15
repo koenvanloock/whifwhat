@@ -42,7 +42,7 @@ module TournamentManagement {
                 console.log(result.data);
                 this.allPlayers = result.data});
 
-            if (tournamentService.getCurrentTournament() && tournamentService.getCurrentTournament().tournamentId == $routeParams["tournamentId"]) {
+            if (tournamentService.getCurrentTournament() && tournamentService.getCurrentTournament().id == $routeParams["tournamentId"]) {
                 this.tournament = tournamentService.getCurrentTournament();
                 this.init();
             } else {
@@ -60,7 +60,7 @@ module TournamentManagement {
             this.numberOfSeriesEntries = new Array(this.tournament.maximumNumberOfSeriesEntries);
             this.tournament.series.map((series) => {this.seriesSubscriptions.push(series)});
             this.tournament.series.map( (series: Series) => {
-                this.seriesService.fetchSeriesPlayers(series.seriesId).then(
+                this.seriesService.fetchSeriesPlayers(series.id).then(
                     (seriesPlayers: any) => {series.seriesPlayers = seriesPlayers;}
                 )
             });
@@ -79,7 +79,7 @@ module TournamentManagement {
         getSeriesSubscriptions(){
             this.subscriptionList = "";
             if(this.playerSelection.selectedItem) {
-                this.playerService.getSeriesSubscriptionsOfPlayer(this.playerSelection.selectedItem.playerId, this.tournament.tournamentId).then( (response: any) => {
+                this.playerService.getSeriesSubscriptionsOfPlayer(this.playerSelection.selectedItem.playerId, this.tournament.id).then( (response: any) => {
 
                     this.subscription.seriesSubscriptions = response.data.map((series,index) => {this.getSubscriptionOfSeries(this.subscription.seriesSubscriptions, series, index)});
                     this.subscriptionList = this.subscriptionList.substring(0,(this.subscriptionList.length-2));
@@ -140,9 +140,9 @@ module TournamentManagement {
         });
 
         console.log(this.tournament);
-        this.playerService.subscribePlayer(subscriptionList, this.tournament.series.map((series) => series.seriesId), selectedPlayer.selectedItem.playerId).then((resp) =>{
+        this.playerService.subscribePlayer(subscriptionList, this.tournament.series.map((series) => series.id), selectedPlayer.selectedItem.id).then((resp) =>{
             this.tournament.series.map((series) => {
-                this.seriesService.fetchSeriesPlayers(series.seriesId).then(
+                this.seriesService.fetchSeriesPlayers(series.id).then(
                     (seriesPlayers: any) => {series.seriesPlayers = seriesPlayers;}
                 )
             });
