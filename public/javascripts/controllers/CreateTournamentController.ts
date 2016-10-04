@@ -17,7 +17,7 @@ module TournamentManagement{
         createTournament(){
             this.tournamentService.addTournament(this.name,this.tournamentDate, this.hasMultipleSeries, this.maximumNumberOfSeriesEntries, this.showClub).then(
                 (tournament: any) => {
-                this.tournamentService.getTournament(tournament.tournamentId).then( (result) =>{
+                this.tournamentService.getTournament(tournament.data.id).then( (result) =>{
                     var selectedTournament: any = result.data;
                     this.tournamentService.setCurrentTournament(selectedTournament);
                     this.$location.path('/tournament/' + selectedTournament.id + "/seriesSetup");

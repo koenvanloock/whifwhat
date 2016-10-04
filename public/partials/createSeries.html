@@ -25,15 +25,14 @@
                 <td><input ng-model="series.seriesColor" type="color" ng-change="seriesSetupCtrl.updateSeries($index)"></td>
                 <td>
                     <md-input-container>
-                        <md-select ng-model=series.setTargetScore layout-padding aria-label="select targetscore">
-                            <md-select-label>{{series.setTargetScore}}</md-select-label>
-                            <md-option ng-repeat="setTargetScore in seriesSetupCtrl.targetScores" ng-value=setTargetScore>{{setTargetScore}}</md-option>
+                        <md-select ng-model=series.setTargetScore layout-padding aria-label="select targetscore" ng-change="seriesSetupCtrl.updateSeries($index)">
+                            <md-option ng-repeat="setTargetScore in seriesSetupCtrl.targetScores" ng-value="setTargetScore">{{setTargetScore}}</md-option>
                         </md-select>
                     </md-input-container>
                 </td>
                 <td>
                     <md-input-container>
-                        <md-select ng-model=series.numberOfSetsToWin layout-padding aria-label="select numberOfSetsToWin">
+                        <md-select ng-model=series.numberOfSetsToWin layout-padding aria-label="select numberOfSetsToWin" ng-change="seriesSetupCtrl.updateSeries($index)">
                             <md-option ng-repeat="numberOfSetsToWin in seriesSetupCtrl.numberOfSetsToWinList" ng-value=numberOfSetsToWin>{{numberOfSetsToWin}}</md-option>
                         </md-select>
                     </md-input-container>
@@ -41,7 +40,7 @@
                 <td><md-switch ng-model="series.playingWithHandicaps" aria-label="playing with handicaps" ng-change="seriesSetupCtrl.updateSeries($index)"></md-switch></td>
                 <td>
                     <md-input-container>
-                        <md-select ng-model="series.extraHandicapForRecs" layout-padding aria-label="add extraHandicapForRecs">
+                        <md-select ng-model="series.extraHandicapForRecs" layout-padding aria-label="add extraHandicapForRecs" ng-change="seriesSetupCtrl.updateSeries($index)">
                             <md-select-label>{{series.extraHandicapForRecs}}</md-select-label>
                             <md-option ng-repeat="extraHandicapForRecs in seriesSetupCtrl.extraHandicapForRecsList" ng-value=extraHandicapForRecs>{{extraHandicapForRecs}}</md-option>
                         </md-select>

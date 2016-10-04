@@ -28,6 +28,7 @@
     "public/javascripts/models/SeriesRound.ts",
     "public/javascripts/models/Player.ts",
     "public/javascripts/models/Rank.ts",
+    "public/javascripts/models/Query.ts",
 
 
     "public/javascripts/services/authService.ts",
@@ -44,6 +45,7 @@
     "public/javascripts/controllers/CreateTournamentController.ts",
     "public/javascripts/controllers/DrawController.ts",
     "public/javascripts/controllers/RoundElementController.ts",
+    "public/javascripts/controllers/TournamentOverViewController.ts",
     "public/javascripts/controllers/SeriesRoundSetupController.ts",
     "public/javascripts/controllers/SeriesSetupController.ts",
     "public/javascripts/controllers/CreateSeriesController.ts",

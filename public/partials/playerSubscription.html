@@ -32,7 +32,7 @@
             <div layout="row">
                 <md-select ng-repeat="nr in playerSubscrCtrl.numberOfSeriesEntries track by $index"
                            ng-model="playerSubscrCtrl.subscription.seriesSubscriptions[$index]" placeholder="Kies een reeks" flex="33"
-                           ng-model-options="{trackBy: '$value.seriesId'}"
+                           ng-model-options="{trackBy: '$value.id'}"
                            layout-align="center center">
                     <md-option ng-repeat="seriesToSubscribe in playerSubscrCtrl.seriesSubscriptions"
                                ng-value="seriesToSubscribe">
@@ -44,7 +44,7 @@
         </div>
     </section>
 
-    <tournament-overview tournament="playerSubscrCtrl.tournament"></tournament-overview>
+    <tournament-overview query="playerSubscrCtrl.query" tournament="playerSubscrCtrl.tournament"></tournament-overview>
 
     <md-sidenav class="md-sidenav-right md-whiteframe-z2" md-component-id="right">
     <section ng-controller="PlayerController">

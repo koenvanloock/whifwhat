@@ -124,13 +124,13 @@ class SeriesRoundServiceTest extends PlaySpec{
   }
 
   "calculate the correct score of a player in a series" in {
-    val playerWithRoundPlayers = SeriesPlayerWithRoundPlayers(SeriesPlayer("1", Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores()),
+    val playerWithRoundPlayers = SeriesPlayerWithRoundPlayers(SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores()),
       List(
         SeriesRoundPlayer("1","1", "4", Player("1","Koen", "Van Loock", Ranks.D0), PlayerScores(3,0,6,2,84,40,304044)),
         SeriesRoundPlayer("1","1", "7", Player("2","Koen", "Van Loock", Ranks.D0), PlayerScores(2,1,5,2,64,40,103024))
       ))
 
-    seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1", Player("1", "Koen", "Van Loock", Ranks.D0),PlayerScores(5,1,11,4,148,80,407068))
+    seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0),PlayerScores(5,1,11,4,148,80,407068))
   }
 
   "calculate the roundScore of a winning player with a matchUpdate" in {

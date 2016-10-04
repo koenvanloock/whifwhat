@@ -19,15 +19,15 @@ class SeriesServiceTest extends PlaySpec {
   val gil = Player("9", "Gil", "Corujeira-Figueira", Ranks.E2)
 
   val players = List(
-    SeriesPlayer("1", koen, PlayerScores()),
-    SeriesPlayer("2", hans, PlayerScores()),
-    SeriesPlayer("3", Player("3", "Luk", "Geraets", Ranks.D6), PlayerScores()),
-    SeriesPlayer("4", Player("4", "Lode", "Van Renterghem", Ranks.E6), PlayerScores()),
-    SeriesPlayer("5", Player("5", "Tim", "Firquet", Ranks.C2), PlayerScores()),
-    SeriesPlayer("6", aram, PlayerScores()),
-    SeriesPlayer("7", Player("7", "Tim", "Uitdewilligen", Ranks.E0), PlayerScores()),
-    SeriesPlayer("8", Player("8", "Matthias", "Lesuise", Ranks.D6), PlayerScores()),
-    SeriesPlayer("9", Player("9", "Gil", "Corrujeira-Figueira", Ranks.D0), PlayerScores())
+    SeriesPlayer("1","1", koen, PlayerScores()),
+    SeriesPlayer("2","1", hans, PlayerScores()),
+    SeriesPlayer("3","1", Player("3", "Luk", "Geraets", Ranks.D6), PlayerScores()),
+    SeriesPlayer("4","1", Player("4", "Lode", "Van Renterghem", Ranks.E6), PlayerScores()),
+    SeriesPlayer("5","1", Player("5", "Tim", "Firquet", Ranks.C2), PlayerScores()),
+    SeriesPlayer("6","1", aram, PlayerScores()),
+    SeriesPlayer("7","1", Player("7", "Tim", "Uitdewilligen", Ranks.E0), PlayerScores()),
+    SeriesPlayer("8","1", Player("8", "Matthias", "Lesuise", Ranks.D6), PlayerScores()),
+    SeriesPlayer("9","1", Player("9", "Gil", "Corrujeira-Figueira", Ranks.D0), PlayerScores())
   )
 
   val appBuilder = new GuiceApplicationBuilder().build()
@@ -98,35 +98,35 @@ class SeriesServiceTest extends PlaySpec {
 
       seriesService.calculateSeriesScores(List(
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("1", koen, PlayerScores()),
+          SeriesPlayer("1","1", koen, PlayerScores()),
           List(
             SeriesRoundPlayer("1", "1", "2", koen, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
             SeriesRoundPlayer("2", "3", "3", koen, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("2",hans, PlayerScores()),
+          SeriesPlayer("2","1",hans, PlayerScores()),
           List(
             SeriesRoundPlayer("2", "2", "1", hans, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
             SeriesRoundPlayer("2", "2", "2", hans, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("3", nicky, PlayerScores()),
+          SeriesPlayer("3","1", nicky, PlayerScores()),
           List(
             SeriesRoundPlayer("3", "3", "1", nicky, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
             SeriesRoundPlayer("3", "3", "2", nicky, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
-          SeriesPlayer("4", gil, PlayerScores()),
+          SeriesPlayer("4","1", gil, PlayerScores()),
           List(
             SeriesRoundPlayer("4", "4", "1", gil, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
             SeriesRoundPlayer("4", "4", "2", gil, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           ))
 
       )) mustBe List(
-        SeriesPlayer("1", koen, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("2", hans, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("3", nicky, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
-        SeriesPlayer("4", gil, PlayerScores(5, 1, 11, 4, 148, 80, 407068)))
+        SeriesPlayer("1","1", koen, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("2","1", hans, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("3","1", nicky, PlayerScores(5, 1, 11, 4, 148, 80, 407068)),
+        SeriesPlayer("4","1", gil, PlayerScores(5, 1, 11, 4, 148, 80, 407068)))
     }
 
 

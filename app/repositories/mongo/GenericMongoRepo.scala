@@ -56,7 +56,7 @@ class GenericMongoRepo[M: Model]
     val msg = s"retrieveAllByFields( $optionalFieldsMap )"
     logger.debug(msg)
     val filters = fieldsMapToFilters(optionalFieldsMap.getOrElse(Map()))
-
+    println(filters)
     collectionFuture.flatMap(collection =>
       collection
       .find(Json.obj(filters: _*))
@@ -128,7 +128,7 @@ class GenericMongoRepo[M: Model]
   // helpers
   //
 
-  private def fieldsMapToFilters(fieldsMap: Map[String, String]): Seq[(String, JsValueWrapper)] =
+  def fieldsMapToFilters(fieldsMap: Map[String, String]): Seq[(String, JsValueWrapper)] =
     fieldsMap.mapValues(toJsFieldJsValueWrapper[String]).toSeq
 
   private def checked[Z](action: String => Future[Z])(id: String): Future[Z] =

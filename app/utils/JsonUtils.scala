@@ -27,8 +27,9 @@ object JsonUtils {
     implicit val playerReads = Json.format[Player]
     (
       (JsPath \ "playerId").read[String](minLength[String](1) keepAnd maxLength[String](255)) and
+          (JsPath \ "seriesId").read[String] and
         (JsPath \ "player").read[Player](playerReads)
-      ) (SeriesPlayer.apply(_, _, PlayerScores()))
+      ) (SeriesPlayer.apply(_, _, _, PlayerScores()))
   }
 
 
@@ -77,7 +78,7 @@ object JsonUtils {
     ) (TournamentSeries.apply(UUID.randomUUID().toString,_, _, _, _, _, _, _, 1, _))
 
 
-  val tournamentWithSeriesWrites: Writes[TournamentWithSeries] = new Writes[TournamentWithSeries] {
+  val tournamentWithSeriesWritesOnlyPlayers: Writes[TournamentWithSeries] = new Writes[TournamentWithSeries] {
     override def writes(o: TournamentWithSeries): JsValue = Json.obj(
       "id" -> o.tournament.id,
       "tournamentName" -> o.tournament.tournamentName,
@@ -104,7 +105,7 @@ object JsonUtils {
     "extraHandicapForRecs" -> o.extraHandicapForRecs,
     "showReferees" -> o.showReferees,
       "currentRoundNr" -> o.currentRoundNr,
-    "seriesPlayers" -> o.seriesPlayers.map{seriesPlayer => Json.toJson(seriesPlayer).asInstanceOf[JsObject]},
+    "seriesPlayers" -> o.seriesPlayers.map{seriesPlayer => Json.toJson(seriesPlayer.player).asInstanceOf[JsObject]},
     "tournamentId" -> o.tournamentId
     )
   }

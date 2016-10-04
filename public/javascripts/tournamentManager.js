@@ -8,7 +8,9 @@ var tournamentmanager = angular.module("tournamentManager", [
     'ngMaterial',
     'angular-jwt',
     'ngFileUpload',
-    'ngImgCrop']);
+    'ngImgCrop',
+    'md.data.table'
+]);
 
 
 
@@ -22,7 +24,7 @@ angular.module("managerServices", [])
 tournamentmanager.directive("tournamentOverview", function () {
     return {
         restrict: 'E',
-        scope: {tournament: '='},
+        scope: {tournament: '=', query: '='},
         templateUrl: "assets/directives/tournamentOverview.html"
     }
 });
@@ -34,6 +36,14 @@ tournamentmanager.directive("seriesRoundSetup", function(){
         templateUrl: "assets/directives/SeriesRoundSetup.html",
         controller: "roundElementController",
         controllerAs: "ctrl"
+    }
+});
+
+tournamentmanager.directive("seriesPlayers", function(){
+    return{
+        restrict: 'E',
+        scope: {query: '=', seriesPlayers: '='},
+        templateUrl: "assets/directives/seriesplayers.html"
     }
 });
 

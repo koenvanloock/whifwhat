@@ -15,8 +15,8 @@ module TournamentManagement{
         return this.$http.post(this.base.url + '/players', player)
     }
 
-        subscribePlayer(seriesPlayerList, seriesList, playerId) {
-        return this.$http.post(this.base.url + '/seriesplayers', {"subscriptions": seriesPlayerList, seriesList: seriesList, playerId: playerId})
+        subscribePlayer(seriesPlayerList, seriesList, player) {
+        return this.$http.post(this.base.url + '/seriesplayers', {"subscriptions": seriesPlayerList, seriesList: seriesList, player: player})
     }
 
         updatePlayer(player) {

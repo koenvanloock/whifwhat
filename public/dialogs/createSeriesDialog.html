@@ -37,7 +37,7 @@
                 <div layout-padding>
                     <md-input-container>
                     <label>Aantal te winnen sets</label>
-                    <md-select ng-model="series.numberOfSetsToWin" layout-padding>
+                    <md-select ng-model="createSeriesCtrl.series.numberOfSetsToWin" layout-padding>
                         <md-option ng-repeat="numberOfSetsToWin in createSeriesCtrl.numberOfSetsToWinList" value={{numberOfSetsToWin}}>{{numberOfSetsToWin}}</md-option>
                     </md-select>
                 </md-input-container>

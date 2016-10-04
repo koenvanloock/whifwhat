@@ -9,6 +9,8 @@ module TournamentManagement{
         private editing: boolean;
         private playerToEdit: Player;
         private allPlayers: Array<Player>;
+        private shownPlayers: Array<Player>;
+
         private editIndex = null;
         private emptyPlayer = {
             'id': "",
@@ -16,6 +18,8 @@ module TournamentManagement{
             'lastname': "",
             'rank': null
         };
+
+        private query: any;
 
         private result: any;
         private errorMsg: string;
@@ -33,6 +37,11 @@ module TournamentManagement{
                 }
             );
 
+            this.query = {
+                limit: 5,
+                page: 1
+            };
+
             playerService.getAllPlayers().then(
                 (result: any) => {
                     result.data.map((player) => {
@@ -44,9 +53,14 @@ module TournamentManagement{
                             'imagepath': player.imagepath
                         });
                     });
+
                 });
         }
 
+
+        getImagePath(player: Player){
+            return (player.imagepath) ? player.imagepath : "../assets/images/noImageIcon.jpg";
+        }
 
         getRankOfValue(value: number){
             return this.ranks.filter( rank => rank.value === value)[0];

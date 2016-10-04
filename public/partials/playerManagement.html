@@ -1,7 +1,8 @@
 <div layout="column" layout-align="center center">
     <div class="md-whiteframe-z2 md-margin" flex="50">
 
-        <table style="background: rgba(125,125,125,0.5)">
+        <md-table-container style="background: rgba(125,125,125,0.5)">
+        <table md-table >
             <tr>
                 <th></th>
                 <th>Voornaam</th>
@@ -9,10 +10,9 @@
                 <th>Klassement</th>
                 <th>Acties</th>
             </tr>
-            <tr ng-repeat="player in ctrl.allPlayers">
+            <tr ng-repeat="player in ctrl.allPlayers | limitTo: ctrl.query.limit: (ctrl.query.page - 1) * ctrl.query.limit">
                 <td>
-                    <img ng-hide="player.imagepath" src="../assets/images/noImageIcon.jpg" height="50" width="50" style="border-radius: 25px">
-                    <img ng-show="player.imagepath" ng-src="{{ '../assets/'+ player.imagepath}}" height="50" width="50" style="border-radius: 25px">
+                    <img ng-src="{{ctrl.getImagePath(player)}}" height="50" width="50" style="border-radius: 25px">
                 </td>
                 <td>{{player.firstname}}</td>
                 <td>{{player.lastname}}</td>
@@ -27,6 +27,8 @@
                 </td>
             </tr>
         </table>
+            <md-table-pagination md-limit="ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="ctrl.query.page" md-total="{{ctrl.allPlayers.length}}" md-page-select></md-table-pagination>
+        </md-table-container>
     </div>
     <div layout="row" class="md-margin" style="background: rgba(93, 93, 93, 0.7)">
 

@@ -17,12 +17,12 @@ module TournamentManagement{
                     private $routeParams: IRouteParamsService,
                     private tournamentService: TournamentService,
                     private seriesService:SeriesService) {
-                        if(tournamentService.getCurrentTournament() == null){
                                 tournamentService.getTournament($routeParams['tournamentId']).then( (result: any)=>
-
-                                { this.currentTournament = result.data; console.log(this.currentTournament);tournamentService.setCurrentTournament(result.data);
+                                {
+                                        this.currentTournament = result.data; console.log(this.currentTournament);
+                                        tournamentService.setCurrentTournament(result.data);
                                 });
-                        }
+
 
                         $scope.$watch(() => tournamentService.getCurrentTournament(), (oldVal, newVal) => {
                                return (oldVal != newVal) ? newVal : oldVal;
@@ -47,6 +47,8 @@ module TournamentManagement{
                         this.$mdDialog.show(dialog).then( (newSeries) => {
                                 newSeries.tournamentId = tournamentToAddSeries.id;
                                 if(!newSeries.extraHandicapForRecs) newSeries.extraHandicapForRecs=0;
+                                newSeries.setTargetScore  = parseInt(newSeries.setTargetScore);
+                                newSeries.numberOfSetsToWin = parseInt(newSeries.numberOfSetsToWin);
                                 newSeries.currentRoundNr= tournamentToAddSeries.series ? tournamentToAddSeries.series.length+1 :1;
                                 seriesService.addSeries(newSeries).then( (insertedSeries) => {
                                         if(!tournamentToAddSeries.series) tournamentToAddSeries.series = [];
@@ -59,6 +61,7 @@ module TournamentManagement{
 
                 updateSeries(index) {
                         var seriesToUpdate = this.currentTournament.series[index];
+                        seriesToUpdate.setTargetScore = parseInt(seriesToUpdate.setTargetScore);
                         this.seriesService.updateSeries(seriesToUpdate);
                 };
 

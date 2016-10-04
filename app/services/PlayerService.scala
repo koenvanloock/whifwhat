@@ -17,7 +17,7 @@ class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, se
       })
     }.map(_.flatten)
 
-  def deleteSubscriptions(seriesId: String, playerId: String): Future[Int] = { seriesPlayerRepository.deleteSubscriptions(seriesId, playerId).map{ numberOfDeletedRows =>
+  def deleteSubscriptions(seriesId: String, player: Player): Future[Int] = { seriesPlayerRepository.deleteSubscriptions(seriesId, player).map{ numberOfDeletedRows =>
       println(s"subscriptions deleted for $seriesId: "+numberOfDeletedRows.toString)
       numberOfDeletedRows
   }}

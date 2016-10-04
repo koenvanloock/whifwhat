@@ -19,7 +19,6 @@ class TournamentController @Inject()(tournamentRepository: TournamentRepository,
  val tournamentWrites = Json.format[Tournament]
 
   def createTournament() = Action.async{ request =>
-    logger.info("received request: "+request.body.toString)
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
          logger.info(tournament.toString)
         tournamentRepository.create(tournament).map(x => Created(Json.toJson(tournament)))
@@ -29,13 +28,13 @@ class TournamentController @Inject()(tournamentRepository: TournamentRepository,
 
   def getTournamentById(tournamentId: String) = Action.async{
     tournamentRepository.retrieveById(tournamentId).flatMap{
-      case Some(tournament) => seriesRepository.retrieveAll().flatMap { seriesList =>
+      case Some(tournament) => seriesRepository.retrieveAllByField("tournamentId", tournamentId).flatMap { seriesList =>
         Future.sequence{seriesList.map{ series =>
           seriesPlayerRepository.retrieveAllSeriesPlayers(series.id).map{ seriesPlayers =>
               SeriesWithPlayers(series.id, series.seriesName, series.seriesColor, series.numberOfSetsToWin, series.setTargetScore,series.playingWithHandicaps, series.extraHandicapForRecs, series.showReferees, series.currentRoundNr, seriesPlayers,series.tournamentId)
           }
         }
-      }.map{ seriesWithPlayerList => Ok(Json.toJson(TournamentWithSeries(tournament, seriesWithPlayerList))(JsonUtils.tournamentWithSeriesWrites))}
+      }.map{ seriesWithPlayerList => Ok(Json.toJson(TournamentWithSeries(tournament, seriesWithPlayerList))(JsonUtils.tournamentWithSeriesWritesOnlyPlayers))}
       }
       case _ => Future(NotFound)
     }
