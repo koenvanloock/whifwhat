@@ -1,9 +1,9 @@
 package models
 
 import models.matches.SiteMatch
-import models.player.SeriesRoundPlayer
+import models.player.SeriesPlayer
 
 
-case class RobinGroup(robinGroupId: String, robinPlayers: List[SeriesRoundPlayer], robinMatches: List[SiteMatch])
+case class RobinGroup(robinGroupId: String, robinPlayers: List[SeriesPlayer], robinMatches: List[SiteMatch])
 
 

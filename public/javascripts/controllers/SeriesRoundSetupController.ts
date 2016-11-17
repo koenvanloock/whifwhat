@@ -14,10 +14,14 @@ module TournamentManagement {
                  (response: any) => {
                     this.seriesList = [];
                     response.data.map( (series) => {
-                        this.seriesList.push(series);
-                        this.closed.push(true);
+                        roundService.loadRoundsOfSeries(series.id).then( rounds => {
+                            series.rounds = rounds;
+                            this.seriesList.push(series);
+                            this.closed.push(true);
+                        })
                     })
                 });
+
 
             $rootScope.$watch(()  => roundService.getRoundsOfSeries,  (oldval, newval) => {
                 if (oldval!=newval) {
@@ -37,16 +41,10 @@ module TournamentManagement {
 
 
         createSeriesRound(index) {
-            var initSeriesRound = {
-                seriesId: this.seriesList[index].seriesId,
-                roundType: "B",
-                numberOfBracketRounds: 0,
-                numberOfRobinGroups: 0,
-                roundNr: (this.seriesList[index].rounds ? this.seriesList[index].rounds.length + 1 : 1)
-            };
+
             this.closed[index] = false;
             if (this.seriesList[index].rounds == undefined) this.seriesList[index].rounds = [];
-                this.roundService.createSeriesRound(initSeriesRound).then((response) => {
+                this.roundService.createSeriesRound(this.seriesList[index].id).then((response) => {
                 this.seriesList[index].rounds.push(response.data);
             })
         };
@@ -61,12 +59,19 @@ module TournamentManagement {
 
         selectionChanged(index) {
             if(!this.seriesList[index].rounds || this.seriesList[index].rounds.length <1)
-            this.roundService.loadRoundsOfSeries(this.seriesList[index].id).then((roundList: any) => {
-                this.roundService.setRoundsOfSeries(roundList.data);
-                this.seriesList[index].rounds = this.roundService.getRoundsOfSeries();
-            });
+                this.seriesList[index].rounds = this.roundService.loadRoundsOfSeries(this.seriesList[index].id);
 
+        };
+
+        deleteRound(index, roundId, series){
+            console.log("in de delete");
+            this.roundService.deleteSeriesRound(roundId).then( (result) => {
+                this.roundService.loadRoundsOfSeries(series.id).then( (roundsOfIndex) => {
+                    series.rounds = roundsOfIndex;
+                });
+            })
         }
+
     }
 
     angular.module("managerControllers").controller("SeriesRoundSetupController", SeriesRoundSetupController)

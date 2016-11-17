@@ -1,5 +1,6 @@
 package services
 
+import models.{SiteBracketRound, SiteRobinRound}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -31,14 +32,14 @@ class DrawServiceTest extends PlaySpec {
       SeriesPlayer("16","1", Player("16", "Sterre", "Roos", Ranks.E4), PlayerScores()))
 
     "draw 1 sorted robins" in {
-      val drawnGroups = drawService.drawSortedRobins(players, 1, 21, 2).get
+      val drawnGroups = drawService.drawSortedRobins(players, SiteRobinRound("123abc",1,"12315646",1, Nil), 21, 2).get
       drawnGroups.robinList.length mustBe 1
       drawnGroups.robinList.head.robinPlayers.length mustBe 9
       drawnGroups.robinList.head.robinMatches.length mustBe 36
     }
 
     "draw 2 sorted robins" in {
-      val drawnGroups = drawService.drawSortedRobins(players, 2, 21, 2).get
+      val drawnGroups = drawService.drawSortedRobins(players, SiteRobinRound("123abc",2,"12315646",1, Nil), 21, 2).get
       drawnGroups.robinList.length mustBe 2
       drawnGroups.robinList.head.robinPlayers.length mustBe 5
       drawnGroups.robinList.head.robinMatches.length mustBe 10
@@ -48,7 +49,7 @@ class DrawServiceTest extends PlaySpec {
     }
 
     "draw 3 sorted robins" in {
-      val drawnGroups = drawService.drawSortedRobins(players, 3, 21, 2).get
+      val drawnGroups = drawService.drawSortedRobins(players, SiteRobinRound("123abc",3,"12315646",1, Nil), 21, 2).get
       drawnGroups.robinList.length mustBe 3
       drawnGroups.robinList.head.robinPlayers.length mustBe 3
       drawnGroups.robinList.head.robinMatches.length mustBe 3
@@ -58,15 +59,15 @@ class DrawServiceTest extends PlaySpec {
     }
 
     "draw 0 sorted robins with 5 as numberOfRobins" in {
-      drawService.drawSortedRobins(players, 5, 21, 2) mustBe None
+      drawService.drawSortedRobins(players,SiteRobinRound("123abc",5,"12315646",1, Nil), 21, 2) mustBe None
     }
 
     "draw 0 sorted robins with 0 as numberOfRobins" in {
-      drawService.drawSortedRobins(players, 0, 21, 2) mustBe None
+      drawService.drawSortedRobins(players, SiteRobinRound("123abc",0,"12315646",1, Nil), 21, 2) mustBe None
     }
 
     "the ranked random sorts the players by rank and distributes them across the first places in all groups" in {
-      val test = drawService.drawRobins(players, 3, 21, 2, DrawTypes.RankedRandomOrder).get
+      val test = drawService.drawRobins(players, SiteRobinRound("123abc",3,"12315646",1, Nil), 21, 2, DrawTypes.RankedRandomOrder).get
       val firstPlacesFirstNams = test.robinList.map(robin => robin.robinPlayers.head.player.firstname)
       firstPlacesFirstNams must contain("Koen")
       firstPlacesFirstNams must contain("Aram")
@@ -74,16 +75,16 @@ class DrawServiceTest extends PlaySpec {
     }
 
     "draw random" in {
-      val test = drawService.drawRobins(players, 3, 21, 2, DrawTypes.RandomOrder).get
+      val test = drawService.drawRobins(players, SiteRobinRound("123abc",3,"12315646",1, Nil), 21, 2, DrawTypes.RandomOrder).get
       test.robinList.length mustBe 3
     }
 
     "a bracket with 0 rounds returns None" in {
-      drawService.drawBracket(players, 0,2,21) mustBe None
+      drawService.drawBracket(players, SiteBracketRound("123abc",0,"12315646",1, Nil,Nil),2,21) mustBe None
     }
 
     "draw a bracket with one round (final)" in {
-      val bracket = drawService.drawBracket(players, 1, 2, 21).get
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",1,"12315646",1, Nil,Nil),2,21).get
 
       bracket.bracketPlayers.length mustBe 2
       bracket.bracketRounds.length mustBe 1
@@ -92,7 +93,7 @@ class DrawServiceTest extends PlaySpec {
     }
 
     "draw a bracket with two rounds (semi-finals)" in {
-      val bracket = drawService.drawBracket(players, 2, 2, 21).get
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",2,"12315646",1, Nil,Nil),2,21).get
 
       bracket.bracketPlayers.length mustBe 4
       bracket.bracketRounds.length mustBe 2
@@ -106,8 +107,8 @@ class DrawServiceTest extends PlaySpec {
 
     }
 
-    "draw a bracket with two rounds (quarter-finals)" in {
-      val bracket = drawService.drawBracket(players, 3, 2, 21).get
+    "draw a bracket with three rounds (quarter-finals)" in {
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",3,"12315646",1, Nil,Nil),2,21).get
 
       bracket.bracketPlayers.length mustBe 8
       bracket.bracketRounds.length mustBe 3
@@ -129,7 +130,7 @@ class DrawServiceTest extends PlaySpec {
 
 
     "draw a bracket with 4 rounds (sixteenth-finals)" in {
-      val bracket = drawService.drawBracket(extendedPlayers, 4, 2, 21).get
+      val bracket = drawService.drawBracket(extendedPlayers, SiteBracketRound("123abc",4,"12315646",1, Nil,Nil),2,21).get
 
       bracket.bracketPlayers.length mustBe 16
       bracket.bracketRounds.length mustBe 4

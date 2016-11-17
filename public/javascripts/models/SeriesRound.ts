@@ -5,7 +5,7 @@ module TournamentManagement{
         roundNr: number;
         numberOfRobinGroups?: number;
         numberOfBracketRounds?: number;
-        seriesRoundId: string;
+        id: string;
         seriesId: string;
 
     }

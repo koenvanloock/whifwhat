@@ -7,18 +7,19 @@
 
         <div ng-repeat="round in series.rounds">
 
-            <div class="robins" ng-repeat="robin in round.robins">
-            <table>
-                <tr ng-repeat="player in robin.robinPlayers">
-                    <td>{{player.firstname}}</td>
-                    <td>{{player.lastname}}</td>
-                    <td>{{player.rank.name}}</td>
-                </tr>
-            </table>
+            <div class="robins" ng-repeat="robin in round.robinRounds">
+                <div layout="row">
+
+                <div layout="column">
+                <round-players round-players="robin.robinPlayers"></round-players>
+                <robin-matches robin-matches="robin.robinMatches"></robin-matches>
+                    </div>
+
+                    <md-button class="md-fab md-primary" ng-click="drawCtrl.updateSeriesRound(round)"><i class="fa fa-save"></i></md-button>
+                    <md-button class="md-fab md-primary" ng-click="drawCtrl.redraw(round)"><i class="fa fa-refresh"></i></md-button>
+                    </div>
+           </div>
+        <h3 style="color:white">{{drawCtrl.errors[$index]}}</h3>
             </div>
         </div>
-
-        <h3 style="color:white">{{drawCtrl.errors[$index]}}</h3>
-    </div>
-
 </div>

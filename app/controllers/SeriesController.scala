@@ -34,6 +34,6 @@ class SeriesController @Inject()(seriesRepository: SeriesRepository) extends Con
   }
 
   def getSeriesOfTournament(tournamentId: String) = Action.async{
-    seriesRepository.retrieveAllByField("TOURNAMENT_ID", tournamentId).map(seriesList => Ok(Json.listToJson(seriesList)))
+    seriesRepository.retrieveAllByField("tournamentId", tournamentId).map(seriesList => Ok(Json.listToJson(seriesList)))
   }
 }

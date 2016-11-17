@@ -33,6 +33,8 @@ body{
 
 .viewField{
     margin-left: 220px;
+    overflow: auto;
+    max-height: 80vh;
 }
 
 .cropArea {
@@ -53,4 +55,21 @@ form .progress {
     font-size: smaller;
     background: orange;
     width: 0;
+}
+
+.playerTable{
+   text-align: center;
+}
+
+
+.pointLabel{
+    text-align: center;
+}
+
+.matchTag{
+    padding-left: 10px;
+    padding-bottom: 5px;
+    padding-right: 10px;
+    text-align: center;
+    background: #2f8cc1;
 }

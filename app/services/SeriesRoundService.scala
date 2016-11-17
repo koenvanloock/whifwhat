@@ -4,66 +4,60 @@ import javax.inject.Inject
 
 import models._
 import models.matches.{SiteMatch, SiteMatchWithGames}
-import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers, SeriesRoundPlayer}
+import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import repositories.mongo.SeriesRoundRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
-/*
-  def saveBracket(bracket: Bracket): Future[Option[SeriesRoundWithPlayersAndMatches]] = {
 
-    //todo delete existing elements in DB !!!! (need roundNR???)
 
-     roundPlayersRepository.saveBracketPlayers(bracket.bracketPlayers).map { playerList =>
-       //todo save round
-       // save roundMatches
-        //todo save matches
-        Some(bracket)
-     }
-
-  }*/
-
-/*
-  def saveRobin(robin: RobinRound): Future[Option[SeriesRoundWithPlayersAndMatches]] = {
-    val players = robin.robinList.flatMap(_.robinPlayers)
-    //todo delete existing elements in DB !!!! (need roundNR???)
-
-    roundPlayersRepository.saveRobinPlayers(players).map { playerList =>
-      //todo save round
-      // save roundMatch
-      //todo save matches
-      Some(robin)
+  def createSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = {
+    def getNextRoundNrOfSeries(seriesId: String) = {
+      seriesRoundRepository.retrieveAllByField("seriesId",seriesId).map( list => seriesRound match{
+        case r: SiteRobinRound => r.copy(roundNr = list.length + 1 )
+        case b: SiteBracketRound => b.copy(roundNr = list.length + 1)
+      })
     }
-  }*/
 
-/*
-  def saveFullSeriesRound(fullSeriesRound: SeriesRoundWithPlayersAndMatches): Future[Option[SeriesRoundWithPlayersAndMatches]] = fullSeriesRound match {
-    case bracket: Bracket => saveBracket(bracket)
-    case robin: RobinRound => saveRobin(robin)
-  }*/
-
-  def createSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = seriesRoundRepository.create(seriesRound)
-
-
-  def convertRoundToGeneric(seriesRound: SeriesRound): GenericSeriesRound = seriesRound match {
-    case robin  : SiteRobinRound   => GenericSeriesRound(robin.id,None, Some(robin.numberOfRobinGroups), "R",robin.seriesId, robin.roundNr)
-    case bracket: SiteBracketRound => GenericSeriesRound(bracket.id, Some(bracket.numberOfBracketRounds), None, "B", bracket.seriesId, bracket.roundNr)
+    val seriesToCreate = getNextRoundNrOfSeries(seriesRound.seriesId)
+    seriesToCreate.flatMap(seriesRoundRepository.create)
   }
 
-  def convertGenericToRound(genericSeriesRound: GenericSeriesRound): SeriesRound ={
-    genericSeriesRound.roundType match{
-      case "R" => SiteRobinRound(genericSeriesRound.seriesRoundId, genericSeriesRound.numberOfRobins.get, genericSeriesRound.seriesId, genericSeriesRound.roundNr)
-      case "B" => SiteBracketRound(genericSeriesRound.seriesRoundId, genericSeriesRound.numberOfBracketRounds.get, genericSeriesRound.seriesId, genericSeriesRound.roundNr)
-    }
-  }
 
   def updateSeriesRound(seriesRound: SeriesRound) = seriesRoundRepository.update(seriesRound)
 
 
-  def getRoundsOfSeries(seriesId: String) = seriesRoundRepository.retrieveAllByField("SERIES_ID", seriesId)
-  def delete(seriesRoundId: String) = seriesRoundRepository.delete(seriesRoundId)
+  def getRoundsOfSeries(seriesId: String) = seriesRoundRepository.retrieveAllByField("seriesId", seriesId)
+
+
+  def updateRoundNrForDeletedNr(roundNrToDelete: Int): (SeriesRound) => Future[SeriesRound] = {
+    def decreaseRoundNr(round: SeriesRound) = round match {
+      case r:SiteRobinRound => r.copy(roundNr = r.roundNr - 1)
+      case b:SiteBracketRound => b.copy(roundNr = b.roundNr - 1)
+    }
+
+    round => if(round.roundNr > roundNrToDelete) updateSeriesRound(decreaseRoundNr(round)) else Future(round)
+  }
+
+  def updateRoundNrs(round: SeriesRound) = {
+    val roundToDeleteNr = round.roundNr
+    getRoundsOfSeries(round.seriesId).flatMap{ rounds => Future.sequence{
+          rounds.map(updateRoundNrForDeletedNr(roundToDeleteNr))
+        }
+       }
+
+  }
+
+  def delete(seriesRoundId: String): Future[Unit] = {
+    seriesRoundRepository.retrieveById(seriesRoundId).flatMap {
+      case Some(round) => updateRoundNrs(round).flatMap(updated =>
+        seriesRoundRepository.delete(seriesRoundId)).map(_ => Some(()))
+      case None => Future(None)
+    }
+    seriesRoundRepository.delete(seriesRoundId)
+  }
 
   def calculatePlayerScore: (SeriesPlayerWithRoundPlayers) => SeriesPlayer = {
     seriesPlayerWithRoundPlayers =>
@@ -80,13 +74,13 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       ))
   }
 
-  def updateSeriesRoundPlayerAfterMatch(seriesRoundPlayer: SeriesRoundPlayer, playerMatches: List[SiteMatch]) = {
+  def updateSeriesPlayerAfterMatch(seriesPlayer: SeriesPlayer, playerMatches: List[SiteMatch]) = {
 
-    val newPlayerScore = calculateRoundPlayerScore(seriesRoundPlayer, playerMatches)
-    seriesRoundPlayer.copy(playerScores = newPlayerScore)
+    val newPlayerScore = calculateRoundPlayerScore(seriesPlayer, playerMatches)
+    seriesPlayer.copy(playerScores = newPlayerScore)
   }
 
-  def calculateRoundPlayerScore(seriesRoundPlayer: SeriesRoundPlayer, playerMatches: List[SiteMatch]): PlayerScores = {
+  def calculateRoundPlayerScore(seriesRoundPlayer: SeriesPlayer, playerMatches: List[SiteMatch]): PlayerScores = {
     def PlayerScoresForA(acc: PlayerScores, siteMatch: SiteMatch): PlayerScores = {
       val matchWonPoints: Int = siteMatch.games.map(_.pointA).sum
       val matchLostPoints: Int = siteMatch.games.map(_.pointB).sum
@@ -136,8 +130,8 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
 
   val seriesRounds: List[SeriesRound] = List(
-    SiteRobinRound("1", 2, "1", 1),
-    SiteBracketRound("2", 2, "1", 1)
+    SiteRobinRound("1", 2, "1", 1, List()),
+    SiteBracketRound("2", 2, "1", 1, List(),List())
   )
 
   def getSeriesRound(seriesRoundId: String) = {
@@ -145,10 +139,10 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   }
 
 
-  def isRoundComplete(seriesRoundWithPlayersAndMatches: SeriesRoundWithPlayersAndMatches): Boolean = seriesRoundWithPlayersAndMatches match {
-    case robinRound: RobinRound =>
+  def isRoundComplete(seriesRoundWithPlayersAndMatches: SeriesRound): Boolean = seriesRoundWithPlayersAndMatches match {
+    case robinRound: SiteRobinRound =>
       robinRound.robinList.forall(robinGroup => robinGroup.robinMatches.forall(matchService.isMatchComplete))
-    case bracketRound: Bracket =>
+    case bracketRound: SiteBracketRound =>
       bracketRound.bracketRounds.forall(bracketMatchList => bracketMatchList.forall(matchService.isBracketMatchComplete))
   }
 }

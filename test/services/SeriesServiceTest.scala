@@ -39,9 +39,9 @@ class SeriesServiceTest extends PlaySpec {
 
   "TournamentSeriesService" should {
     "return a list of series of a tournament" in {
-
+      val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
       val series = waitFor(seriesService.getTournamentSeriesOfTournament("1"))
-      series must contain(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1"))
+      series must contain(TournamentSeries(insertedSeries.id, "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1"))
     }
 
     //    "draw a series" in {
@@ -69,13 +69,13 @@ class SeriesServiceTest extends PlaySpec {
     "advance to the next round if complete" in {
       val series = TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, playingWithHandicaps = true, 0, showReferees = false, 1, "1")
       val roundList = List(
-        RobinRound(List(RobinGroup("1", List(), List(
+        SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
           SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
             SiteGame(21, 15, 1),
             SiteGame(21, 15, 2))
           ))))),
-        RobinRound(List(RobinGroup("2", List(), List()))),
-        Bracket("1", List(), List(List()))
+        SiteRobinRound("124",1,"124",2,List(RobinGroup("2", List(), List()))),
+        SiteBracketRound("1",1,"125",3, List(), List(List()))
       )
       seriesService.advanceSeries(series, roundList).currentRoundNr mustBe 2
     }
@@ -100,26 +100,26 @@ class SeriesServiceTest extends PlaySpec {
         SeriesPlayerWithRoundPlayers(
           SeriesPlayer("1","1", koen, PlayerScores()),
           List(
-            SeriesRoundPlayer("1", "1", "2", koen, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("2", "3", "3", koen, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesPlayer("1", "2", koen, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesPlayer("2", "3", koen, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
           SeriesPlayer("2","1",hans, PlayerScores()),
           List(
-            SeriesRoundPlayer("2", "2", "1", hans, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("2", "2", "2", hans, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesPlayer("2", "1", hans, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesPlayer("2", "2", hans, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
           SeriesPlayer("3","1", nicky, PlayerScores()),
           List(
-            SeriesRoundPlayer("3", "3", "1", nicky, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("3", "3", "2", nicky, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesPlayer("3", "1", nicky, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesPlayer("3", "2", nicky, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           )),
         SeriesPlayerWithRoundPlayers(
           SeriesPlayer("4","1", gil, PlayerScores()),
           List(
-            SeriesRoundPlayer("4", "4", "1", gil, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
-            SeriesRoundPlayer("4", "4", "2", gil, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
+            SeriesPlayer("4", "1", gil, PlayerScores(3, 0, 6, 2, 84, 40, 304044)),
+            SeriesPlayer("4", "2", gil, PlayerScores(2, 1, 5, 2, 64, 40, 103024))
           ))
 
       )) mustBe List(

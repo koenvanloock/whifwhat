@@ -47,6 +47,30 @@ tournamentmanager.directive("seriesPlayers", function(){
     }
 });
 
+tournamentmanager.directive("roundPlayers", function(){
+    return{
+        restrict: 'E',
+        scope: {roundPlayers: '='},
+        templateUrl: "assets/directives/roundPlayers.html"
+    }
+});
+
+tournamentmanager.directive("robinMatches", function(){
+    return{
+        restrict: 'E',
+        scope: {robinMatches: '='},
+        templateUrl: "assets/directives/robinMatches.html"
+    }
+});
+
+tournamentmanager.directive("robinMatch", function(){
+    return{
+        restrict: 'E',
+        scope: {match: '='},
+        templateUrl: "assets/directives/robinMatch.html"
+    }
+});
+
 tournamentmanager.config(function($mdThemingProvider) {
     $mdThemingProvider.theme('default')
         .primaryPalette('teal')

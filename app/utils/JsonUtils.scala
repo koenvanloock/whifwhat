@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
-import models.{SeriesWithPlayers, Tournament, TournamentSeries, TournamentWithSeries}
+import models._
 import play.api.libs.json._
 import play.api.mvc.{AnyContent, Request}
 import play.api.libs.json.Reads._
@@ -14,6 +14,18 @@ import play.api.libs.functional.syntax._ // Combinator syntax
 
 
 object JsonUtils {
+  def listWrites[T](implicit tWrites: Writes[T]) = {
+      new Writes[List[T]] {
+        override def writes(list: List[T]): JsValue = Json.toJson(list.map(Json.toJson(_)(tWrites)))
+      }
+    }
+
+  def listReads[T](implicit tReads: Reads[T]) = {
+    new Reads[List[T]] {
+      override def reads(json: JsValue): JsResult[List[T]] = json.validate[JsArray].map(jsArray => jsArray.value.flatMap(jsVal => jsVal.validate[T](tReads).asOpt).toList)
+    }
+  }
+
   val fullSeriesReads: Reads[TournamentSeries] = Json.reads[TournamentSeries]
 
   def using(sortParameter: Option[String]): JsObject =

@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import models._
 import models.matches.{SiteGame, SiteMatch, SiteMatchWithGames}
-import models.player.{Player, PlayerScores, Rank, SeriesRoundPlayer}
+import models.player.{SeriesPlayer, Player, PlayerScores, Rank}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -20,72 +20,48 @@ import SeriesRoundEvidence._
 
 class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) extends Controller{
 
-  val roundReads = new Reads[SeriesRound]{
-
-    def robinreads(json: JsValue) = Json.fromJson[SiteRobinRound](json)(Json.reads[SiteRobinRound])
-    def bracketreads(json: JsValue) = Json.fromJson[SiteBracketRound](json)(Json.reads[SiteBracketRound])
-
-    override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
-      case "R" => robinreads(json)
-      case "B" => bracketreads(json)
-    }
-  }
-
-  val robinInitReads: Reads[SiteRobinRound] = (
+  implicit val robinInitReads: Reads[SiteRobinRound] = (
     (JsPath \ "numberOfRobinGroups").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteRobinRound.apply(UUID.randomUUID().toString,_, _, _))
+    ) (SiteRobinRound.apply(UUID.randomUUID().toString,_, _, _, Nil))
 
-  val bracketInitReads: Reads[SiteBracketRound] = (
+  implicit val bracketInitReads: Reads[SiteBracketRound] = (
     (JsPath \ "numberOfBracketRounds").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteBracketRound.apply(UUID.randomUUID().toString,_, _, _))
+    ) (SiteBracketRound.apply(UUID.randomUUID().toString,_, _, _, Nil, Nil))
+
+  val robinconfigReads: Reads[SiteRobinRound] = (
+    (JsPath \ "id").read[String] and
+    (JsPath \ "numberOfRobinGroups").read[Int] and
+      (JsPath \ "seriesId").read[String] and
+      (JsPath \ "roundNr").read[Int]
+    ) (SiteRobinRound.apply(_,_, _, _, Nil))
+
+  val bracketConfigReads: Reads[SiteBracketRound] = (
+    (JsPath \ "id").read[String] and
+      (JsPath \ "numberOfBracketRounds").read[Int] and
+      (JsPath \ "seriesId").read[String] and
+      (JsPath \ "roundNr").read[Int]
+    ) (SiteBracketRound.apply(_,_, _, _, Nil, Nil))
 
   val roundReadsInsert = new Reads[SeriesRound]{
 
-    def robinreads(json: JsValue) = Json.fromJson[SiteRobinRound](json)(robinInitReads)
-    def bracketreads(json: JsValue) = Json.fromJson[SiteBracketRound](json)(bracketInitReads)
 
     override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
-      case "R" => robinreads(json)
-      case "B" => bracketreads(json)
+      case "R" => Json.fromJson[SiteRobinRound](json)(robinInitReads)
+      case "B" => Json.fromJson[SiteBracketRound](json)(bracketInitReads)
     }
   }
 
-  val fullRoundReads = new Reads[SeriesRoundWithPlayersAndMatches]{
-    override def reads(json: JsValue): JsResult[SeriesRoundWithPlayersAndMatches] = (json \ "robins").asOpt[JsValue].map{ robinJson =>
-      JsSuccess(RobinRound(fullRobinReads(robinJson)))
-    }.getOrElse(JsSuccess(fullBracketReads(json)))
-  }
+  val roundReadsConfig = new Reads[SeriesRound]{
 
-  def fullRobinReads(json: JsValue): List[RobinGroup] = {
-    implicit val rankReads =  Json.reads[Rank]
-    implicit val playerReads = Json.reads[Player]
-    implicit val  scoreReads = Json.reads[PlayerScores]
-    implicit val seriesPlayerListReads = new Reads[List[SeriesRoundPlayer]]{
-      override def reads(json: JsValue): JsResult[List[SeriesRoundPlayer]] = JsSuccess(json.as[JsArray].value.flatMap( entity => Json.fromJson[SeriesRoundPlayer](entity)(Json.reads[SeriesRoundPlayer]).asOpt).toList)
+
+    override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
+      case "R" => Json.fromJson[SiteRobinRound](json)(robinconfigReads)
+      case "B" => Json.fromJson[SiteBracketRound](json)(bracketConfigReads)
     }
-    implicit val siteGameListReads = new Reads[List[SiteGame]]{
-      override def reads(json: JsValue): JsResult[List[SiteGame]] = JsSuccess(json.as[JsArray].value.flatMap( entity => Json.fromJson[SiteGame](entity)(Json.reads[SiteGame]).asOpt).toList)
-    }
-
-    implicit val siteMatchListReads = new Reads[List[SiteMatch]]{
-      override def reads(json: JsValue): JsResult[List[SiteMatch]] = JsSuccess(json.as[JsArray].value.flatMap( entity => Json.fromJson[SiteMatch](entity)(Json.reads[SiteMatch]).asOpt).toList)
-    }
-
-    val robinGroupReads: Reads[RobinGroup] = (
-        (JsPath \ "robinGroupId").read[String] and
-          (JsPath \ "robinPlayers").read[List[SeriesRoundPlayer]] and
-          (JsPath \ "robinMatches").read[List[SiteMatch]]
-        )(RobinGroup.apply(_,_,_))
-
-    json.as[JsArray].value.flatMap(entry => Json.fromJson(entry)(robinGroupReads).asOpt).toList
-  }
-
-  def fullBracketReads(json: JsValue): Bracket = {
-    Bracket("TESTROUND",List(),List())
   }
 
   def getRoundsOfSeries(seriesId: String) = Action.async{
@@ -94,29 +70,28 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
 
   }
 
-  def updateSeriesRound() = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, roundReads).map{ seriesRound =>
+  def updateConfigSeriesRound() = Action.async{ request =>
+    ControllerUtils.parseEntityFromRequestBody(request, roundReadsConfig).map{ seriesRound =>
       seriesRoundService.updateSeriesRound(seriesRound).map {
         updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
       }
     }.getOrElse(Future(BadRequest))
-
-
-
   }
 
-  def createSeriesRound() = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, roundReadsInsert).map{ seriesRound =>
+  def fullUpdateSeriesRound = Action.async{ request =>
+    ControllerUtils.parseEntityFromRequestBody(request, SeriesRoundEvidence.seriesRoundIsModel.roundReads).map{ seriesRound =>
+      seriesRoundService.updateSeriesRound(seriesRound).map {
+        updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
+      }
+    }.getOrElse(Future(BadRequest))
+  }
+
+  def createSeriesRound(seriesId: String) = Action.async{
+      val seriesRound =  SiteBracketRound(UUID.randomUUID().toString,0, seriesId,0,Nil, Nil)
       seriesRoundService.createSeriesRound(seriesRound).map{
         round => Created(Json.toJson(round))
       }
-    }.getOrElse(Future(BadRequest("ongeldig formaat")))
   }
-/*
-  def saveRound = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, fullRoundReads).map { fullSeriesRound =>
 
-      seriesRoundService.saveFullSeriesRound(fullSeriesRound).map(_ => Ok)
-    }.getOrElse(Future(BadRequest("foute invoer")))
-  }*/
+  def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map{_ => NoContent})
 }

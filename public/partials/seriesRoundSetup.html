@@ -18,13 +18,16 @@
 
     <div ng-hide="roundCtrl.isClosed($index)" flex>
         <div flex></div>
-        <series-round-setup ng-repeat="round in series.rounds track by $index" round="round" flex="90"></series-round-setup>
+        <div ng-repeat="round in series.rounds track by $index" layout="row">
+            <series-round-setup round="round" flex></series-round-setup>
+            <md-button class="md-fab" ng-click="roundCtrl.deleteRound($index,round.id,series)"><i class="fa fa-trash-o"></i></md-button>
+        </div>
     </div>
 </md-toolbar>
 
 <md-button class="blue-button" ng-click="roundCtrl.gotoDrawMenu()">Setup voltooien</md-button>
 
-<md-button class="md-fab md-fab-bottom-left" aria-label="subscribe players" ng-click="roundCtrl.gotoPlayerSubscription()">
+<md-button class="md-fab md-fab-bottom-left" aria-label="subscribe players" ng-click="roundCtrl.gotoDrawMenu()">
     <md-icon md-font-icon="fa fa-chevron-left fa-2x"></md-icon>
 </md-button>
 

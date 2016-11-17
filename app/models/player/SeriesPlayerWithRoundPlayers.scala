@@ -1,3 +1,3 @@
 package models.player
 
-case class SeriesPlayerWithRoundPlayers(seriesPlayer: SeriesPlayer, seriesRoundPlayers: List[SeriesRoundPlayer])
+case class SeriesPlayerWithRoundPlayers(seriesPlayer: SeriesPlayer, seriesRoundPlayers: List[SeriesPlayer])

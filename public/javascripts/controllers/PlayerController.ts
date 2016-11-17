@@ -46,7 +46,7 @@ module TournamentManagement{
                 (result: any) => {
                     result.data.map((player) => {
                         this.allPlayers.push({
-                            'id': player.playerId,
+                            'id': player.id,
                             'firstname': player.firstname,
                             'lastname': player.lastname,
                             'rank': player.rank,
