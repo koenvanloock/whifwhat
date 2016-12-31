@@ -1,10 +1,9 @@
 package services
 
-import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
+import models.matches.{SiteGame, SiteMatch}
 
 class MatchService {
   def isMatchComplete(siteMatch: SiteMatch): Boolean = siteMatch.games.forall(_.isCorrect(siteMatch.targetScore))
-  def isBracketMatchComplete(bracketMatchWithGames: BracketMatch): Boolean = bracketMatchWithGames.siteMatch.games.forall(_.isCorrect(bracketMatchWithGames.siteMatch.targetScore))
 
   def calculateMatchStats(siteMatch: SiteMatch) = {
     siteMatch.copy(

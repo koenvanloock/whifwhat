@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.matches.{SiteMatch, SiteMatchWithGames}
+import models.matches.SiteMatch
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import repositories.mongo.SeriesRoundRepository
 
@@ -131,7 +131,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
   val seriesRounds: List[SeriesRound] = List(
     SiteRobinRound("1", 2, "1", 1, List()),
-    SiteBracketRound("2", 2, "1", 1, List(),List())
+    SiteBracketRound("2", 2, "1", 1, List(), SiteBracket.buildBracket(2,21,2))
   )
 
   def getSeriesRound(seriesRoundId: String) = {
@@ -143,6 +143,6 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     case robinRound: SiteRobinRound =>
       robinRound.robinList.forall(robinGroup => robinGroup.robinMatches.forall(matchService.isMatchComplete))
     case bracketRound: SiteBracketRound =>
-      bracketRound.bracketRounds.forall(bracketMatchList => bracketMatchList.forall(matchService.isBracketMatchComplete))
+      SiteBracket.isComplete(bracketRound.bracket)
   }
 }

@@ -2,6 +2,7 @@ package services
 
 import models.{SiteBracketRound, SiteRobinRound}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
+import models.SiteBracket
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatestplus.play.PlaySpec
@@ -80,67 +81,59 @@ class DrawServiceTest extends PlaySpec {
     }
 
     "a bracket with 0 rounds returns None" in {
-      drawService.drawBracket(players, SiteBracketRound("123abc",0,"12315646",1, Nil,Nil),2,21) mustBe None
+      drawService.drawBracket(players, SiteBracketRound("123abc",0,"12315646",1, Nil,SiteBracket.buildBracket(0,21,2)),2,21) mustBe None
     }
 
     "draw a bracket with one round (final)" in {
-      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",1,"12315646",1, Nil,Nil),2,21).get
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",1,"12315646",1, Nil,SiteBracket.buildBracket(1,21,2)),2,21).get
 
       bracket.bracketPlayers.length mustBe 2
-      bracket.bracketRounds.length mustBe 1
-      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
-      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "2"
+      bracket.bracket.size mustBe 1
+      bracket.bracket.getRoundList(0).head.playerA.get.id mustBe "1"
+      bracket.bracket.getRoundList(0).head.playerB.get.id mustBe "2"
     }
 
     "draw a bracket with two rounds (semi-finals)" in {
-      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",2,"12315646",1, Nil,Nil),2,21).get
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",2,"12315646",1, Nil,SiteBracket.buildBracket(1,21,2)),2,21).get
 
       bracket.bracketPlayers.length mustBe 4
-      bracket.bracketRounds.length mustBe 2
-      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
-      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "4"
-      bracket.bracketRounds.head.last.siteMatch.playerA.get.id mustBe "3"
-      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
+      bracket.bracket.size mustBe 2
+      bracket.bracket.getRoundList(1).head.playerA.get.id mustBe "1"
+      bracket.bracket.getRoundList(1).head.playerB.get.id mustBe "4"
+      bracket.bracket.getRoundList(1).drop(1).head.playerA.get.id mustBe "3"
+      bracket.bracket.getRoundList(1).drop(1).head.playerB.get.id mustBe "2"
 
-      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
-      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
+      bracket.bracket.getRoundList(0).head.playerA mustBe None
+      bracket.bracket.getRoundList(0).head.playerB mustBe None
 
     }
 
     "draw a bracket with three rounds (quarter-finals)" in {
-      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",3,"12315646",1, Nil,Nil),2,21).get
+      val bracket = drawService.drawBracket(players, SiteBracketRound("123abc",3,"12315646",1, Nil,SiteBracket.buildBracket(1,21,2)),2,21).get
 
       bracket.bracketPlayers.length mustBe 8
-      bracket.bracketRounds.length mustBe 3
+      bracket.bracket.size mustBe 3
+      bracket.bracket.getRoundList(2).head.playerA.get.id mustBe "1"
+      bracket.bracket.getRoundList(2).head.playerB.get.id mustBe "8"
+      bracket.bracket.getRoundList(2).drop(1).head.playerA.get.id mustBe "5"
+      bracket.bracket.getRoundList(2).drop(1).head.playerB.get.id mustBe "4"
 
-      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
-      bracket.bracketRounds.head.head.siteMatch.playerB.get.id mustBe "8"
-      bracket.bracketRounds.head.drop(1).head.siteMatch.playerA.get.id mustBe "5"
-      bracket.bracketRounds.head.drop(1).head.siteMatch.playerB.get.id mustBe "4"
+      bracket.bracket.getRoundList(2).drop(2).head.playerA.get.id mustBe "3"
+      bracket.bracket.getRoundList(2).drop(2).head.playerB.get.id mustBe "6"
+      bracket.bracket.getRoundList(2).last.playerA.get.id mustBe "7"
+      bracket.bracket.getRoundList(2).last.playerB.get.id mustBe "2"
 
-      bracket.bracketRounds.head.drop(2).head.siteMatch.playerA.get.id mustBe "3"
-      bracket.bracketRounds.head.drop(2).head.siteMatch.playerB.get.id mustBe "6"
-      bracket.bracketRounds.head.last.siteMatch.playerA.get.id mustBe "7"
-      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
-
-      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
-      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
+      bracket.bracket.getRoundList(0).head.playerA mustBe None
+      bracket.bracket.getRoundList(0).head.playerB mustBe None
 
     }
 
 
     "draw a bracket with 4 rounds (sixteenth-finals)" in {
-      val bracket = drawService.drawBracket(extendedPlayers, SiteBracketRound("123abc",4,"12315646",1, Nil,Nil),2,21).get
+      val bracket = drawService.drawBracket(extendedPlayers, SiteBracketRound("123abc",4,"12315646",1, Nil,SiteBracket.buildBracket(1,21,2)),2,21).get
 
       bracket.bracketPlayers.length mustBe 16
-      bracket.bracketRounds.length mustBe 4
-
-      bracket.bracketRounds.head.head.siteMatch.playerA.get.id mustBe "1"
-      bracket.bracketRounds.head.last.siteMatch.playerB.get.id mustBe "2"
-
-      bracket.bracketRounds.last.head.siteMatch.playerA mustBe None
-      bracket.bracketRounds.last.head.siteMatch.playerB mustBe None
-
+      bracket.bracket.size mustBe 4
     }
   }
 }

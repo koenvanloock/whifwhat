@@ -4,8 +4,6 @@ import java.util.UUID
 import javax.inject.Inject
 
 import models._
-import models.matches.{SiteGame, SiteMatch, SiteMatchWithGames}
-import models.player.{SeriesPlayer, Player, PlayerScores, Rank}
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
@@ -30,7 +28,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
     (JsPath \ "numberOfBracketRounds").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteBracketRound.apply(UUID.randomUUID().toString,_, _, _, Nil, Nil))
+    ) (SiteBracketRound.apply(UUID.randomUUID().toString,_, _, _, Nil, SiteBracket.buildBracket(1,21,2)))
 
   val robinconfigReads: Reads[SiteRobinRound] = (
     (JsPath \ "id").read[String] and
@@ -44,7 +42,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
       (JsPath \ "numberOfBracketRounds").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteBracketRound.apply(_,_, _, _, Nil, Nil))
+    ) (SiteBracketRound.apply(_,_, _, _, Nil, SiteBracket.buildBracket(1,21,2)))
 
   val roundReadsInsert = new Reads[SeriesRound]{
 
@@ -56,8 +54,6 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
   }
 
   val roundReadsConfig = new Reads[SeriesRound]{
-
-
     override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
       case "R" => Json.fromJson[SiteRobinRound](json)(robinconfigReads)
       case "B" => Json.fromJson[SiteBracketRound](json)(bracketConfigReads)
@@ -87,7 +83,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
   }
 
   def createSeriesRound(seriesId: String) = Action.async{
-      val seriesRound =  SiteBracketRound(UUID.randomUUID().toString,0, seriesId,0,Nil, Nil)
+      val seriesRound =  SiteBracketRound(UUID.randomUUID().toString,0, seriesId,0,Nil, SiteBracket.buildBracket(1,21,2))
       seriesRoundService.createSeriesRound(seriesRound).map{
         round => Created(Json.toJson(round))
       }

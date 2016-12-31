@@ -14,8 +14,8 @@ class LoginService @Inject()(userRepository: UserRepository, rolesRepository: Ro
   def validateLogin(credentials: Credentials): Future[Option[String]] = {
     getUser(credentials.username).flatMap{
       case Some(user) =>
-        println(user.paswordHash)
-        BCrypt.checkpw(credentials.password, user.paswordHash) match {
+        println(user.passwordHash)
+        BCrypt.checkpw(credentials.password, user.passwordHash) match {
           case true =>
             getRoles(user).map { roles =>
               roles.map(role => createJWT(user.username, role))
@@ -27,7 +27,7 @@ class LoginService @Inject()(userRepository: UserRepository, rolesRepository: Ro
     }
   }
 
-  def createUser(user: User) = userRepository.create(user.copy(paswordHash = BCrypt.hashpw(user.paswordHash, BCrypt.gensalt)))
+  def createUser(user: User) = userRepository.create(user.copy(passwordHash = BCrypt.hashpw(user.passwordHash, BCrypt.gensalt)))
 
 
   def getUser(username: String): Future[Option[User]] = userRepository.retrieveByField("username", username)

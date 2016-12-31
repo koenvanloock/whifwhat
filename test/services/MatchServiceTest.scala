@@ -1,6 +1,6 @@
 package services
 
-import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
+import models.matches.{SiteGame, SiteMatch}
 import org.scalatestplus.play.PlaySpec
 
 class MatchServiceTest extends PlaySpec{
@@ -42,24 +42,6 @@ class MatchServiceTest extends PlaySpec{
         SiteGame(3, 11, 3),
         SiteGame(13, 10, 4)
       ) )) mustBe false
-    }
-
-    "a complete BracketMatch returns true" in {
-      matchService.isBracketMatchComplete(BracketMatch("1", "1",  1,2, SiteMatch("1",None, None, "1", 2, isHandicapForB = true, 11, 3, 0, 0, List(
-        SiteGame(11, 8, 1),
-        SiteGame(11, 6, 2),
-        SiteGame(3, 11, 3),
-        SiteGame(12, 10, 4)
-      ) ))) mustBe true
-    }
-
-    "an incomplete BracketMatch returns false" in {
-      matchService.isBracketMatchComplete(BracketMatch("1", "1",  1,2, SiteMatch("1",None, None, "1", 2, isHandicapForB = true, 11, 3, 0, 0, List(
-        SiteGame(11, 8, 1),
-        SiteGame(0, 6, 2),
-        SiteGame(3, 11, 3),
-        SiteGame(12, 10, 4)
-      ) ))) mustBe false
     }
   }
 

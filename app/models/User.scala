@@ -19,7 +19,7 @@ case class Role(id: String, roleName: String)
 
   }
 
-case class User(id: String, username: String, paswordHash: String, roleId: String)
+case class User(id: String, username: String, passwordHash: String, roleId: String)
 
   object UserEvidence {
 

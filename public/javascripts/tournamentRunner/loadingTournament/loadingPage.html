@@ -1,0 +1,20 @@
+<div class="md-padding">
+<md-table-container style=" background: rgba(125,125,125,0.5);">
+  <table md-table>
+    <thead>
+      <tr>
+        <td>Naam</td>
+        <td>Datum</td>
+        <td>Spelen</td>
+      </tr>
+
+    </thead>
+    <tr ng-repeat="tournament in ctrl.tournaments">
+     <td> {{tournament.tournamentName}}</td>
+      <td>{{tournament.tournamentDate}}</td>
+        <td><md-button class="md-fab" ng-click="ctrl.activateTournament(tournament.id)"><i class="fa fa-eye"></i></md-button></td>
+    </tr>
+  </table>
+</md-table-container>
+
+</div>

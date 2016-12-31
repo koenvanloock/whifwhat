@@ -43,9 +43,9 @@
                 <input ng-model="ctrl.playerToEdit.lastname"/>
             </md-input-container>
 
-            <md-select ng-model="ctrl.playerToEdit.rank.value" placeholder="Klassement" flex="30">
+            <md-select ng-model="ctrl.playerToEdit.rank" placeholder="Klassement" flex="30">
                 <md-option ng-repeat="rank in ctrl.ranks"
-                           ng-value="rank.value">
+                           ng-value="rank">
                     {{rank.name}}
                 </md-option>
             </md-select>

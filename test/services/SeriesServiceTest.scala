@@ -1,10 +1,11 @@
 package services
 
 import models._
-import models.matches.{SiteGame, SiteMatch, SiteMatchWithGames}
+import models.matches.{SiteGame, SiteMatch}
 import models.player._
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
+import models.SiteBracket
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, SeriesRoundRepository}
 
@@ -75,24 +76,10 @@ class SeriesServiceTest extends PlaySpec {
             SiteGame(21, 15, 2))
           ))))),
         SiteRobinRound("124",1,"124",2,List(RobinGroup("2", List(), List()))),
-        SiteBracketRound("1",1,"125",3, List(), List(List()))
+        SiteBracketRound("1",1,"125",3, List(), SiteBracket.buildBracket(1,21,2))
       )
       seriesService.advanceSeries(series, roundList).currentRoundNr mustBe 2
     }
-
-    //  "don't advance to the next round if it's the final one" in {
-    //    val series = TournamentSeries("1","Open met voorgift", "#ffffff",2,21,playingWithHandicaps = true, 0,showReferees = false,3, "1")
-    //    val roundList = List(
-    //      RobinRound(List(RobinGroup("1",List(),List(
-    //        SiteMatchWithGames("1", "1","2","1",2,true,21,2,2,0, List(
-    //          SiteGame("1","1",21,15,1),
-    //          SiteGame("1","1",21,15,2))
-    //        ))))),
-    //      RobinRound(List(RobinGroup("2",List(),List()))),
-    //      Bracket("1", List(),List(List()))
-    //    )
-    //    seriesService.advanceSeries(series, roundList).currentRoundNr mustBe 3
-    //  }
 
     "calculate SeriesScores" in {
 

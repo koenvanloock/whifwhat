@@ -2,12 +2,11 @@ package controllers
 
 import javax.inject.Inject
 
-import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
 import models.player._
 import models._
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
-import services.{DrawService, SeriesService}
+import services.SeriesService
 import utils.JsonUtils
 import models.SeriesRoundEvidence._
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -1,0 +1,10 @@
+<bracket-node>
+  <bracket-match match="node.value"></bracket-match>
+
+
+  {{node.left}}
+  {{node.right}}
+
+  <bracket-node ng-if="node.left" node="node.left"</bracket-node>
+  <bracket-node ng-if="node.right" node="bracket.right"></bracket-node>
+</bracket-node>

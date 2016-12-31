@@ -31,6 +31,10 @@ module TournamentManagement {
             this.$location.path("/playerManagement");
         }
 
+        gotoPlayTournament(){
+            this.$location.path("/playTournament")
+        }
+
 
         loadTournament(){this.$location.path("/loadTournament")}
     }

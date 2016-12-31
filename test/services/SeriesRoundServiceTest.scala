@@ -1,14 +1,13 @@
 package services
 
 import helpers.TestHelpers._
-import models.{SiteBracketRound, RobinGroup, SiteRobinRound}
-import models.matches.{BracketMatch, SiteGame, SiteMatch}
+import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
+import models.matches.{SiteGame, SiteMatch}
 import models.player._
+import models.types.{LeafMatch, NodeMatch}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.mongo.SeriesRoundRepository
-
-import scala.concurrent.Await
 
 
 class SeriesRoundServiceTest extends PlaySpec{
@@ -16,6 +15,7 @@ class SeriesRoundServiceTest extends PlaySpec{
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
   val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository)
+
 
   val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
 
@@ -92,13 +92,11 @@ class SeriesRoundServiceTest extends PlaySpec{
     )
 
     val matches =
-      List(
-        List(
-          BracketMatch("1","1",1,1, SiteMatch("1", None, None, "1",7,true,21,2, 0, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
-          BracketMatch("2","1",1,2, SiteMatch("1", None, None, "1",3,false,21,2, 0, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
-        ),
-        List(BracketMatch("3","1",2,1, SiteMatch("1", None, None,"3", 6,true,21,2, 0, 0,List(SiteGame(21,16,1),SiteGame(21,14,2)))))
+      NodeMatch[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 2, 0,List(SiteGame(21,16,1),SiteGame(21,14,2))),
+        LeafMatch[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
+        LeafMatch(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
       )
+
 
     seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe true
   }
@@ -112,12 +110,9 @@ class SeriesRoundServiceTest extends PlaySpec{
     )
 
     val matches =
-      List(
-          List(
-            BracketMatch("1","1",1,1, SiteMatch("1", None, None, "1",7,true,21,2, 0, 0, List(SiteGame(21,16,1),SiteGame(0,0,2)))),
-            BracketMatch("2","1",1,2, SiteMatch("1", None, None, "1",3,false,21,2, 0, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
-          ),
-        List(BracketMatch("3","1",2,1, SiteMatch("1", None, None,"3", 6,true,21,2, 0, 0,List(SiteGame(21,16,1),SiteGame(0,0,2)))))
+      NodeMatch[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 1, 0,List(SiteGame(21,16,1),SiteGame(0,0,2))),
+        LeafMatch[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
+        LeafMatch(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
       )
 
     seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe false

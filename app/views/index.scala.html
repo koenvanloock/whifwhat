@@ -17,7 +17,8 @@
             <div class="left-panel" ng-controller="TitleScreenController as titleScreenCtrl" ng-show="titleScreenCtrl.hasUser()">
                 <ul class="navList">
                     <li class="navListItem" ><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentWizard()">Maak tornooi</md-button></li>
-                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentList()">Laad tornooi</md-button></li>
+                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentList()">Laad tornooiConfiguratie</md-button></li>
+                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoPlayTournament()">Speel tornooi</md-button></li>
                     <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoPlayerManagement()">Beheer spelers</md-button></li>
                 </ul>
 
@@ -73,6 +74,11 @@
         <script src="@routes.Assets.versioned("javascripts/services/TournamentService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesRoundService.js")"></script>
+
+
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/tournamentRunner.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/loadingTournament/loadingController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/loadingTournament/loadingService.js")"></script>
 
     </body>
 </html>

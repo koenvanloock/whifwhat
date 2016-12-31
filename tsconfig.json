@@ -29,6 +29,9 @@
     "public/javascripts/models/Player.ts",
     "public/javascripts/models/Rank.ts",
     "public/javascripts/models/Query.ts",
+    "public/javascripts/models/BracketNode.ts",
+    "public/javascripts/models/SiteMatch.ts",
+    "public/javascripts/models/Game.ts",
 
 
     "public/javascripts/services/authService.ts",
@@ -53,6 +56,10 @@
     "public/javascripts/controllers/TournamentListController.ts",
     "public/javascripts/controllers/TitleScreenController.ts",
     "public/javascripts/controllers/PlayerController.ts",
+
+
+    "public/javascripts/tournamentRunner/loadingTournament/loadingController.ts",
+    "public/javascripts/tournamentRunner/loadingTournament/loadingService.ts",
 
     "typings/angular-jwt/angular-jwt.d.ts",
     "typings/angularjs/angular-cookies.d.ts",

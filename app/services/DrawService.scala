@@ -4,9 +4,10 @@ import java.util.UUID
 import javax.inject.Inject
 
 import models._
-import models.matches.{BracketMatch, SiteGame, SiteMatch, SiteMatchWithGames}
+import models.matches.{SiteGame, SiteMatch}
 import models.player._
-import scala.util.{Try, Random}
+
+import scala.util.{Random, Try}
 
 class DrawService @Inject()() {
 
@@ -24,7 +25,7 @@ class DrawService @Inject()() {
       val ids = for (robinNr <- (0 until robinRound.numberOfRobinGroups).toList) yield (robinNr, UUID.randomUUID().toString)
       val robins: List[RobinGroup] = ids.map { tuple =>
         val playerGroup = robinPlayers.zipWithIndex.filter(couple => couple._2 % robinRound.numberOfRobinGroups == tuple._1).map(couple => SeriesPlayer(UUID.randomUUID().toString, couple._1.id, couple._1.player, PlayerScores()))
-        val matches = createRobinMatches(tuple._2, playerGroup, robinRound.numberOfRobinGroups, setTargetScore)
+        val matches = createRobinMatches(tuple._2, playerGroup, numberOfSetsToWin, setTargetScore)
         RobinGroup(tuple._2, playerGroup, matches)
       }
       Some(robinRound.copy(robinList=robins))
@@ -50,14 +51,14 @@ class DrawService @Inject()() {
     }
   }
 
-  def drawEmptyMatches(roundNr: Int, bracketId: String, numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[BracketMatch] = {
+  def drawEmptyMatches(roundNr: Int, bracketId: String, numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[SiteMatch] = {
     (0 to Math.pow(2, numberOfBracketRounds - roundNr - 1).toInt).toList.map { matchNr =>
       createBracketMatch(roundNr, bracketId, matchNr + 1, numberOfSetsToWin, setTargetScore, None, None)
     }
 
   }
 
-  def drawFirstRound(roundNr: Int, bracketId: String, bracketPlayers: List[SeriesPlayer], numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[BracketMatch] = {
+  def drawFirstRound(roundNr: Int, bracketId: String, bracketPlayers: List[SeriesPlayer], numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[SiteMatch] = {
     numberOfBracketRounds match {
       case 4 => List((1, 0, 15), (2, 8, 7), (3, 4, 11), (4, 12, 3), (5, 2, 13), (6, 10, 5), (7, 6, 9), (8, 14, 1)).map(createMatchFromPlayerIndex(roundNr, bracketId, numberOfSetsToWin, setTargetScore, bracketPlayers))
       case 3 => List((1, 0, 7), (1, 4, 3), (1, 2, 5), (1, 6, 1)).map(createMatchFromPlayerIndex(roundNr, bracketId, numberOfSetsToWin, setTargetScore, bracketPlayers))
@@ -66,16 +67,16 @@ class DrawService @Inject()() {
     }
   }
 
-  def createMatchFromPlayerIndex(roundNr: Int, bracketId: String, numberOfSetsToWin: Int, setTargetScore: Int, bracketPlayers: List[SeriesPlayer]): ((Int, Int, Int)) => BracketMatch = {
+  def createMatchFromPlayerIndex(roundNr: Int, bracketId: String, numberOfSetsToWin: Int, setTargetScore: Int, bracketPlayers: List[SeriesPlayer]): ((Int, Int, Int)) => SiteMatch = {
     tuple => createBracketMatch(roundNr, bracketId, tuple._1, numberOfSetsToWin, setTargetScore, bracketPlayers.drop(tuple._2).headOption, bracketPlayers.drop(tuple._3).headOption)
   }
 
-  def createBracketMatch(roundNr: Int, bracketId: String, matchNr: Int, numberOfSetsToWin: Int, setTargetScore: Int, playerA: Option[SeriesPlayer], playerB: Option[SeriesPlayer]): BracketMatch = {
+  def createBracketMatch(roundNr: Int, bracketId: String, matchNr: Int, numberOfSetsToWin: Int, setTargetScore: Int, playerA: Option[SeriesPlayer], playerB: Option[SeriesPlayer]): SiteMatch = {
     val relHandicap = Try(playerA.get.player.rank.value - playerB.get.player.rank.value).toOption.getOrElse(0)
     val isForB = relHandicap > 0
     val matchId = UUID.randomUUID().toString
     val sets = createSiteGameForMatch(numberOfSetsToWin)
-    BracketMatch(matchId, bracketId, roundNr, matchNr, SiteMatch(UUID.randomUUID().toString, playerA.map(_.player), playerB.map(_.player), bracketId, relHandicap, isForB, setTargetScore, numberOfSetsToWin, 0,0, sets))
+    SiteMatch(UUID.randomUUID().toString, playerA.map(_.player), playerB.map(_.player), bracketId, relHandicap, isForB, setTargetScore, numberOfSetsToWin, 0,0, sets)
   }
 
   def convertToBracketPlayer(bracketId: String): (SeriesPlayer) => SeriesPlayer = seriesPlayer => SeriesPlayer(UUID.randomUUID().toString, bracketId, seriesPlayer.player, PlayerScores())
@@ -91,7 +92,8 @@ class DrawService @Inject()() {
       val bracketPlayers = players.take(Math.pow(2, bracket.numberOfBracketRounds).toInt).map {
         convertToBracketPlayer(bracketId)
       }
-      Some(bracket.copy(bracketPlayers= bracketPlayers, bracketRounds= bracketRounds))
+      val firstRoundMatches = drawFirstRound(bracket.numberOfBracketRounds, bracketId, bracketPlayers, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+      Some(bracket.copy(bracketPlayers= bracketPlayers, bracket = SiteBracket.createBracket(firstRoundMatches)))
 
     } else None
   }
