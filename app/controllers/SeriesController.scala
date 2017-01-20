@@ -11,10 +11,10 @@ import utils.JsonUtils
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import JsonUtils.ListWrites._
-import repositories.mongo.SeriesRepository
+import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 import models.SeriesEvidence._
 
-class SeriesController @Inject()(seriesRepository: SeriesRepository) extends Controller with StrictLogging{
+class SeriesController @Inject()(seriesRepository: SeriesRepository, seriesRoundRepository: SeriesRoundRepository) extends Controller with StrictLogging{
 
   def createSeries = Action.async{ request =>
     logger.info("received request: "+request.body.toString)
@@ -35,5 +35,20 @@ class SeriesController @Inject()(seriesRepository: SeriesRepository) extends Con
 
   def getSeriesOfTournament(tournamentId: String) = Action.async{
     seriesRepository.retrieveAllByField("tournamentId", tournamentId).map(seriesList => Ok(Json.listToJson(seriesList)))
+  }
+
+  def deleteSeries(seriesId: String) = Action.async{
+    deleteRoundsOfSeries(seriesId).flatMap{ x =>
+      seriesRepository.delete(seriesId).map{ result => NoContent}
+    }
+  }
+
+  def deleteRoundsOfSeries(seriesId: String): Future[List[Unit]] = {
+    seriesRoundRepository.retrieveAllByField("seriesId", seriesId).flatMap { seriesRoundList =>
+      print(seriesRoundList.mkString("\n"))
+      Future.sequence {
+        seriesRoundList.map(round => seriesRoundRepository.delete(round.id))
+      }
+    }
   }
 }

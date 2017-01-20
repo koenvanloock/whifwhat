@@ -13,8 +13,6 @@ module TournamentManagement {
                 this.errors = new Array(this.tournament.series.length);
                 drawService.drawInitial($routeParams["tournamentId"]).then(
                     (drawResponse: any) => {
-                        console.log(drawResponse.data);
-
                         drawResponse.data.map(  drawResult => {
 
                          this.tournament.series.map( (series, index) =>{
@@ -22,7 +20,6 @@ module TournamentManagement {
                                 if(!series.rounds){
                                     series.rounds = [];
                                 }
-                                console.log(drawResult.round);
                                 series.rounds.push(drawResult.round);
                                 this.errors[index] = drawResult.error;
                             }

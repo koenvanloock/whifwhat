@@ -121,6 +121,7 @@ tournamentmanager.directive("bracketNode", ['$compile',function ($compile) {
     };
 
 }]);
+
 tournamentmanager.directive("bracketMatch", function(){
    return{
        restrict: 'E',

@@ -50,7 +50,7 @@ module TournamentManagement {
         };
 
         gotoPlayerSubscription() {
-            this.$location.path("/" + this.$routeParams["tournamentId"] + "/playerSubscription")
+            this.$location.path("/tournament/" + this.$routeParams["tournamentId"] + "/playerSubscription")
         };
 
         gotoDrawMenu() {
@@ -64,7 +64,6 @@ module TournamentManagement {
         };
 
         deleteRound(index, roundId, series){
-            console.log("in de delete");
             this.roundService.deleteSeriesRound(roundId).then( (result) => {
                 this.roundService.loadRoundsOfSeries(series.id).then( (roundsOfIndex) => {
                     series.rounds = roundsOfIndex;

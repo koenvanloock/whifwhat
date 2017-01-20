@@ -11,7 +11,6 @@ module TournamentRunner{
 
 
             loadService.loadTournaments().then( (result) => {
-                console.log(result);
                 this.tournaments = result.data
             });
 

@@ -17,14 +17,19 @@ GET           /tournaments/:tournamentId                     controllers.Tournam
 GET           /tournaments                                   controllers.TournamentController.getAllTournaments
 POST          /tournaments                                   controllers.TournamentController.createTournament()
 
+GET           /activeTournament                              controllers.TournamentController.getActiveTournament
+PUT           /activeTournament/:tournamentId                controllers.TournamentController.activateTournament(tournamentId: String)
+
 GET           /series/:tournamentId                          controllers.SeriesController.getSeriesOfTournament(tournamentId: String)
 POST          /series                                        controllers.SeriesController.createSeries
 PUT           /series/:seriesId                              controllers.SeriesController.updateSeries(seriesId: String)
+DELETE        /series/:seriesId                              controllers.SeriesController.deleteSeries(seriesId: String)
 
 GET           /seriesrounds/:seriesId                        controllers.SeriesRoundController.getRoundsOfSeries(seriesId: String)
 POST          /seriesrounds/:seriesId                        controllers.SeriesRoundController.createSeriesRound(seriesId: String)
 PUT           /seriesrounds                                  controllers.SeriesRoundController.fullUpdateSeriesRound
 PUT           /seriesroundsconfig                            controllers.SeriesRoundController.updateConfigSeriesRound
+PATCH         /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.updateRoundMatch(seriesRoundId: String)
 DELETE        /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.deleteSeriesRound(seriesRoundId: String)
 
 GET           /drawseries/:tournamentId                      controllers.DrawController.drawSeriesOfTournament(tournamentId: String)

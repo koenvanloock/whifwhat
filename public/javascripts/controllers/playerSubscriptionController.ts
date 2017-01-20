@@ -69,9 +69,7 @@ module TournamentManagement {
                     (seriesPlayers: any) => {
                         series.seriesPlayers = [];
                         seriesPlayers.data.map( (seriesPlayer) => {
-                        console.log(seriesPlayer.player);
                         series.seriesPlayers.push(seriesPlayer.player);});
-                        console.log(this.tournament);
                     }
 
                 )
@@ -103,7 +101,7 @@ module TournamentManagement {
         calculateTournamentPlayers(){
             if(this.tournament && this.tournament.series) {
                 return this.tournament.series
-                    .map((series) => series.seriesPlayers.length ? series.seriesPlayers.length : 0)
+                    .map((series) => (series.seriesPlayers && series.seriesPlayers.length) ? series.seriesPlayers.length : 0)
                     .reduce((acc, newVal) => acc + newVal, 0);
             }else{
                 return 0;

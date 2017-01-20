@@ -39,9 +39,6 @@ module TournamentManagement {
         };
 
         answer() {
-            //this.series.numberOfSetsToWin = parseInt(this.series.numberOfSetsToWin);
-            //this.series.setTargetScore = parseInt(this.series.setTargetScore);
-            console.log(this.series);
             this.$mdDialog.hide(this.series);
         };
 

@@ -59,7 +59,8 @@
 
 
     "public/javascripts/tournamentRunner/loadingTournament/loadingController.ts",
-    "public/javascripts/tournamentRunner/loadingTournament/loadingService.ts",
+    "public/javascripts/tournamentRunner/overview/OverviewController.ts",
+    "public/javascripts/tournamentRunner/services/loadingService.ts",
 
     "typings/angular-jwt/angular-jwt.d.ts",
     "typings/angularjs/angular-cookies.d.ts",

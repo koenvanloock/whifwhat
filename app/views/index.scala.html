@@ -10,10 +10,7 @@
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/ng-img-crop/compile/minified/ng-img-crop.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
     </head>
-    <body >
-            <div style="padding:20px;">
-                <h1 class="title">Whif-What</h1>
-
+    <body>
             <div class="left-panel" ng-controller="TitleScreenController as titleScreenCtrl" ng-show="titleScreenCtrl.hasUser()">
                 <ul class="navList">
                     <li class="navListItem" ><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentWizard()">Maak tornooi</md-button></li>
@@ -31,8 +28,6 @@
                 </section>
             </div>
 
-
-            </div>
 
         <div ng-view class="viewField"></div>
 
@@ -78,7 +73,8 @@
 
         <script src="@routes.Assets.versioned("javascripts/tournamentRunner/tournamentRunner.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/tournamentRunner/loadingTournament/loadingController.js")"></script>
-        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/loadingTournament/loadingService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/overview/OverviewController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/services/loadingService.js")"></script>
 
     </body>
 </html>

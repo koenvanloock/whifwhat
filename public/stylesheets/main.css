@@ -34,7 +34,7 @@ body{
 .viewField{
     margin-left: 220px;
     overflow: auto;
-    max-height: 80vh;
+    max-height: 99vh;
 }
 
 .cropArea {
@@ -72,4 +72,8 @@ form .progress {
     padding-right: 10px;
     text-align: center;
     background: #2f8cc1;
+}
+
+.left-pad {
+    padding-left: 10px;
 }

@@ -7,7 +7,7 @@
         <div layout="row">
             <md-input-container flex>
                 <label>Gebruikersnaam</label>
-                <input type="text" ng-model="loginCtrl.credentials.username"/>
+                <input type="text" ng-model="loginCtrl.credentials.username" aria-label="whiffWhatLogin"/>
             </md-input-container>
         </div>
 
@@ -16,7 +16,7 @@
                 <label>Wachtwoord</label>
                 <input type="password" ng-model="loginCtrl.credentials.password"/>
             </md-input-container>
-            <md-button class="md-fab" style="opacity: 1" ng-click="loginCtrl.loginAction()" aria-label="unlock car">
+            <md-button class="md-fab" style="opacity: 1" ng-click="loginCtrl.loginAction()" aria-label="whiffWhatPwd">
                 <i class="fa fa-unlock-alt fa-2x"></i>
             </md-button>
         </div>

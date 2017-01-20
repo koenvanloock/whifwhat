@@ -1,0 +1,68 @@
+<md-card layout="row" class="matchTag">
+  <div layout="column" style="width: 300px;">
+    <div>
+      <h3>Naam</h3>
+    </div>
+    <div layout="row" layout-align="start center">
+        <span><img ng-src="{{(match.playerA.imagepath) ? match.playerA.imagepath : 'assets/images/noImageIcon.jpg'}}"
+                   style="border-radius: 25px; display: inline;height: 50px;width: 50px"/></span>
+      <span style="margin-left: 5px;">{{match.playerA.firstname + " " + match.playerA.lastname }}</span>
+    </div>
+    <div layout="row" layout-align="start center">
+        <span><img ng-src="{{(match.playerB.imagepath) ? match.playerB.imagepath : 'assets/images/noImageIcon.jpg'}}"
+                   style="border-radius: 25px; display: inline;height: 50px;width: 50px"/></span>
+      <span style="margin-left: 5px;">{{match.playerB.firstname + " " + match.playerB.lastname }}</span>
+
+    </div>
+  </div>
+
+  <div layout="column" >
+    <div>
+      <h3>Vg</h3>
+    </div>
+    <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
+      <div layout="row" layout-align="start center" style="height:50px;">
+        <p ng-show="match.isHandicapForA">+ {{match.handicap}}</p>
+      </div>
+
+      <div layout="row" layout-align="start center">
+        <p  ng-hide="match.isHandicapForA">+ {{match.handicap}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div layout="column" >
+    <div>
+      <h3>Sets</h3>
+    </div>
+    <div layout="row">
+      <div ng-repeat="game in match.games" style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
+        <div layout="row" layout-align="start center" style="height:50px;">
+          <input class="pointLabel" ng-model="game.pointA"/>
+        </div>
+
+        <div layout="row" layout-align="start center">
+          <input class="pointLabel" ng-model="game.pointB"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div layout="column">
+    <div>
+      <h3>Uitslag</h3>
+    </div>
+
+    <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(28, 121, 120, 0.8)">
+      <div layout="row" layout-align="start center" style="height:50px;">
+        <p class="pointLabel">{{match.wonSetsA}}</p>
+      </div>
+
+      <div layout="row" layout-align="start center">
+        <p class="pointLabel">{{match.wonSetsB}}</p>
+      </div>
+    </div>
+
+  </div>
+
+</md-card>

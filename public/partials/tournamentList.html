@@ -1,15 +1,20 @@
 <div>
     <md-toolbar><h2 style="margin-left: 20px">Kies een tornooi</h2></md-toolbar>
-    <md-card>
-    <table class="md-whiteframe-z2" style="margin: 20px">
-        <tr>
-            <th>Tornooi</th>
-            <th>Edit</th>
-        </tr>
-        <tr ng-repeat="tournament in tournamentListCtrl.tournaments">
-            <td>{{tournament.tournamentName}}</td>
-            <td><a href="{{'#/tournament/'+ tournament.id + '/seriesSetup'}}">bekijk</a></td>
-        </tr>
-    </table>
+
+    <md-card ng-repeat="tournament in tournamentListCtrl.tournaments" ng-click="tournamentListCtrl.gotoSeriesSetup(tournament.id)" style="padding: 20px; background: #FF9800; cursor: pointer" flex="60">
+
+        <div layout="row">
+            <h1 flex="75">{{tournament.tournamentName}}</h1>
+            <div layout="column">
+                <div flex="60"></div>
+                <b>Datum: {{tournament.tournamentDate}}</b>
+                <b>Verschillende reeksen: {{tournament.hasMultipleSeries ? "ja" : "nee"}}</b>
+
+            </div>
+        </div>
+
+
     </md-card>
+
+
 </div>

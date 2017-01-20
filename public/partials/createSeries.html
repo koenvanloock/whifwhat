@@ -1,5 +1,5 @@
 <md-toolbar layout="row">
-    <h2>{{seriesSetupCtrl.currentTournament.tournamentName}} Reeksen</h2>
+    <h2 class="left-pad">{{seriesSetupCtrl.currentTournament.tournamentName}} Reeksen</h2>
     <md-button class="md-fab" aria-label="add series" ng-click="seriesSetupCtrl.createSeries($event)">
         <md-icon md-font-icon="fa fa-plus fa-2x"></md-icon>
     </md-button>
@@ -16,6 +16,7 @@
                 <td class="table-header">spelen met voorgift</td>
                 <td class="table-header">extra voorgift voor recreanten</td>
                 <td class="table-header">toon scheidsrechters</td>
+                <td class="table-header"></td>
 
             </tr>
         </thead>
@@ -47,6 +48,7 @@
                     </md-input-container>
                 </td>
                 <td><md-switch ng-model="series.showReferees" aria-label="show referees" ng-change="seriesSetupCtrl.updateSeries($index)"></md-switch></td>
+                <td> <md-button aria-label="deleteSeries" class="md-fab" ng-click="seriesSetupCtrl.deleteSeries($event, $index, series.id, series.seriesName)"><i class="fa fa-trash-o"></i></md-button></td>
             </tr>
         </tbody>
     </table>

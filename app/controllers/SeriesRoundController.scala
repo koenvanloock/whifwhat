@@ -15,6 +15,8 @@ import utils.JsonUtils.ListWrites._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
+import models.matches.MatchEvidence.matchIsModel._
+import models.matches.{MatchEvidence, SiteMatch}
 
 class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) extends Controller{
 
@@ -90,4 +92,13 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
   }
 
   def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map{_ => NoContent})
+
+  def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
+    ControllerUtils.parseEntityFromRequestBody(request, Json.reads[SiteMatch]).map{ siteMatch =>
+        seriesRoundService.updateRoundWithMatch(siteMatch, seriesRoundId).map{
+          case Some(updatedRound) => Ok(Json.toJson(updatedRound))
+          case _ => InternalServerError
+        }
+    }.getOrElse(Future(BadRequest))
+  }
 }

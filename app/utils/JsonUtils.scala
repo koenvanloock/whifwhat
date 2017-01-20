@@ -81,8 +81,8 @@ object JsonUtils {
   val seriesReads: Reads[TournamentSeries] = (
     (JsPath \ "seriesName").read[String](minLength[String](1) keepAnd maxLength[String](255)) and
       (JsPath \ "seriesColor").read[String] and
-      (JsPath \ "setTargetScore").read[Int] and
       (JsPath \ "numberOfSetsToWin").read[Int] and
+      (JsPath \ "setTargetScore").read[Int] and
       (JsPath \ "playingWithHandicaps").read[Boolean] and
       (JsPath \ "extraHandicapForRecs").read[Int] and
       (JsPath \ "showReferees").read[Boolean] and

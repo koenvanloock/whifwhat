@@ -19,7 +19,7 @@ module TournamentManagement{
                     private seriesService:SeriesService) {
                                 tournamentService.getTournament($routeParams['tournamentId']).then( (result: any)=>
                                 {
-                                        this.currentTournament = result.data; console.log(this.currentTournament);
+                                        this.currentTournament = result.data;
                                         tournamentService.setCurrentTournament(result.data);
                                 });
 
@@ -84,6 +84,29 @@ module TournamentManagement{
                                 showNoSeries(event);
                         }
                 }
+                
+                
+                deleteSeries(event, index, seriesId, seriesName){
+
+                        var confirm = this.$mdDialog.confirm()
+                            .clickOutsideToClose(true)
+                            .title('delete reeks '+seriesName+"?")
+                            .textContent('delete reeks '+seriesName+"?")
+                            .ariaLabel('deleteRoundDialog')
+                            .targetEvent(event)
+                            .ok('delete')
+                            .cancel("annuleren");
+
+                        this.$mdDialog.show(confirm).then(
+                            () =>
+                                this.seriesService.deleteSeries(seriesId).then( (response) => this.currentTournament.series.splice(index,1))
+                        , () => {
+                               console.log("something went wrong or cancel")
+                        });
+
+
+                }
+                
         }
         angular.module("managerControllers").controller("SeriesSetupController", SeriesSetupController);
 }

@@ -6,11 +6,37 @@ import models._
 import models.matches.SiteMatch
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import repositories.mongo.SeriesRoundRepository
+import utils.RoundResult
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
+
+  def calculateRoundResults(seriesRound: SeriesRound): SeriesRound = seriesRound match{
+    case robinRound: SiteRobinRound => RoundResult.calculateRobinResults(robinRound)
+    case bracketRound: SiteBracketRound => RoundResult.calculateBracketResults(bracketRound)
+  }
+
+  def updateMatchInRound(siteMatch: SiteMatch, round: SeriesRound): SeriesRound = round match{
+    case robinRound: SiteRobinRound => robinRound.copy(robinList = robinRound.robinList.map(group => group.copy( robinMatches = group.robinMatches.map(matchToUpdateOrOriginalMatch(siteMatch)))))
+    case bracketRound: SiteBracketRound => bracketRound.copy(bracket = bracketRound.bracket.map(matchToUpdateOrOriginalMatch(siteMatch)))
+  }
+
+  def matchToUpdateOrOriginalMatch(siteMatch: SiteMatch): (SiteMatch) => SiteMatch = {
+    matchTocheck => if (matchTocheck.id == siteMatch.id) siteMatch else matchTocheck
+  }
+
+  def updateRoundWithMatch(siteMatch: SiteMatch, roundId: String): Future[Option[SeriesRound]] = {
+    seriesRoundRepository.retrieveById(roundId).flatMap{
+      case Some(round) =>
+        val updatedRound = calculateRoundResults(updateMatchInRound(siteMatch, round))
+        updateSeriesRound(updatedRound).map{ _ => Some(updatedRound)}
+
+
+      case _ => Future(None)
+    }
+  }
 
 
   def createSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = {

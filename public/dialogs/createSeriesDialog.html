@@ -1,4 +1,4 @@
-<md-dialog aria-label="creëer series"  ng-cloak flex="40">
+<md-dialog aria-label="creëer series"  ng-cloak flex="40" class="md-padding">
     <form>
         <md-toolbar>
             <div class="md-toolbar-tools">
@@ -19,7 +19,7 @@
 
                 <md-input-container>
                     <label>Reekskleur</label>
-                    <input type="color" ng-model="createSeriesCtrl.series.seriesColor">
+                    <input type="color" style="width: 50px" ng-model="createSeriesCtrl.series.seriesColor">
                 </md-input-container>
             </div>
 
@@ -38,7 +38,7 @@
                     <md-input-container>
                     <label>Aantal te winnen sets</label>
                     <md-select ng-model="createSeriesCtrl.series.numberOfSetsToWin" layout-padding>
-                        <md-option ng-repeat="numberOfSetsToWin in createSeriesCtrl.numberOfSetsToWinList" value={{numberOfSetsToWin}}>{{numberOfSetsToWin}}</md-option>
+                        <md-option ng-repeat="numberOfSetsToWin in createSeriesCtrl.numberOfSetsToWinList" ng-value={{numberOfSetsToWin}}>{{numberOfSetsToWin}}</md-option>
                     </md-select>
                 </md-input-container>
                 </div>
@@ -53,23 +53,23 @@
                     <md-checkbox ng-checked="createSeriesCtrl.series.showReferees" ng-click="createSeriesCtrl.flipShowReferees()" aria-label="toon scheidsrechters">Toon scheidsrechters</md-checkbox>
                 </md-input-container>
 
-                <div layout-padding>
+                <div style="margin-top: 15px;">
                     <md-input-container>
                     <label>Extra voorgift voor recreanten</label>
                     <md-select ng-model="createSeriesCtrl.series.extraHandicapForRecs" layout-padding>
                         <md-select-label>{{createSeriesCtrl.series.extraHandicapForRecs}}</md-select-label>
-                        <md-option ng-repeat="extraHandicapForRecs in createSeriesCtrl.extraHandicapForRecsList" ng-value=createSeriesCtrl.extraHandicapForRecs>{{extraHandicapForRecs}}</md-option>
+                        <md-option ng-repeat="extraHandicapForRecs in createSeriesCtrl.extraHandicapForRecsList" ng-value="extraHandicapForRecs">{{extraHandicapForRecs}}</md-option>
                     </md-select>
                     </md-input-container>
                 </div>
 
         </md-dialog-content>
-        <div class="md-actions" layout="row">
+        <md-dialog-actions layout="row">
             <span flex></span>
-            <md-button ng-click="createSeriesCtrl.cancel()" >
+            <md-button class="md-raised" ng-click="createSeriesCtrl.cancel()" >
                 Cancel
             </md-button>
-            <md-button ng-click="createSeriesCtrl.answer()" style="margin-right:20px;" >Ok</md-button>
-        </div>
+            <md-button class="md-raised md-primary" ng-click="createSeriesCtrl.answer()" style="margin-right:20px;" >Ok</md-button>
+        </md-dialog-actions>
     </form>
 </md-dialog>

@@ -15,12 +15,10 @@ module TournamentManagement {
         }
 
         logout(){
-            console.log("logging out");
             this.authservice.logout();
 
         }
         gotoTournamentWizard(){
-            console.log("test");
             this.$location.path("/createTournament");}
 
         gotoTournamentList(){

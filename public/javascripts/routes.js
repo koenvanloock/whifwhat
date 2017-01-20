@@ -62,9 +62,14 @@ angular.module('tournamentManager')
             controller: "loadingController",
             controllerAs: "ctrl",
             requiresLogin: true
+          }).when("/tournamentOverview", {
+            templateUrl: "assets/javascripts/tournamentRunner/overview/tournamentOverview.html",
+            controller: "OverviewController",
+            controllerAs: "ctrl",
+            requiresLogin: true
           }).otherwise({
-        requiresLogin: true
-      });
+            requiresLogin: true
+          });
 
       jwtInterceptorProvider.tokenGetter = ['$cookies', function ($cookies) {
         return $cookies.get('auth_token');

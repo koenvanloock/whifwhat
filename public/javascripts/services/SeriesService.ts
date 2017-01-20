@@ -13,6 +13,11 @@ module TournamentManagement {
             return this.$http.put(this.base.url + "/series/" + series.id, series);
         }
 
+        deleteSeries(seriesId){
+            return this.$http.delete(this.base.url + "/series/" + seriesId);
+
+        }
+        
         fetchSeriesPlayers(seriesId) {
             return this.$http.get(this.base.url + "/seriesplayers/" + seriesId);
         }
