@@ -29,6 +29,6 @@
                         series-round-id="ctrl.selectedRound.id"
                         ng-show="ctrl.activeBracketRound()"></editable-bracket-node>
 
-  <editable-robin-round ng-repeat="robingroup in ctrl.selectedRound.robinRounds" robinround="robingroup"  update-fn="ctrl.updateRoundMatch" series-round-id="ctrl.selectedRound.id" ng-show="ctrl.activeRobinRound()"></editable-robin-round>
+  <editable-robin-round ng-repeat="robingroup in ctrl.selectedRound.robinRounds" robinround="robingroup"  update-fn="ctrl.updateRound(seriesRoundId,match)" series-round-id="ctrl.selectedRound.id" ng-show="ctrl.activeRobinRound()"></editable-robin-round>
 
 </div>

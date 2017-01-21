@@ -26,6 +26,9 @@ module TournamentRunner{
 
         updateSeriesRound = function(roundId, match){
             return this.$http.patch(this.base.url + "/seriesrounds/" + roundId, match);
+        };
+        isThereActiveTournament = function(){
+            return this.$http.get(this.base.url + '/hasActiveTournament')
         }
     }
     

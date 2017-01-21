@@ -1,6 +1,6 @@
 <md-card id="robinMatches">
   <h2>Wedstrijden</h2>
   <ul ng-repeat="match in robinMatches">
-    <editable-robin-match match="match" series-id="seriesId"></editable-robin-match>
+    <editable-robin-match match="match" series-round-id="seriesRoundId" update-fn="updateFn({seriesRoundId: seriesRoundId, match: match})"></editable-robin-match>
   </ul>
 </md-card>

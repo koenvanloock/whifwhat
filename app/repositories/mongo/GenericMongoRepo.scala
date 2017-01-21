@@ -56,7 +56,6 @@ class GenericMongoRepo[M: Model]
     val msg = s"retrieveAllByFields( $optionalFieldsMap )"
     logger.debug(msg)
     val filters = fieldsMapToFilters(optionalFieldsMap.getOrElse(Map()))
-    println(filters)
     collectionFuture.flatMap(collection =>
       collection
       .find(Json.obj(filters: _*))
@@ -75,7 +74,6 @@ class GenericMongoRepo[M: Model]
 
   def update(u_m: M): Future[M] = {
     val msg = s"update($u_m)"
-    println(msg)
     model.getId(u_m).map(checked(uncheckedUpdate(u_m))).getOrElse {
       val msg = s"update with object $u_m ko (no id)"
       logger.debug(msg)

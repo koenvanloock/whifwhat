@@ -9,10 +9,17 @@ module TournamentRunner{
 
         constructor(private $location: ILocationService, private loadService: LoadingService){
 
+            loadService.isThereActiveTournament().then( (response) => {
+                if (response.data.hasTournament) {
+                    console.log(response);
+                    this.gotoOverview();
+                } else {
+                    loadService.loadTournaments().then((result) => {
+                        this.tournaments = result.data
+                    });
+                }
+            } )
 
-            loadService.loadTournaments().then( (result) => {
-                this.tournaments = result.data
-            });
 
         }
 
@@ -22,6 +29,10 @@ module TournamentRunner{
                     this.$location.path('/tournamentOverview');
                 }
             })
+        }
+
+        gotoOverview(){
+            this.$location.path('/tournamentOverview');
         }
 
 

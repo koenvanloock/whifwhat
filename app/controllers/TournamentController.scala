@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import actors.TournamentActor
-import actors.TournamentActor.{GetActiveTournament, LoadTournament}
+import actors.TournamentActor.{GetActiveTournament, HasActiveTournament, LoadTournament}
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.StrictLogging
 import models.{SeriesWithPlayers, Tournament, TournamentWithSeries}
@@ -53,20 +53,24 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
   }
 
 
-  def activateTournament(tournamentId: String) = Action.async{
+  def activateTournament(tournamentId: String) = Action.async {
 
 
-    tournamentRepository.retrieveById(tournamentId).flatMap{
+    tournamentRepository.retrieveById(tournamentId).flatMap {
       case Some(tournament) =>
-        (activeTournamentActor ? LoadTournament(tournament)).mapTo[Either[String, Tournament]].map{
+        (activeTournamentActor ? LoadTournament(tournament)).mapTo[Either[String, Tournament]].map {
           case Right(activeTournament) => Ok(Json.toJson(activeTournament))
           case Left(message) => BadRequest(message)
         }
       case None => Future(BadRequest("The requested tournament doesn't exist"))
     }
-
-
   }
+
+    def hasActiveTournament = Action.async{
+      (activeTournamentActor ? HasActiveTournament).mapTo[Boolean].map( hasActive =>
+      Ok(Json.obj("hasTournament" -> hasActive)))
+    }
+
 
   def getActiveTournament() = Action.async{
     (activeTournamentActor ? GetActiveTournament).mapTo[Option[Tournament]].map{

@@ -34,16 +34,19 @@ object RoundResult {
   )
 
   def getScoresOfPlayer(matchList: List[SiteMatch], seriesPlayer: SeriesPlayer): PlayerScores = matchList.foldRight[PlayerScores](PlayerScores()){ (matchToAdd, acc) =>
-      if(matchToAdd.playerA.exists(player => player.id == seriesPlayer.id)){
+      if(matchToAdd.playerA.exists(player => player.id == seriesPlayer.player.id)){
+        println("the player was A")
         addPlayerAscores(matchToAdd, acc)
-      } else if(matchToAdd.playerB.exists(player => player.id == seriesPlayer.id)){
+      } else if(matchToAdd.playerB.exists(player => player.id == seriesPlayer.player.id)){
+        println("the player was B")
         addPlayerBscores(matchToAdd, acc)
       } else{
+        println("the player wasn't found")
         acc
       }
   }
 
-  def calculatePlayerScore(matchList: List[SiteMatch]): (SeriesPlayer) => SeriesPlayer = seriesPlayer => seriesPlayer.copy(playerScores = getScoresOfPlayer(matchList, seriesPlayer))
+  def calculatePlayerScore(matchList: List[SiteMatch]): (SeriesPlayer) => SeriesPlayer = seriesPlayer => seriesPlayer.copy(playerScores = {println("scores: "+ getScoresOfPlayer(matchList, seriesPlayer));getScoresOfPlayer(matchList, seriesPlayer)})
 
   // todo perhaps deal with direct confrontations, calculate totals
   def calculateRobinGroupScores(robinGroup: RobinGroup): RobinGroup = robinGroup.copy(robinPlayers = robinGroup.robinPlayers.map(calculatePlayerScore(robinGroup.robinMatches)))

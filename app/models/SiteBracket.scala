@@ -9,7 +9,7 @@ import models.types.{Bracket, LeafMatch, NodeMatch, SiteMatchNode}
 object SiteBracket {
   def isWon(siteMatch: SiteMatch): Boolean = {
     (siteMatch.wonSetsA > siteMatch.wonSetsB) && siteMatch.wonSetsA == siteMatch.numberOfSetsToWin ||
-      siteMatch.wonSetsA > siteMatch.wonSetsB && siteMatch.wonSetsB == siteMatch.numberOfSetsToWin
+      siteMatch.wonSetsA < siteMatch.wonSetsB && siteMatch.wonSetsB == siteMatch.numberOfSetsToWin
   }
 
   def isComplete(bracket: Bracket[SiteMatch]): Boolean = bracket.fold(isWon)(_ && _)

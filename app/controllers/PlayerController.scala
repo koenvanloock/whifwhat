@@ -84,7 +84,6 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
   def enterSubscriptions() = Action.async{ request =>
 
     request.body.asJson.flatMap{ json =>
-      println(json)
       deletePreviousTournamentSeriesSubscriptions(json).flatMap { numberOfDeletes =>
 
         parseSeriesPlayers(json).map{ seriesPlayers =>
@@ -96,11 +95,9 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
 
   def parseSeriesPlayers(json: JsValue): Option[List[SeriesPlayer]] = {
     (json \ "player").asOpt[Player](fullPlayerReads).flatMap{ player =>
-      println(player)
       (json \ "subscriptions").asOpt[JsArray].map { array =>
         array.value.map{  seriesSubscriptionIdJson =>
           seriesSubscriptionIdJson.asOpt[String].map{ seriesSubscriptionId =>
-            println(seriesSubscriptionId)
             SeriesPlayer(UUID.randomUUID().toString, seriesSubscriptionId, player, PlayerScores())
           }
         }.toList.flatten

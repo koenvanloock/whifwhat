@@ -95,10 +95,16 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
 
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[SiteMatch]).map{ siteMatch =>
-        seriesRoundService.updateRoundWithMatch(siteMatch, seriesRoundId).map{
+       val matchWithSetResults = calculateSets(siteMatch)
+        seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map{
           case Some(updatedRound) => Ok(Json.toJson(updatedRound))
           case _ => InternalServerError
         }
     }.getOrElse(Future(BadRequest))
+  }
+
+  def calculateSets(siteMatch: SiteMatch): SiteMatch = {
+    val setTuple = siteMatch.games.foldRight((0,0))( (game, tuple) => if(game.isCorrect(siteMatch.targetScore) && game.pointA > game.pointB) (tuple._1 +1, tuple._2) else if(game.isCorrect(siteMatch.targetScore) && game.pointA < game.pointB) (tuple._1, tuple._2 +1) else tuple )
+    siteMatch.copy(wonSetsA = setTuple._1, wonSetsB = setTuple._2)
   }
 }

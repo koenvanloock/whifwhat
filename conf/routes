@@ -19,6 +19,7 @@ POST          /tournaments                                   controllers.Tournam
 
 GET           /activeTournament                              controllers.TournamentController.getActiveTournament
 PUT           /activeTournament/:tournamentId                controllers.TournamentController.activateTournament(tournamentId: String)
+GET           /hasActiveTournament                           controllers.TournamentController.hasActiveTournament
 
 GET           /series/:tournamentId                          controllers.SeriesController.getSeriesOfTournament(tournamentId: String)
 POST          /series                                        controllers.SeriesController.createSeries

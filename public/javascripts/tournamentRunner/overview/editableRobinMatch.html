@@ -38,11 +38,11 @@
     <div layout="row">
       <div ng-repeat="game in match.games" style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
         <div layout="row" layout-align="start center" style="height:50px;">
-          <input class="pointLabel" ng-model="game.pointA"/>
+          <input class="pointLabel" ng-model="game.pointA" ng-blur="updateFn({seriesRoundId: seriesRoundId, match: match})" type="number"/>
         </div>
 
         <div layout="row" layout-align="start center">
-          <input class="pointLabel" ng-model="game.pointB"/>
+          <input class="pointLabel" ng-model="game.pointB" ng-blur="updateFn({seriesRoundId: seriesRoundId, match: match})" type="number"/>
         </div>
       </div>
     </div>

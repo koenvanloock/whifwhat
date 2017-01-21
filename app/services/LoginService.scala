@@ -14,7 +14,6 @@ class LoginService @Inject()(userRepository: UserRepository, rolesRepository: Ro
   def validateLogin(credentials: Credentials): Future[Option[String]] = {
     getUser(credentials.username).flatMap{
       case Some(user) =>
-        println(user.passwordHash)
         BCrypt.checkpw(credentials.password, user.passwordHash) match {
           case true =>
             getRoles(user).map { roles =>

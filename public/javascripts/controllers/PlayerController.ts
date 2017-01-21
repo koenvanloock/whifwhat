@@ -76,18 +76,16 @@ module TournamentManagement{
 
         startEditPlayer(playerindex){
         if(this.editIndex != playerindex) {
-            this.playerToEdit = {
-                "id": this.allPlayers[playerindex].id,
-                "firstname": this.allPlayers[playerindex].firstname,
-                "lastname": this.allPlayers[playerindex].lastname,
-                "imagepath": this.allPlayers[playerindex].imagepath,
-                "rank": {
-                    "value": this.allPlayers[playerindex].rank.value,
-                    "name": this.allPlayers[playerindex].rank.name
+            var indexToEdit = this.query.limit * (this.query.page-1) + playerindex;
 
-                }
+            this.playerToEdit = {
+                "id": this.allPlayers[indexToEdit].id,
+                "firstname": this.allPlayers[indexToEdit].firstname,
+                "lastname": this.allPlayers[indexToEdit].lastname,
+                "imagepath": this.allPlayers[indexToEdit].imagepath,
+                "rank": this.ranks[this.allPlayers[indexToEdit].rank.value]
             };
-            this.editIndex = playerindex;
+            this.editIndex = indexToEdit;
             this.editing = true;
             this.inserting = false;
         } else {

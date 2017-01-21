@@ -31,7 +31,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     seriesRoundRepository.retrieveById(roundId).flatMap{
       case Some(round) =>
         val updatedRound = calculateRoundResults(updateMatchInRound(siteMatch, round))
-        updateSeriesRound(updatedRound).map{ _ => Some(updatedRound)}
+        updateSeriesRound(updatedRound).map{ _ => println(updatedRound);Some(updatedRound)}
 
 
       case _ => Future(None)
