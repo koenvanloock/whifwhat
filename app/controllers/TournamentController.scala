@@ -28,7 +28,6 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
 
   def createTournament() = Action.async{ request =>
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
-         logger.info(tournament.toString)
         tournamentRepository.create(tournament).flatMap { createdTournament =>
           if (!createdTournament.hasMultipleSeries) {
             createDefaulSeries(createdTournament, request)
@@ -69,8 +68,6 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
 
 
   def activateTournament(tournamentId: String) = Action.async {
-
-
     tournamentRepository.retrieveById(tournamentId).flatMap {
       case Some(tournament) =>
         (activeTournamentActor ? LoadTournament(tournament)).mapTo[Either[String, Tournament]].map {

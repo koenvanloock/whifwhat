@@ -18,10 +18,6 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
   implicit val playerFormat = Json.format[Player]
   val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
 
-
-
-
-
   def drawSeriesOfTournament(tournamentId: String) = Action.async{
 
     seriesService.drawTournamentFirstRounds(tournamentId).map{ drawnRoundsResults =>

@@ -8,9 +8,7 @@ import models.TournamentSeries
 import models.player._
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
-import reactivemongo.util.LazyLogger.LazyLogger
 import services.{SeriesPlayerService, PlayerService}
-import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,7 +38,6 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
     )(Player.apply (_,_,_,_))
 
   def getAllPlayers = Action.async{
-
     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
   }
 
@@ -119,22 +116,6 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
       series => Ok(Json.listToJson(series)(Json.writes[TournamentSeries]))
     }
   }
-
-  /* handle manually for now, just enter path at player create/update
-  def uploadPlayerImage = Action.async { request =>
-    request.body.asMultipartFormData
-      .flatMap { multiPart =>
-        multiPart.file("uploadFile").map { filePart =>
-         /* val path: String = saveFileToImageFolder(filePart)
-          filePart.contentType match {
-            case Some("text/csv") => parseCsvFile(fileEntity, entityId, path, delimiter, request)
-            case _ =>
-              deleteFile(path)*/
-              Future(Ok)
-          }
-      }.getOrElse(Future(BadRequest))
-  }*/
-
 
   def searchPlayers(searchString: Option[String]) = Action.async{
     searchString match {

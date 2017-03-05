@@ -85,10 +85,7 @@ class DrawService @Inject()() {
 
     if (bracket.numberOfBracketRounds > 0) {
       val bracketId = UUID.randomUUID().toString
-      val bracketRounds = (0 until bracket.numberOfBracketRounds).toList.map {
-        case roundNr if (roundNr == 0) => drawFirstRoundOfBracket(roundNr + 1, bracketId, players, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
-        case roundNr if (roundNr > 0) => drawEmptyMatches(roundNr + 1, bracketId, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
-      }
+      val bracketRounds = (0 until bracket.numberOfBracketRounds).toList.map(drawBracketRound(bracketId, players, numberOfSetsToWin, setTargetScore, bracket))
       val bracketPlayers = players.take(Math.pow(2, bracket.numberOfBracketRounds).toInt).map {
         convertToBracketPlayer(bracketId)
       }
@@ -96,6 +93,11 @@ class DrawService @Inject()() {
       Some(bracket.copy(bracketPlayers = bracketPlayers, bracket = SiteBracket.createBracket(firstRoundMatches)))
 
     } else None
+  }
+
+  def drawBracketRound(bracketId: String, players: List[SeriesPlayer], numberOfSetsToWin: Int, setTargetScore: Int, bracket: SiteBracketRound): Int => List[SiteMatch] = {
+    case roundNr if (roundNr == 0) => drawFirstRoundOfBracket(roundNr + 1, bracketId, players, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+    case roundNr if (roundNr > 0) => drawEmptyMatches(roundNr + 1, bracketId, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
   }
 
   def drawSubsequentRound(seriesRound: SeriesRound, sortedPlayerList: List[SeriesPlayer], series: TournamentSeries): Option[SeriesRound] =  seriesRound match {

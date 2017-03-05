@@ -48,10 +48,9 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
     seriesPlayerRepository.retrieveAllSeriesPlayers(seriesId).flatMap { seriesPlayers =>
       if (seriesPlayers.length > 1) {
         seriesRepository.retrieveById(seriesId).map {
-          case Some(foundSeries) => drawService.drawRobins(seriesPlayers, robinRound, foundSeries.setTargetScore, foundSeries.numberOfSetsToWin, drawType) match {
-            case Some(drawnRobinRound) => Right(seriesId,drawnRobinRound)
-            case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
-          }
+          case Some(foundSeries) =>
+                    val drawResult = drawService.drawRobins(seriesPlayers, robinRound, foundSeries.setTargetScore, foundSeries.numberOfSetsToWin, drawType)
+                    drawnRoundOrError(seriesId)(drawResult)
           case _ => Left(DrawError(seriesId, "Reeks niet gevonden!"))
         }
       } else {
@@ -94,6 +93,11 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
       seriesRoundService.updateSeriesRound(updatedRound).map( _  => Right(updatedRound))
     }
     case _ => Future(Left(roundRanking))
+  }
+
+  def drawnRoundOrError(seriesId: String): Option[SiteRobinRound] => Either[DrawError, (String, SiteRobinRound)] = robinOpt => robinOpt match {
+    case Some(drawnRobinRound) => Right(seriesId,drawnRobinRound)
+    case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
   }
 
 }

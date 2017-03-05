@@ -6,6 +6,7 @@ import models.{Credentials, User}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller}
 import services.LoginService
+import utils.ControllerUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -15,32 +16,20 @@ class LoginController @Inject()(loginService: LoginService) extends Controller{
   implicit val userFormat = Json.format[User]
 
 
-  def login = Action.async{ request =>
-      request.body.asJson match {
-
-        case Some(json) =>
-        json.validate[Credentials](credentialsFormat).asOpt match {
-          case Some(credentials) =>
-              loginService.validateLogin(credentials).map {
-                case Some(token) => Ok(Json.toJson(token))
-                case _ => BadRequest
-              }
-          case _ => Future(BadRequest)
+  def login = Action.async { request =>
+    ControllerUtils.parseEntityFromRequestBody(request, credentialsFormat) match {
+      case Some(credentials) =>
+        loginService.validateLogin(credentials).map {
+          case Some(token) => Ok(Json.toJson(token))
+          case _ => BadRequest
         }
-
-        case _ => Future(BadRequest)
-      }
+      case _ => Future(BadRequest)
+    }
   }
 
   def createUser = Action.async{ request =>
-    request.body.asJson.flatMap{ json =>
-
-      json.validate[User].asOpt.map{ user =>
+    ControllerUtils.parseEntityFromRequestBody(request, userFormat).map{ user =>
         loginService.createUser(user).map( user => Ok(Json.toJson(user)))
-
-      }
-
-
     }.getOrElse(Future(BadRequest("Geef een geldige user op")))
   }
 }
