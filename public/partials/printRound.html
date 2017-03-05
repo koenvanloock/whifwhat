@@ -1,0 +1,30 @@
+<md-toolbar class="md-padding noPrint">
+  <h2>Afdrukken startronde {{ctrl.series.seriesName}}</h2>
+<div layout="row" layout-align="space-around center">
+  <md-checkbox ng-model="ctrl.economic">economic prints</md-checkbox>
+  <input type="color" ng-model="ctrl.matchStyle.backgroundColor"/>
+  <md-button class="md-raised md-accent" ng-show="ctrl.matchStyle.color == '#ffffff'" ng-click="ctrl.matchStyle.color = '#000000'" style="color: black">Aaa</md-button>
+  <md-button class="md-raised md-accent" ng-show="ctrl.matchStyle.color == '#000000'" ng-click="ctrl.matchStyle.color = '#ffffff'" style="color: white">Aaa</md-button>
+</div>
+</md-toolbar>
+<div class="md-padding">
+
+<div ng-show="ctrl.roundToPrint.roundType === 'B'">
+
+  <div ng-repeat="match in ctrl.matchList">
+    <economic-match-format ng-show="ctrl.economic" match="match" series-name="'eindtabel ' + ctrl.series.seriesName" my-style="ctrl.matchStyle"></economic-match-format>
+    <fabulous-match-format ng-hide="ctrl.economic" match="match" series-name="'eindtabel ' + ctrl.series.seriesName" my-style="ctrl.matchStyle"></fabulous-match-format>
+  </div>
+</div>
+
+  <div ng-show="ctrl.roundToPrint.roundType === 'R'">
+
+    <div ng-repeat="robinRound in ctrl.roundToPrint.robinRounds track by myIndex">
+      <div ng-repeat="match in robinRound.robinMatches track by $index" ng-class="{pageend: ($index != 0 && $index % 9 == 0)}">
+        <economic-match-format ng-show="ctrl.economic" match="match" series-name="ctrl.series.seriesName + ' poule '+ (myIndex+1)" my-style="ctrl.matchStyle"></economic-match-format>
+        <fabulous-match-format ng-hide="ctrl.economic" match="match" series-name="ctrl.series.seriesName + ' poule '+ (myIndex+1)" my-style="ctrl.matchStyle"></fabulous-match-format>
+      </div>
+    </div>
+  </div>
+
+</div>

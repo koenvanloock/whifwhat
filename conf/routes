@@ -3,7 +3,8 @@
 # ~~~~
 
 
-GET           /players                                       controllers.PlayerController.getAllPlayers
+#GET           /players                                       controllers.PlayerController.getAllPlayers
+GET           /players                                       controllers.PlayerController.searchPlayers(searchString: Option[String])
 POST          /players                                       controllers.PlayerController.insertPlayer()
 PUT           /players                                       controllers.PlayerController.updatePlayer
 DELETE        /players/:playerId                             controllers.PlayerController.deletePlayer(playerId: String)
@@ -22,16 +23,25 @@ PUT           /activeTournament/:tournamentId                controllers.Tournam
 GET           /hasActiveTournament                           controllers.TournamentController.hasActiveTournament
 
 GET           /series/:tournamentId                          controllers.SeriesController.getSeriesOfTournament(tournamentId: String)
+GET           /singleSeries/:seriesId                        controllers.SeriesController.getSeries(seriesId: String)
 POST          /series                                        controllers.SeriesController.createSeries
 PUT           /series/:seriesId                              controllers.SeriesController.updateSeries(seriesId: String)
 DELETE        /series/:seriesId                              controllers.SeriesController.deleteSeries(seriesId: String)
 
+GET           /round/:roundId                                controllers.SeriesRoundController.getRound(roundId: String)
 GET           /seriesrounds/:seriesId                        controllers.SeriesRoundController.getRoundsOfSeries(seriesId: String)
+GET           /activeround/:seriesId                         controllers.SeriesRoundController.getActiveRoundOfSeries(seriesId: String)
 POST          /seriesrounds/:seriesId                        controllers.SeriesRoundController.createSeriesRound(seriesId: String)
 PUT           /seriesrounds                                  controllers.SeriesRoundController.fullUpdateSeriesRound
 PUT           /seriesroundsconfig                            controllers.SeriesRoundController.updateConfigSeriesRound
 PATCH         /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.updateRoundMatch(seriesRoundId: String)
 DELETE        /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.deleteSeriesRound(seriesRoundId: String)
+GET           /matchList/:seriesRoundId                      controllers.SeriesRoundController.getMatchListOfRound(seriesRoundId: String)
+
+GET           /nextRound/:seriesId/:roundNr                  controllers.SeriesRoundController.proceedToNextRound(seriesId: String, roundNr: Int)
+GET           /previousRound/:seriesId/:roundNr              controllers.SeriesRoundController.showPreviousRound(seriesId: String, roundNr: Int)
+GET           /isLastRound/:seriesId                         controllers.SeriesRoundController.isLastRoundOfSeries(seriesId: String)
+
 
 GET           /drawseries/:tournamentId                      controllers.DrawController.drawSeriesOfTournament(tournamentId: String)
 POST          /redraw                                        controllers.DrawController.redraw

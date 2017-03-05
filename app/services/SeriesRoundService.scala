@@ -5,17 +5,29 @@ import javax.inject.Inject
 import models._
 import models.matches.SiteMatch
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
-import repositories.mongo.SeriesRoundRepository
-import utils.RoundResult
+import play.api.libs.json.JsObject
+import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
+import utils.RoundScoreCalculator
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository) {
+class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository, seriesRepository: SeriesRepository) {
+  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRoundRepository.retrieveAllByField(fieldKey, fieldValue)
+  def retrieveByFields(jsObject: JsObject): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveByFields(jsObject)
 
-  def calculateRoundResults(seriesRound: SeriesRound): SeriesRound = seriesRound match{
-    case robinRound: SiteRobinRound => RoundResult.calculateRobinResults(robinRound)
-    case bracketRound: SiteBracketRound => RoundResult.calculateBracketResults(bracketRound)
+  def getMatchesOfRound(seriesRoundId: String): Future[List[SiteMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
+    case Some(bracketRound: SiteBracketRound) => bracketRound.bracket.toList
+    case Some(robinRound: SiteRobinRound) => robinRound.robinList.flatMap( robinGroup => robinGroup.robinMatches)
+    case None => List()
+  }
+
+  def getRound(roundId: String) = seriesRoundRepository.retrieveById(roundId)
+
+
+  def calculateRoundResults(playingWithHandicaps: Boolean, seriesRound: SeriesRound): SeriesRound = seriesRound match{
+    case robinRound: SiteRobinRound => RoundScoreCalculator.calculateRobinResults(playingWithHandicaps, robinRound)
+    case bracketRound: SiteBracketRound => RoundScoreCalculator.calculateBracketResults(bracketRound, playingWithHandicaps)
   }
 
   def updateMatchInRound(siteMatch: SiteMatch, round: SeriesRound): SeriesRound = round match{
@@ -30,10 +42,13 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   def updateRoundWithMatch(siteMatch: SiteMatch, roundId: String): Future[Option[SeriesRound]] = {
     seriesRoundRepository.retrieveById(roundId).flatMap{
       case Some(round) =>
-        val updatedRound = calculateRoundResults(updateMatchInRound(siteMatch, round))
-        updateSeriesRound(updatedRound).map{ _ => println(updatedRound);Some(updatedRound)}
-
-
+        seriesRepository.retrieveById(round.seriesId).flatMap{
+          case Some(series) =>
+            val updatedRound = calculateRoundResults(series.playingWithHandicaps, updateMatchInRound(siteMatch, round))
+            updateSeriesRound(updatedRound).map{ _ => Some(updatedRound)
+          }
+          case _ => Future(None)
+        }
       case _ => Future(None)
     }
   }
@@ -46,7 +61,6 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
         case b: SiteBracketRound => b.copy(roundNr = list.length + 1)
       })
     }
-
     val seriesToCreate = getNextRoundNrOfSeries(seriesRound.seriesId)
     seriesToCreate.flatMap(seriesRoundRepository.create)
   }
@@ -155,17 +169,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   }
 
 
-  val seriesRounds: List[SeriesRound] = List(
-    SiteRobinRound("1", 2, "1", 1, List()),
-    SiteBracketRound("2", 2, "1", 1, List(), SiteBracket.buildBracket(2,21,2))
-  )
-
-  def getSeriesRound(seriesRoundId: String) = {
-    Future(seriesRounds.find(round => round.id.contains(seriesRoundId)))
-  }
-
-
-  def isRoundComplete(seriesRoundWithPlayersAndMatches: SeriesRound): Boolean = seriesRoundWithPlayersAndMatches match {
+  def isRoundComplete(seriesRound: SeriesRound): Boolean = seriesRound match {
     case robinRound: SiteRobinRound =>
       robinRound.robinList.forall(robinGroup => robinGroup.robinMatches.forall(matchService.isMatchComplete))
     case bracketRound: SiteBracketRound =>

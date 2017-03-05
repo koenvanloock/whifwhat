@@ -12,7 +12,7 @@ import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 import helpers.TestHelpers._
 import models.matches.{SiteGame, SiteMatch}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
-import models.types.{LeafMatch, NodeMatch}
+import models.types.{BracketLeaf, BracketNode}
 
 import scala.concurrent.Await
 
@@ -90,15 +90,14 @@ class SeriesRoundControllerTest extends PlaySpec with OneAppPerTest{
                               |""".stripMargin)
 
       val test = json.validate[SiteBracketRound](SeriesRoundEvidence.seriesRoundIsModel.siteBracketRoundReads).asOpt
-      println(test)
       test mustBe Some(SiteBracketRound("585c679a806f032c0189bd14",2,"585c66d0806f03d50089bd00",1,
         List(SeriesPlayer("8531ad27-7959-48ee-9177-45440ac42edb","77eb8f10-474c-46ca-9778-f21e45166f4e",Player("585c66f8806f03e90089bd02","Koen", "Van Loock", Ranks.D0),PlayerScores()),
           SeriesPlayer("6a31ddcd-78a4-4114-8e00-266c4b05faa5","77eb8f10-474c-46ca-9778-f21e45166f4e",Player("585c671f806f03d50089bd04","Tim", "Uitdewilligen", Ranks.E0),PlayerScores()),
           SeriesPlayer("20e564cd-b483-40a9-8710-5052ebd432df","77eb8f10-474c-46ca-9778-f21e45166f4e",Player("585c6701806f03b60089bd03","Hans", "Van Bael", Ranks.E4),PlayerScores()),
           SeriesPlayer("9c8d41e3-f187-4ae9-94b8-bd140cd36e88","77eb8f10-474c-46ca-9778-f21e45166f4e",Player("585c672a806f03d50089bd05","Matthias", "Lesuisse", Ranks.D6),PlayerScores())
-        ),NodeMatch(SiteMatch("4117a520-b4d2-476e-85a4-6bd1c35017c7",None, None, "",0,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3))),
-          LeafMatch(SiteMatch("f7b2438d-e799-4666-91ba-f943e1b7429e",None, None, "77eb8f10-474c-46ca-9778-f21e45166f4e",3,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3)))),
-          LeafMatch(SiteMatch("859a655c-a979-4c03-9b53-5c96de24541b",None, None, "77eb8f10-474c-46ca-9778-f21e45166f4e",2,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3))))
+        ),BracketNode(SiteMatch("4117a520-b4d2-476e-85a4-6bd1c35017c7",None, None, "",0,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3))),
+          BracketLeaf(SiteMatch("f7b2438d-e799-4666-91ba-f943e1b7429e",None, None, "77eb8f10-474c-46ca-9778-f21e45166f4e",3,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3)))),
+          BracketLeaf(SiteMatch("859a655c-a979-4c03-9b53-5c96de24541b",None, None, "77eb8f10-474c-46ca-9778-f21e45166f4e",2,true, 21, 2, 0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3))))
           ),"B"))
     }
   }

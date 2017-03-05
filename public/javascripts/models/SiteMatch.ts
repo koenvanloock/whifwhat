@@ -4,7 +4,7 @@ module TournamentManagement{
         playerA?: Player
         playerB?: Player
         handicap: number
-        isHandicapForA: boolean
+        isHandicapForB: boolean
         games: Array<Game>
     }
 }

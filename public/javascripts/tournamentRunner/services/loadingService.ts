@@ -20,8 +20,8 @@ module TournamentRunner{
             return this.$http.get(this.base.url + "/series/"+tournamentId);
         };
 
-        getRoundsOfActiveSeries = function(seriesId){
-            return this.$http.get(this.base.url + "/seriesrounds/"+ seriesId);
+        getCurrentRoundOfSeries = function(seriesId){
+            return this.$http.get(this.base.url + "/activeround/"+ seriesId);
         };
 
         updateSeriesRound = function(roundId, match){
@@ -29,6 +29,10 @@ module TournamentRunner{
         };
         isThereActiveTournament = function(){
             return this.$http.get(this.base.url + '/hasActiveTournament')
+        };
+
+        isLastRound = function(seriesId){
+            return this.$http.get(this.base.url + '/isLastRound/'+seriesId)
         }
     }
     

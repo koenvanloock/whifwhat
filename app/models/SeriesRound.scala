@@ -1,6 +1,6 @@
 package models
 
-import models.matches.{SiteGame, SiteMatch}
+import models.matches.{MatchChecker, SiteGame, SiteMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 import models.types._
 import play.api.libs.functional.syntax._
@@ -11,6 +11,8 @@ import utils.JsonUtils
 import scala.language.postfixOps
 
 sealed trait SeriesRound {
+  def isComplete: Boolean
+
   def id: String
 
   def seriesId: String
@@ -24,6 +26,8 @@ case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: St
 
   def setId(id: String)(m: SiteBracketRound): SiteBracketRound = m.copy(id = id)
 
+  def isComplete = SiteBracket.isComplete(this.bracket)
+
 }
 
 
@@ -31,6 +35,8 @@ case class SiteRobinRound(id: String, numberOfRobinGroups: Int, seriesId: String
   def getId(m: SiteRobinRound): Option[String] = Some(id)
 
   def setId(id: String)(m: SiteRobinRound): SiteRobinRound = m.copy(id = id)
+
+  def isComplete = this.robinList.forall( robingroup => robingroup.robinMatches.forall(MatchChecker.isWon))
 }
 
 
@@ -70,23 +76,23 @@ object SeriesRoundEvidence {
       ) (SiteBracketRound.apply(_, _, _, _, _, _))
 
 
-    implicit val leafReads: Reads[LeafMatch[SiteMatch]] = new Reads[LeafMatch[SiteMatch]] {
-      override def reads(json: JsValue): JsResult[LeafMatch[SiteMatch]] = {
-        (json \ "value").validate[SiteMatch].map(x => LeafMatch(x))
+    implicit val leafReads: Reads[BracketLeaf[SiteMatch]] = new Reads[BracketLeaf[SiteMatch]] {
+      override def reads(json: JsValue): JsResult[BracketLeaf[SiteMatch]] = {
+        (json \ "value").validate[SiteMatch].map(x => BracketLeaf(x))
       }
     }
 
-    implicit val leafWrites: Writes[LeafMatch[SiteMatch]] = new Writes[LeafMatch[SiteMatch]] {
-      override def writes(leafMatch: LeafMatch[SiteMatch]): JsValue = {
+    implicit val leafWrites: Writes[BracketLeaf[SiteMatch]] = new Writes[BracketLeaf[SiteMatch]] {
+      override def writes(leafMatch: BracketLeaf[SiteMatch]): JsValue = {
         Json.obj("value" -> leafMatch.value)
       }
     }
 
-    implicit val nodeReads: Reads[NodeMatch[SiteMatch]] = (
+    implicit val nodeReads: Reads[BracketNode[SiteMatch]] = (
       (__ \ "value").read[SiteMatch] and
         (__ \ "left").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads) and
         (__ \ "right").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads)
-      ) (NodeMatch[SiteMatch](_, _, _))
+      ) (BracketNode[SiteMatch](_, _, _))
 
     implicit val nodeWrites: Writes[SiteMatchNode] = (
       (__ \ "value").write[SiteMatch] and
@@ -96,15 +102,15 @@ object SeriesRoundEvidence {
 
     implicit def bracketSiteMatchReads = new Reads[Bracket[SiteMatch]] {
       override def reads(json: JsValue): JsResult[Bracket[SiteMatch]] = (json \ "left").asOpt[JsValue] match {
-        case Some(node) => Json.fromJson[NodeMatch[SiteMatch]](json)(nodeReads)
-        case None => Json.fromJson[LeafMatch[SiteMatch]](json)(leafReads)
+        case Some(node) => Json.fromJson[BracketNode[SiteMatch]](json)(nodeReads)
+        case None => Json.fromJson[BracketLeaf[SiteMatch]](json)(leafReads)
       }
     }
 
     implicit def bracketSiteMatchWrites = new Writes[Bracket[SiteMatch]] {
       override def writes(bracket: Bracket[SiteMatch]): JsValue = bracket match {
-        case n: NodeMatch[SiteMatch] => Json.toJson(SiteBracket.convertNodeToSiteMatchNode(n))(nodeWrites).asInstanceOf[JsObject]
-        case l: LeafMatch[SiteMatch] => Json.toJson(l)(leafWrites)
+        case n: BracketNode[SiteMatch] => Json.toJson(SiteBracket.convertNodeToSiteMatchNode(n))(nodeWrites).asInstanceOf[JsObject]
+        case l: BracketLeaf[SiteMatch] => Json.toJson(l)(leafWrites)
       }
     }
 

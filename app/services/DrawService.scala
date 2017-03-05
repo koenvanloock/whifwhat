@@ -28,7 +28,7 @@ class DrawService @Inject()() {
         val matches = createRobinMatches(tuple._2, playerGroup, numberOfSetsToWin, setTargetScore)
         RobinGroup(tuple._2, playerGroup, matches)
       }
-      Some(robinRound.copy(robinList=robins))
+      Some(robinRound.copy(robinList = robins))
     } else None
   }
 
@@ -58,7 +58,7 @@ class DrawService @Inject()() {
 
   }
 
-  def drawFirstRound(roundNr: Int, bracketId: String, bracketPlayers: List[SeriesPlayer], numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[SiteMatch] = {
+  def drawFirstRoundOfBracket(roundNr: Int, bracketId: String, bracketPlayers: List[SeriesPlayer], numberOfBracketRounds: Int, numberOfSetsToWin: Int, setTargetScore: Int): List[SiteMatch] = {
     numberOfBracketRounds match {
       case 4 => List((1, 0, 15), (2, 8, 7), (3, 4, 11), (4, 12, 3), (5, 2, 13), (6, 10, 5), (7, 6, 9), (8, 14, 1)).map(createMatchFromPlayerIndex(roundNr, bracketId, numberOfSetsToWin, setTargetScore, bracketPlayers))
       case 3 => List((1, 0, 7), (1, 4, 3), (1, 2, 5), (1, 6, 1)).map(createMatchFromPlayerIndex(roundNr, bracketId, numberOfSetsToWin, setTargetScore, bracketPlayers))
@@ -76,7 +76,7 @@ class DrawService @Inject()() {
     val isForB = relHandicap > 0
     val matchId = UUID.randomUUID().toString
     val sets = createSiteGameForMatch(numberOfSetsToWin)
-    SiteMatch(UUID.randomUUID().toString, playerA.map(_.player), playerB.map(_.player), bracketId, relHandicap, isForB, setTargetScore, numberOfSetsToWin, 0,0, sets)
+    SiteMatch(UUID.randomUUID().toString, playerA.map(_.player), playerB.map(_.player), bracketId, Math.abs(relHandicap), isForB, setTargetScore, numberOfSetsToWin, 0, 0, sets)
   }
 
   def convertToBracketPlayer(bracketId: String): (SeriesPlayer) => SeriesPlayer = seriesPlayer => SeriesPlayer(UUID.randomUUID().toString, bracketId, seriesPlayer.player, PlayerScores())
@@ -86,19 +86,25 @@ class DrawService @Inject()() {
     if (bracket.numberOfBracketRounds > 0) {
       val bracketId = UUID.randomUUID().toString
       val bracketRounds = (0 until bracket.numberOfBracketRounds).toList.map {
-        case roundNr if(roundNr==0) => drawFirstRound(roundNr + 1, bracketId, players, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
-        case roundNr if(roundNr > 0) => drawEmptyMatches(roundNr + 1, bracketId, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+        case roundNr if (roundNr == 0) => drawFirstRoundOfBracket(roundNr + 1, bracketId, players, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+        case roundNr if (roundNr > 0) => drawEmptyMatches(roundNr + 1, bracketId, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
       }
       val bracketPlayers = players.take(Math.pow(2, bracket.numberOfBracketRounds).toInt).map {
         convertToBracketPlayer(bracketId)
       }
-      val firstRoundMatches = drawFirstRound(bracket.numberOfBracketRounds, bracketId, bracketPlayers, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
-      Some(bracket.copy(bracketPlayers= bracketPlayers, bracket = SiteBracket.createBracket(firstRoundMatches)))
+      val firstRoundMatches = drawFirstRoundOfBracket(bracket.numberOfBracketRounds, bracketId, bracketPlayers, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+      Some(bracket.copy(bracketPlayers = bracketPlayers, bracket = SiteBracket.createBracket(firstRoundMatches)))
 
     } else None
   }
 
+  def drawSubsequentRound(seriesRound: SeriesRound, sortedPlayerList: List[SeriesPlayer], series: TournamentSeries): Option[SeriesRound] =  seriesRound match {
+    case bracket: SiteBracketRound  => drawBracket(sortedPlayerList, bracket, series.numberOfSetsToWin, series.setTargetScore)
+    case robinRound: SiteRobinRound => drawRobins(sortedPlayerList, robinRound, series.setTargetScore, series.numberOfSetsToWin, DrawTypes.EnteredOrder)
+  }
+
 }
+
 
 case class DrawType(name: String)
 

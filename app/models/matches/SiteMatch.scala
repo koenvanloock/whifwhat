@@ -41,3 +41,10 @@ object MatchEvidence{
     override implicit val getResult: GetResult[SiteMatch] = GetResult(r => SiteMatch(r.<<,None,None,r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, List()))
   }
 }
+
+object MatchChecker{
+  def isWon(siteMatch: SiteMatch): Boolean = {
+    (siteMatch.wonSetsA > siteMatch.wonSetsB) && siteMatch.wonSetsA == siteMatch.numberOfSetsToWin ||
+      siteMatch.wonSetsA < siteMatch.wonSetsB && siteMatch.wonSetsB == siteMatch.numberOfSetsToWin
+  }
+}

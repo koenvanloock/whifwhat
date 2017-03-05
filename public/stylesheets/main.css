@@ -32,7 +32,6 @@ body{
 }
 
 .viewField{
-    margin-left: 220px;
     overflow: auto;
     max-height: 99vh;
 }
@@ -76,4 +75,83 @@ form .progress {
 
 .left-pad {
     padding-left: 10px;
+}
+
+.printMatch table{
+    background: white;
+}
+
+.printMatch{
+    font-weight: bold;
+    font-size: 10px;
+    color: black;
+    border-collapse: collapse;
+}
+
+.printMatch td, .printMatch tr, .printMatch table{
+    border-collapse: collapse;
+    border: 2px solid  #a3a3a3;
+}
+
+.printMatch td {
+    text-align: center;
+    height: 15px;
+}
+
+.playerCell{
+    height: 15px;
+    width: 150px;
+}
+
+.gameCell{
+    height: 15px;
+    width: 40px;
+}
+
+.horizontalLine{
+    height: 3px;
+    width: 100%;
+    border-bottom: 2px solid #9b9b9b;
+}
+
+#nextRound, #finalRound{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+#previousRound{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+.finalRanking li{
+    list-style-type: none;
+    margin: 10px;
+}
+
+.first{
+    background: gold;
+    padding: 20px 20px 20px 10px;
+}
+
+.second{
+    background: silver;
+    padding: 10px;
+}
+
+.third{
+    background: darkorange;
+    padding: 5px 5px 5px 10px;
+}
+
+.ranking-elem{
+    padding-left: 10px;
+}
+
+.finalRanking li{
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
 }

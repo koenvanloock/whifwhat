@@ -1,12 +1,13 @@
 module TournamentManagement {
     import IRouteParamsService = angular.route.IRouteParamsService;
+    import ILocationService = angular.ILocationService;
 
     class DrawController {
-        static $inject = ["TournamentService", "DrawService","SeriesRoundService", "$routeParams"];
+        static $inject = ["TournamentService", "DrawService","SeriesRoundService", "$routeParams", "$location"];
         private tournament: Tournament;
         private errors: Array<string>;
 
-        constructor(private tournamentService: TournamentService, private drawService: DrawService, private seriesRoundService: SeriesRoundService, private $routeParams: IRouteParamsService) {
+        constructor(private tournamentService: TournamentService, private drawService: DrawService, private seriesRoundService: SeriesRoundService, private $routeParams: IRouteParamsService, private $location: ILocationService) {
             tournamentService.getTournament($routeParams["tournamentId"]).then((response: any) => {
 
                 this.tournament = response.data;
@@ -54,6 +55,10 @@ module TournamentManagement {
             this.seriesRoundService.updateSeriesRound(seriesRound).then(
                 (response) => console.log("saved " + seriesRound.id)
             )
+        }
+        
+        printRound(roundId){
+            this.$location.path("/printRound/"+roundId);
         }
 
 

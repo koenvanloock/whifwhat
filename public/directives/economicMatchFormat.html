@@ -1,0 +1,31 @@
+<div class="printMatch">
+  <table>
+    <thead>
+      <tr ng-style="myStyle" class="matchHeader">
+        <td class="playerCell">Spelers</td>
+        <td class="gameCell">VG</td>
+        <td class="gameCell" ng-repeat="game in match.games track by $index">S{{$index+1}}</td>
+        <td class="gameCell">Uitslag</td>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td class="playerCell">{{match.playerA.firstname + " "+ match.playerA.lastname}}</td>
+      <td class="gameCell">{{(match.isHandicapForB) ? '': '+'+ match.handicap }}</td>
+      <td class="gameCell" ng-repeat="game in match.games"></td>
+      <td class="gameCell"></td>
+    </tr>
+    <tr>
+      <td class="playerCell">{{match.playerB.firstname + " "+ match.playerB.lastname}}</td>
+      <td class="gameCell">{{(match.isHandicapForB) ? '+' + match.handicap : ''}}</td>
+      <td class="gameCell" ng-repeat="game in match.games"></td>
+      <td class="gameCell"></td>
+    </tr>
+    <tr>
+      <td colspan="{{match.games.length}}"></td>
+      <td colspan="3" ng-style="myStyle">{{seriesName}}</td>
+    </tr>
+    </tbody>
+  </table>
+
+</div>

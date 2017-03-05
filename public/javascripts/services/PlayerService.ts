@@ -6,6 +6,10 @@ module TournamentManagement{
         getAllPlayers() {
         return this.$http.get(this.base.url + '/players');
     }
+        
+        getPlayersBySearch(searchString: string){
+            return this.$http.get(this.base.url + "/players?searchString="+searchString);
+        }
 
         getRanks() {
         return this.$http.get(this.base.url + '/ranks')

@@ -12,7 +12,7 @@
     <tr ng-repeat="tournament in ctrl.tournaments">
      <td> {{tournament.tournamentName}}</td>
       <td>{{tournament.tournamentDate}}</td>
-        <td><md-button class="md-fab" ng-click="ctrl.activateTournament(tournament.id)"><i class="fa fa-eye"></i></md-button></td>
+        <td><md-button class="md-fab" aria-label="activate tournament" ng-click="ctrl.activateTournament(tournament.id)"><i class="fa fa-eye"></i></md-button></td>
     </tr>
   </table>
 </md-table-container>

@@ -6,9 +6,9 @@ import actors.TournamentActor
 import actors.TournamentActor.{GetActiveTournament, HasActiveTournament, LoadTournament}
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.StrictLogging
-import models.{SeriesWithPlayers, Tournament, TournamentWithSeries}
+import models.{SeriesWithPlayers, Tournament, TournamentSeries, TournamentWithSeries}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, AnyContent, Controller, Request}
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, TournamentRepository}
 import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
@@ -29,9 +29,24 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
   def createTournament() = Action.async{ request =>
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
          logger.info(tournament.toString)
-        tournamentRepository.create(tournament).map(x => Created(Json.toJson(tournament)))
-    }.getOrElse(Future(BadRequest))
+        tournamentRepository.create(tournament).flatMap { createdTournament =>
+          if (!createdTournament.hasMultipleSeries) {
+            createDefaulSeries(createdTournament, request)
+          } else {
+            Future(Created(Json.toJson(createdTournament)))
+          }
+        }
+    }.getOrElse(Future(BadRequest("Tornooi kon niet aangemaakt worden.")))
 
+  }
+
+  def createDefaulSeries(tournament: Tournament, request: Request[AnyContent]) = {
+    JsonUtils.parseRequestBody(request)(JsonUtils.singleSeriesReads).map { tournamentSeries =>
+      println("testCreate")
+      seriesRepository.create(tournamentSeries.copy(tournamentId = tournament.id, seriesName = tournament.tournamentName)).map { _ =>
+         Created(Json.toJson(tournament))
+      }
+    }.getOrElse(Future(BadRequest("De reeks kon niet gecreërd worden")))
   }
 
   def getTournamentById(tournamentId: String) = Action.async{

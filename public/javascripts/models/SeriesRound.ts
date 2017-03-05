@@ -7,6 +7,8 @@ module TournamentManagement{
         numberOfBracketRounds?: number;
         id: string;
         seriesId: string;
+        robinRounds? : Array<Object>; // todo add RobinGroup as type
+        bracket?: BracketNode
 
     }
 }

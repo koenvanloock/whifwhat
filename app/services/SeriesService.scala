@@ -3,13 +3,22 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.player.SeriesPlayerWithRoundPlayers
+import models.player.{SeriesPlayer, SeriesPlayerWithRoundPlayers}
+import play.api.libs.json.Json
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository}
 
-import scala.concurrent.{Awaitable, Future}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlayerRepository: SeriesPlayerRepository, seriesRepository: SeriesRepository, drawService: DrawService){
+  type FinalRanking = List[SeriesPlayer]
+
+  def create(tournamentSeries: TournamentSeries) = seriesRepository.create(tournamentSeries)
+  def update(tournamentSeries: TournamentSeries) = seriesRepository.update(tournamentSeries)
+  def delete(seriesId: String) = seriesRepository.delete(seriesId)
+
+  def retrieveById(seriesId: String) = seriesRepository.retrieveById(seriesId)
+  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRepository.retrieveAllByField(fieldKey, fieldValue)
   def getTournamentSeriesOfTournament(tournamentId: String): Future[List[TournamentSeries]] = seriesRepository.retrieveAllByField("tournamentId", tournamentId)
 
 
@@ -40,7 +49,7 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
       if (seriesPlayers.length > 1) {
         seriesRepository.retrieveById(seriesId).map {
           case Some(foundSeries) => drawService.drawRobins(seriesPlayers, robinRound, foundSeries.setTargetScore, foundSeries.numberOfSetsToWin, drawType) match {
-            case Some(robinRound) => Right(seriesId,robinRound)
+            case Some(drawnRobinRound) => Right(seriesId,drawnRobinRound)
             case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
           }
           case _ => Left(DrawError(seriesId, "Reeks niet gevonden!"))
@@ -67,13 +76,24 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
     }
   }
 
-  def advanceSeries(tournamentSeries: TournamentSeries, seriesRounds: List[SeriesRound]): TournamentSeries = {
-    if(seriesRounds.length > tournamentSeries.currentRoundNr) tournamentSeries.copy(currentRoundNr = tournamentSeries.currentRoundNr+1) else tournamentSeries
-  }
-
-
-
   def calculateSeriesScores(seriesPlayersWithRoundPlayers: List[SeriesPlayerWithRoundPlayers]) = {
     seriesPlayersWithRoundPlayers.map(seriesRoundService.calculatePlayerScore)
   }
+
+
+  def advanceIfPossibleOrShowFinalRanking(series: TournamentSeries, roundRanking: List[SeriesPlayer]): Future[Either[FinalRanking, SeriesRound]] = {
+    seriesRoundService
+      .retrieveByFields(Json.obj("roundNr" -> (series.currentRoundNr + 1), "seriesId" -> series.id))
+      .flatMap(returnRoundRankingOrNextRoundIfPresent(series, roundRanking))
+  }
+
+  def returnRoundRankingOrNextRoundIfPresent(series: TournamentSeries, roundRanking: FinalRanking): Option[SeriesRound] => Future[Either[FinalRanking, SeriesRound]] = {
+    case Some(nextRound) => update(series.copy(currentRoundNr = series.currentRoundNr + 1)).flatMap{ _ =>
+
+      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
+      seriesRoundService.updateSeriesRound(updatedRound).map( _  => Right(updatedRound))
+    }
+    case _ => Future(Left(roundRanking))
+  }
+
 }

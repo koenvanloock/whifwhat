@@ -2,18 +2,27 @@ module TournamentManagement{
     import IHttpResponseTransformer = angular.IHttpResponseTransformer;
     import ILocationService = angular.ILocationService;
     class TournamentListController{
-        static $inject = ["TournamentService", "$location"];
+        static $inject = ["TournamentService", "$location", "alertService"];
 
         tournaments: Array<Tournament>;
 
-        constructor( private tournamentService: TournamentService, private $location: ILocationService){
-            tournamentService.getAllTournaments().success( (response: Array<Tournament>) => {this.tournaments = response});
+        constructor( private tournamentService: TournamentService, private $location: ILocationService, private alertService: AlertService){
+            tournamentService.getAllTournaments().then( 
+                (response: Array<Tournament>) => {this.tournaments = response.data},
+                (errorResponse) => alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+            );
 
         }
 
 
-        gotoSeriesSetup(tournamentId){
-            return this.$location.path("/tournament/"+ tournamentId + "/seriesSetup");
+        gotoSetup(tournamentId){
+            
+            if(this.tournaments.filter((tournament) => tournament.id === tournamentId)[0].hasMultipleSeries){
+                return this.$location.path("/tournament/"+ tournamentId + "/seriesSetup");
+            } else{
+                return this.$location.path("/tournament/"+ tournamentId + "/playerSubscription");
+            }
+            
         }
 
     }

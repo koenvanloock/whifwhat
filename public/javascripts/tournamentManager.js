@@ -80,7 +80,7 @@ tournamentmanager.directive("bracketNode", ['$compile',function ($compile) {
         scope: {
             node: '='
         },
-        template: '<div layout="row" layout-align="center center">' +
+        template: '<div layout="row">' +
         '<div layout="column">' +
             '<div ng-if="node.left"><bracket-node node="node.left"></bracket-node></div>'+
             '<div ng-if="node.right"><bracket-node node="node.right"></bracket-node></div>' +
@@ -130,9 +130,51 @@ tournamentmanager.directive("bracketMatch", function(){
    } 
 });
 
+tournamentmanager.directive('economicMatchFormat', function(){
+    return{
+        restrict: 'E',
+        scope: { match: '=', myStyle: '=', seriesName: '='},
+        templateUrl: 'assets/directives/economicMatchFormat.html'
+    }
+});
+
+tournamentmanager.directive('fabulousMatchFormat', function(){
+    return{
+        restrict: 'E',
+        scope: { match: '=', myStyle: '=', seriesName: '='},
+        templateUrl: 'assets/directives/fabulousMatchFormat.html'
+    }
+});
+
 tournamentmanager.config(function($mdThemingProvider) {
+    $mdThemingProvider.alwaysWatchTheme(true);
     $mdThemingProvider.theme('default')
         .primaryPalette('teal')
         .accentPalette('orange')
         .dark();
+}).config(function($mdThemingProvider) {
+    $mdThemingProvider.definePalette('white', {
+        '50': 'ffffff',
+        '100': 'ffffff',
+        '200': 'ffffff',
+        '300': 'ffffff',
+        '400': 'ffffff',
+        '500': 'ffffff',
+        '600': 'ffffff',
+        '700': 'ffffff',
+        '800': 'ffffff',
+        '900': 'ffffff',
+        'A100': 'ffffff',
+        'A200': 'ffffff',
+        'A400': 'ffffff',
+        'A700': 'ffffff',
+        'contrastDefaultColor': 'dark'
+    });
+    $mdThemingProvider.theme('light')
+        .primaryPalette('blue')
+        .accentPalette('orange')
+        .backgroundPalette("white");
+    $mdThemingProvider.alwaysWatchTheme(true);
+    $mdThemingProvider.setDefaultTheme('default')
 });
+

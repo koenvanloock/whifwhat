@@ -22,11 +22,11 @@
         </div>
         <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
             <div layout="row" layout-align="start center" style="height:50px;">
-                <p ng-show="match.isHandicapForA">+ {{match.handicap}}</p>
+                <p>{{match.isHandicapForB ? ' ' : '+'+ match.handicap}}</p>
             </div>
 
-            <div layout="row" layout-align="start center">
-                <p  ng-hide="match.isHandicapForA">+ {{match.handicap}}</p>
+            <div layout="row" layout-align="start center" style="height:50px;">
+                <p>{{match.isHandicapForB ? '+'+match.handicap : ' '}}</p>
             </div>
         </div>
     </div>

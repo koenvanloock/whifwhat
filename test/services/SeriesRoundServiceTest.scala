@@ -4,17 +4,18 @@ import helpers.TestHelpers._
 import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
 import models.matches.{SiteGame, SiteMatch}
 import models.player._
-import models.types.{LeafMatch, NodeMatch}
+import models.types.{BracketLeaf, BracketNode}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.mongo.SeriesRoundRepository
+import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 
 
 class SeriesRoundServiceTest extends PlaySpec{
 
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
-  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository)
+  val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository, seriesRepository)
 
 
   val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
@@ -28,30 +29,7 @@ class SeriesRoundServiceTest extends PlaySpec{
 
 
   "SeriesRoundService" should {
-    "return a single seriesRound" in {
 
-      val series = waitFor(seriesRoundService.getSeriesRound("1"))
-      series must contain(SiteRobinRound("1",2,"1",1, Nil))
-    }
-
-    /*
-    "create a seriesRound, he/she recieves an id" in {
-      val series = Await.result(seriesRoundService.create(RobinRound(Some("1"),2,"1",1)), DEFAULT_DURATION)
-      series.get.seriesId.get.length mustBe 36
-    }
-
-    "update a series" in {
-      val createdTournamentSeries = Await.result(seriesService.create(TournamentSeries(None, "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      val series = Await.result(seriesService.update(TournamentSeries(None, "Open zonder voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION).get
-      series.seriesName mustBe "Open zonder voorgift"
-    }*/
-
-    "delete a seriesRound" in {
-      // insert 5 here once integration works
-      waitFor(seriesRoundService.delete("5"))
-      val series = waitFor(seriesRoundService.getSeriesRound("5"))
-      series mustBe None
-    }
 
 
     "isRoundComplete of a complete robinRound returns true" in {
@@ -92,9 +70,9 @@ class SeriesRoundServiceTest extends PlaySpec{
     )
 
     val matches =
-      NodeMatch[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 2, 0,List(SiteGame(21,16,1),SiteGame(21,14,2))),
-        LeafMatch[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
-        LeafMatch(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
+      BracketNode[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 2, 0,List(SiteGame(21,16,1),SiteGame(21,14,2))),
+        BracketLeaf[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
+        BracketLeaf(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
       )
 
 
@@ -110,9 +88,9 @@ class SeriesRoundServiceTest extends PlaySpec{
     )
 
     val matches =
-      NodeMatch[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 1, 0,List(SiteGame(21,16,1),SiteGame(0,0,2))),
-        LeafMatch[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
-        LeafMatch(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
+      BracketNode[SiteMatch](SiteMatch("1", None, None,"3", 6,true,21,2, 1, 0,List(SiteGame(21,16,1),SiteGame(0,0,2))),
+        BracketLeaf[SiteMatch](SiteMatch("1", None, None, "1",7,true,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(22,20,2)))),
+        BracketLeaf(SiteMatch("1", None, None, "1",3,false,21,2, 2, 0, List(SiteGame(21,16,1),SiteGame(21,10,2))))
       )
 
     seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe false

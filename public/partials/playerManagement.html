@@ -1,88 +1,75 @@
 <div layout="column" layout-align="center center">
-    <div class="md-whiteframe-z2 md-margin" flex="50">
+  <div class="md-whiteframe-z2 md-margin" flex="50">
 
-        <md-table-container style="background: rgba(125,125,125,0.5)">
-        <table md-table >
-            <tr>
-                <th></th>
-                <th>Voornaam</th>
-                <th>Achternaam</th>
-                <th>Klassement</th>
-                <th>Acties</th>
-            </tr>
-            <tr ng-repeat="player in ctrl.allPlayers | limitTo: ctrl.query.limit: (ctrl.query.page - 1) * ctrl.query.limit">
-                <td>
-                    <img ng-src="{{ctrl.getImagePath(player)}}" height="50" width="50" style="border-radius: 25px">
-                </td>
-                <td>{{player.firstname}}</td>
-                <td>{{player.lastname}}</td>
-                <td>{{ctrl.ranks[player.rank.value].name}}</td>
-                <td>
-                    <md-button class="md-fab md-primary" aria-label="edit player" ng-click="ctrl.startEditPlayer($index)">
-                        <i class="fa fa-pencil"></i>
-                    </md-button>
-                    <md-button class="md-fab md-primary" aria-label="edit player" ng-click="ctrl.deletePlayer($index)">
-                        <i class="fa fa-trash"></i>
-                    </md-button>
-                </td>
-            </tr>
-        </table>
-            <md-table-pagination md-limit="ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="ctrl.query.page" md-total="{{ctrl.allPlayers.length}}" md-page-select></md-table-pagination>
-        </md-table-container>
-    </div>
-    <div layout="row" class="md-margin" style="background: rgba(93, 93, 93, 0.7)">
-
-        <div  class="md-whiteframe-z2" layout="row">
-            <md-input-container flex="35">
-                <label >Voornaam</label>
-                <input ng-model="ctrl.playerToEdit.firstname"/>
-            </md-input-container>
-
-            <md-input-container flex="35">
-                <label>Achternaam</label>
-                <input ng-model="ctrl.playerToEdit.lastname"/>
-            </md-input-container>
-
-            <md-select ng-model="ctrl.playerToEdit.rank" placeholder="Klassement" flex="30">
-                <md-option ng-repeat="rank in ctrl.ranks"
-                           ng-value="rank">
-                    {{rank.name}}
-                </md-option>
-            </md-select>
-            <md-input-container>
-                <label>pad naar afbeelding</label>
-                <input ng-model="ctrl.playerToEdit.imagepath"/>
-            </md-input-container>
-
-        </div>
-        <md-button class="md-fab" ng-show="ctrl.inserting" ng-click="ctrl.addPlayer()"
-                   style="font-size: 28px; font-weight:  bold" aria-label="add player">+
-        </md-button>
-        <md-button class="md-fab md-primary" ng-show="ctrl.editing" ng-click="ctrl.editPlayer()" aria-label="update player">
-            <i class="fa fa-save"></i>
-        </md-button>
-
-
+    <div style="background: rgba(93, 93, 93, 0.7); padding: 8px;" flex>
+      <md-input-container style="width: 100%">
+        <label>Zoek spelers</label>
+        <input ng-model="ctrl.searchString"/>
+      </md-input-container>
     </div>
 
-    <!--   Handle this manually for now
-    <div>Crop Image and Upload</div>
-    <button ngf-select ng-model="ctrl.picFile" accept="image/*">
-        Select Picture</button>
-    <div ngf-drop ng-model="ctrl.picFile" ngf-pattern="image/*"
-         class="cropArea">
-        <img-crop image="ctrl.picFile  | ngfDataUrl"
-                  result-image="ctrl.croppedDataUrl" ng-init="ctrl.croppedDataUrl=''">
-        </img-crop>
-    </div>
-    <div>
-        <img ng-src="{{ctrl.croppedDataUrl}}" />
-    </div>
-    <button ng-click="ctrl.upload(ctrl.croppedDataUrl, ctrl.picFile.name, ctrl.picFile.size)">Submit</button>
+    <md-table-container style="background: rgba(125,125,125,0.5)">
+      <table md-table>
+        <tr>
+          <th></th>
+          <th>Voornaam</th>
+          <th>Achternaam</th>
+          <th>Klassement</th>
+          <th>Acties</th>
+        </tr>
+        <tr ng-repeat="player in ctrl.allPlayers | limitTo: ctrl.query.limit: (ctrl.query.page - 1) * ctrl.query.limit">
+          <td>
+            <img ng-src="{{ctrl.getImagePath(player)}}" height="50" width="50" style="border-radius: 25px">
+          </td>
+          <td>{{player.firstname}}</td>
+          <td>{{player.lastname}}</td>
+          <td>{{ctrl.ranks[player.rank.value].name}}</td>
+          <td>
+            <md-button class="md-fab md-primary" aria-label="edit player" ng-click="ctrl.startEditPlayer($index)">
+              <i class="fa fa-pencil"></i>
+            </md-button>
+            <md-button class="md-fab md-primary" aria-label="edit player" ng-click="ctrl.deletePlayer($index)">
+              <i class="fa fa-trash"></i>
+            </md-button>
+          </td>
+        </tr>
+      </table>
+      <md-table-pagination md-limit="ctrl.query.limit" md-limit-options="[5, 10, 15]" md-page="ctrl.query.page"
+                           md-total="{{ctrl.allPlayers.length}}" md-page-select></md-table-pagination>
+    </md-table-container>
+  </div>
+  <div layout="row" class="md-margin" style="background: rgba(93, 93, 93, 0.7)">
 
-        <span class="progress" ng-show="progress >= 0">
-          <div style="width:{{ctrl.progress}}%" ng-bind="progress + '%'"></div>
-        </span>
-    <span ng-show="ctrl.result">Upload Successful</span>
-    <span class="err" ng-show="ctrl.errorMsg">{{ctrl.errorMsg}}</span>-->
+    <div class="md-whiteframe-z2" layout="row">
+      <md-input-container flex="35">
+        <label>Voornaam</label>
+        <input ng-model="ctrl.playerToEdit.firstname"/>
+      </md-input-container>
+
+      <md-input-container flex="35">
+        <label>Achternaam</label>
+        <input ng-model="ctrl.playerToEdit.lastname"/>
+      </md-input-container>
+
+      <md-select ng-model="ctrl.playerToEdit.rank" placeholder="Klassement" flex="30">
+        <md-option ng-repeat="rank in ctrl.ranks"
+                   ng-value="rank">
+          {{rank.name}}
+        </md-option>
+      </md-select>
+      <md-input-container>
+        <label>pad naar afbeelding</label>
+        <input ng-model="ctrl.playerToEdit.imagepath"/>
+      </md-input-container>
+
+    </div>
+    <md-button class="md-fab" ng-show="ctrl.inserting" ng-click="ctrl.addPlayer()"
+               style="font-size: 28px; font-weight:  bold" aria-label="add player">+
+    </md-button>
+    <md-button class="md-fab md-primary" ng-show="ctrl.editing" ng-click="ctrl.editPlayer()" aria-label="update player">
+      <i class="fa fa-save"></i>
+    </md-button>
+
+
+  </div>
 </div>

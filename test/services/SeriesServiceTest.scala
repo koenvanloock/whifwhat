@@ -6,11 +6,14 @@ import models.player._
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
 import models.SiteBracket
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, SeriesRoundRepository}
 
 import scala.concurrent.Await
 
+@RunWith(classOf[JUnitRunner])
 class SeriesServiceTest extends PlaySpec {
 
   val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
@@ -35,10 +38,11 @@ class SeriesServiceTest extends PlaySpec {
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
   val seriesPlayerRepository = appBuilder.injector.instanceOf[SeriesPlayerRepository]
   val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+  val drawService = new DrawService
 
-  val seriesService = new SeriesService(new SeriesRoundService(new MatchService, seriesRoundRepository), seriesPlayerRepository, seriesRepository, new DrawService)
+  val seriesService = new SeriesService(new SeriesRoundService(new MatchService, seriesRoundRepository, seriesRepository), seriesPlayerRepository, seriesRepository, drawService)
 
-  "TournamentSeriesService" should {
+  "SeriesService" should {
     "return a list of series of a tournament" in {
       val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
       val series = waitFor(seriesService.getTournamentSeriesOfTournament("1"))
@@ -67,7 +71,7 @@ class SeriesServiceTest extends PlaySpec {
     //    }
     //  }
 
-    "advance to the next round if complete" in {
+    /*"advance to the next round if complete" in {
       val series = TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, playingWithHandicaps = true, 0, showReferees = false, 1, "1")
       val roundList = List(
         SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
@@ -76,10 +80,10 @@ class SeriesServiceTest extends PlaySpec {
             SiteGame(21, 15, 2))
           ))))),
         SiteRobinRound("124",1,"124",2,List(RobinGroup("2", List(), List()))),
-        SiteBracketRound("1",1,"125",3, List(), SiteBracket.buildBracket(1,21,2))
+          SiteBracketRound("1",1,"125",3, List(), SiteBracket.buildBracket(1,21,2))
       )
       seriesService.advanceSeries(series, roundList).currentRoundNr mustBe 2
-    }
+    }*/
 
     "calculate SeriesScores" in {
 
@@ -116,6 +120,39 @@ class SeriesServiceTest extends PlaySpec {
         SeriesPlayer("4","1", gil, PlayerScores(5, 1, 11, 4, 148, 80, 407068)))
     }
 
+
+
+    "returnRoundRankingOrNextRoundIfPresent returns the ranking if it's the last round of the tournament (no next round)" in {
+      val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
+      val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
+        SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
+          SiteGame(21, 15, 1),
+          SiteGame(21, 15, 2))
+        )))))), DEFAULT_DURATION)
+      val ranking = players.reverse
+      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking)(None), DEFAULT_DURATION)
+
+      result mustBe Left(ranking)
+    }
+
+    "returnRoundRankingOrNextRoundIfPresent returns the drawn next round if it exists" in {
+      val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
+      val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
+        SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
+          SiteGame(21, 15, 1),
+          SiteGame(21, 15, 2))
+        )))))), DEFAULT_DURATION)
+      val ranking = players.reverse.take(5)
+      val drawnNextRound = drawService.drawSubsequentRound(seriesRound, ranking ,insertedSeries)
+      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking)(Some(seriesRound)), DEFAULT_DURATION)
+
+      result match {
+        case Right(drawnRound) => drawnRound match{
+          case robin: SiteRobinRound => robin.robinList.head.robinMatches.length mustBe 10
+        }
+        case _ => fail("The result was Left instead of Right")
+      }
+    }
 
   }
 }

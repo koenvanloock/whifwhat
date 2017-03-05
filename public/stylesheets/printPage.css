@@ -1,0 +1,51 @@
+.printMatch{
+    background: white;
+    font-size: 10px;
+    font-weight: bold;
+    color: black;
+    border-collapse: collapse;
+    height: 2.65cm;
+}
+
+.printMatch td, .printMatch tr, .printMatch table{
+    border-collapse: collapse;
+    border: 2px solid  #a3a3a3;
+}
+
+.printMatch td {
+    text-align: center;
+    height: 0.65cm;
+}
+
+.noPrint{
+    display: none;
+}
+
+.playerCell{
+    width: 200px;
+}
+
+.gameCell{
+    width: 40px;
+}
+
+@page {
+    size: A4;
+    margin: 10px;
+    padding: 10px;
+}
+
+.pageend{
+    page-break-after: always;
+}
+
+.matchHeader td{
+    height: 10px;
+    font-size: 8px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.fancyMatch{
+    height: 14cm;
+}

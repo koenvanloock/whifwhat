@@ -16,14 +16,17 @@ var TournamentRunner;
             this.getSeriesOfTournament = function (tournamentId) {
                 return this.$http.get(this.base.url + "/series/" + tournamentId);
             };
-            this.getRoundsOfActiveSeries = function (seriesId) {
-                return this.$http.get(this.base.url + "/seriesrounds/" + seriesId);
+            this.getCurrentRoundOfSeries = function (seriesId) {
+                return this.$http.get(this.base.url + "/activeround/" + seriesId);
             };
             this.updateSeriesRound = function (roundId, match) {
                 return this.$http.patch(this.base.url + "/seriesrounds/" + roundId, match);
             };
             this.isThereActiveTournament = function () {
                 return this.$http.get(this.base.url + '/hasActiveTournament');
+            };
+            this.isLastRound = function (seriesId) {
+                return this.$http.get(this.base.url + '/isLastRound/' + seriesId);
             };
         }
         return LoadingService;

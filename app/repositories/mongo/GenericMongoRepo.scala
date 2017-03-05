@@ -52,23 +52,27 @@ class GenericMongoRepo[M: Model]
   def retrieveAll(): Future[List[M]] = collectionFuture.flatMap(collection => collection.find(Json.obj()).cursor[M]().collect[List]())
 
 
-  def retrieveAllByFields(optionalFieldsMap: Option[Map[String, String]]): Future[List[M]] = {
-    val msg = s"retrieveAllByFields( $optionalFieldsMap )"
-    logger.debug(msg)
-    val filters = fieldsMapToFilters(optionalFieldsMap.getOrElse(Map()))
-    collectionFuture.flatMap(collection =>
-      collection
-      .find(Json.obj(filters: _*))
+  def retrieveByFields(jsonObject: JsObject) = collectionFuture.flatMap(collection =>
+    collection
+      .find(jsonObject)
       .cursor[M]()
       .collect[List]())
-  }
+      .map(_.headOption)
+
+
+  def retrieveAllByFields(jsonObject: JsObject) = collectionFuture.flatMap(collection =>
+    collection
+      .find(jsonObject)
+      .cursor[M]()
+      .collect[List]())
+
 
   def retrieveByField(fieldKey: String, fieldValue: String) = {
     retrieveAllByField(fieldKey, fieldValue).map(_.headOption)
   }
 
   def retrieveAllByField(fieldKey: String, fieldValue: String): Future[List[M]] =
-    retrieveAllByFields(Some(Map(fieldKey -> fieldValue)))
+    retrieveAllByFields(Json.obj(fieldKey -> fieldValue))
 
   // Update
 

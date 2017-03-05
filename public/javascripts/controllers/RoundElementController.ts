@@ -87,7 +87,9 @@ module TournamentManagement {
                         seriesId: result.data.seriesId,
                         roundNr: result.data.roundNr
                     };
-                })
+                },
+                (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+            )
         };
 
 

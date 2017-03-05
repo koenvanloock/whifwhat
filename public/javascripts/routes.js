@@ -4,6 +4,7 @@ angular.module('tournamentManager')
           .when('/', {
             controller: "TitleScreenController",
             controllerAs: 'ctrl',
+            templateUrl: "assets/partials/startPage.html",
             requiresLogin: true
           })
           .when('/login', {
@@ -36,6 +37,13 @@ angular.module('tournamentManager')
             templateUrl: "assets/partials/seriesRoundSetup.html",
             controller: 'SeriesRoundSetupController',
             controllerAs: 'roundCtrl',
+            access: {
+              requiresLogin: true
+            }
+          }).when('/printRound/:roundId', {
+            templateUrl: "assets/partials/printRound.html",
+            controller: 'PrintRoundController',
+            controllerAs: 'ctrl',
             access: {
               requiresLogin: true
             }

@@ -45,6 +45,7 @@
     "public/javascripts/services/PlayerService.ts",
 
     "public/javascripts/controllers/LoginController.ts",
+    "public/javascripts/controllers/MenuController.ts",
     "public/javascripts/controllers/CreateTournamentController.ts",
     "public/javascripts/controllers/DrawController.ts",
     "public/javascripts/controllers/RoundElementController.ts",
@@ -56,6 +57,7 @@
     "public/javascripts/controllers/TournamentListController.ts",
     "public/javascripts/controllers/TitleScreenController.ts",
     "public/javascripts/controllers/PlayerController.ts",
+    "public/javascripts/controllers/PrintRoundController.ts",
 
 
     "public/javascripts/tournamentRunner/loadingTournament/loadingController.ts",

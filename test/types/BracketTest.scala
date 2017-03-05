@@ -16,12 +16,6 @@ class BracketTest extends PlaySpec{
       SiteBracket.buildBracket(2,21,2).size mustBe 2
     }
 
-    "Convert a bracket to Json" in {
-
-      val result = Json.toJson(SiteBracket.buildBracket(1,21,2))
-      println(result)
-    }
-
   }
 
 }

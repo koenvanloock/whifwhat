@@ -7,18 +7,20 @@ import models._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import play.api.mvc.{Action, Controller}
-import services.SeriesRoundService
-import utils.ControllerUtils
+import play.api.mvc.{Action, Controller, Result}
+import services.{SeriesRoundService, SeriesService}
+import utils.{ControllerUtils, JsonUtils, RoundRankingCalculator}
 import utils.JsonUtils.ListWrites._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
 import models.matches.MatchEvidence.matchIsModel._
-import models.matches.{MatchEvidence, SiteMatch}
+import models.matches.{MatchEvidence, SiteGame, SiteMatch}
+import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
-class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) extends Controller{
+class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, seriesService: SeriesService) extends Controller{
+  type FinalRanking = List[SeriesPlayer]
 
   implicit val robinInitReads: Reads[SiteRobinRound] = (
     (JsPath \ "numberOfRobinGroups").read[Int] and
@@ -62,6 +64,12 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
     }
   }
 
+
+  implicit val rankWrites = Json.writes[Rank]
+  implicit val scoresWrites = Json.writes[PlayerScores]
+  implicit val playerWrites = Json.writes[Player]
+  implicit val seriesPlayerWrites = Json.writes[SeriesPlayer]
+
   def getRoundsOfSeries(seriesId: String) = Action.async{
 
     seriesRoundService.getRoundsOfSeries(seriesId).map(roundList => Ok(Json.listToJson(roundList.sortBy(_.roundNr))))
@@ -96,15 +104,108 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService) ex
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[SiteMatch]).map{ siteMatch =>
        val matchWithSetResults = calculateSets(siteMatch)
-        seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map{
-          case Some(updatedRound) => Ok(Json.toJson(updatedRound))
-          case _ => InternalServerError
-        }
+        seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
     }.getOrElse(Future(BadRequest))
   }
 
   def calculateSets(siteMatch: SiteMatch): SiteMatch = {
     val setTuple = siteMatch.games.foldRight((0,0))( (game, tuple) => if(game.isCorrect(siteMatch.targetScore) && game.pointA > game.pointB) (tuple._1 +1, tuple._2) else if(game.isCorrect(siteMatch.targetScore) && game.pointA < game.pointB) (tuple._1, tuple._2 +1) else tuple )
     siteMatch.copy(wonSetsA = setTuple._1, wonSetsB = setTuple._2)
+  }
+
+  def getRound(roundId: String) = Action.async{
+    seriesRoundService
+      .getRound(roundId)
+      .map(showRetrieveRoundResult)
+  }
+
+  def getMatchListOfRound(seriesRoundId: String) = Action.async{
+    implicit val rankWrites = Json.writes[Rank]
+    implicit val playerWrites = Json.writes[Player]
+    implicit val gameWrites = Json.writes[SiteGame]
+    implicit val matchWrites = Json.writes[SiteMatch]
+    seriesRoundService.getMatchesOfRound(seriesRoundId).map( matchList => Ok(Json.listToJson(matchList)))
+  }
+
+  def getNextRoundOrWinnerView(seriesRoundId: String, scoreType: String) = Action.async  {
+    val isWithHandicap = true //todo fech series
+    val parsedScoreType = ScoreTypes.parseScoreType(scoreType)
+    seriesRoundService.getRound(seriesRoundId).flatMap{
+      case Some(seriesRound) => if(seriesRound.isComplete) {
+        val rankedPlayers = RoundRankingCalculator.calculateRoundResults(seriesRound, isWithHandicap, parsedScoreType)
+        // todo add these results to seriesPlayer if needed and draw and return the next series
+        Future(Ok)
+      } else {
+        Future(Ok)
+      }
+      case None => Future(BadRequest)
+    }
+  }
+
+  def proceedToNextRound(seriesId: String, roundNr: Int) = Action.async {
+    seriesService.retrieveById(seriesId).flatMap {
+      case Some(series) => seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> seriesId))
+        .flatMap(showNextRoundOrFinalRanking(series, roundNr))
+      case None => Future(BadRequest("Reeks niet gevonden"))
+    }
+  }
+
+  //todo move logic to service layer ???
+  def checkCompleteAndAdvanceIfPossible(series: TournamentSeries, seriesRound: SeriesRound): Future[Either[String, Either[FinalRanking, SeriesRound]]] = {
+    if (seriesRound.isComplete) {
+      val roundRanking = RoundRankingCalculator.calculateRoundResults(seriesRound, series.playingWithHandicaps, ScoreTypes.DIRECT_CONFRONTATION)
+      seriesService.advanceIfPossibleOrShowFinalRanking(series, roundRanking).map(Right(_))
+    } else {
+      Future(Left("The current round isn't complete"))
+    }
+  }
+
+  def showNextRoundOrFinalRanking(series: TournamentSeries, roundNr: Int): Option[SeriesRound] => Future[Result] = {
+    case Some(seriesRound) => if(roundNr > series.currentRoundNr){
+                                checkCompleteAndAdvanceIfPossible(series, seriesRound).map(showProceedResult)
+                              } else {
+                                seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> series.id)).map {
+                                  case Some(retrievedRound) => Ok(Json.toJson(retrievedRound))
+                                  case _ => BadRequest("Round not found")
+                                }
+                              }
+    case _ => Future(BadRequest("Geen ronde gevonden"))
+  }
+
+  def showProceedResult: (Either[String, Either[FinalRanking, SeriesRound]]) => Result = {
+    case Right(completedResult) => completedResult match {
+      case Right(roundToShow) => Ok(Json.toJson(roundToShow))
+      case Left(playerOrder) => Ok(Json.listToJson(playerOrder))
+    }
+    case Left(error) => BadRequest(error)
+  }
+
+  def showPreviousRound(seriesId: String, roundNr: Int) = Action.async{
+    seriesRoundService.retrieveByFields(Json.obj("roundNr" -> roundNr, "seriesId" -> seriesId)).map(showRetrieveRoundResult)
+  }
+
+  def isLastRoundOfSeries(seriesId: String) = Action.async{
+    seriesService.retrieveById(seriesId).flatMap{
+      case Some(series) =>
+          seriesRoundService.retrieveAllByField("seriesId", seriesId).map { list =>
+            val isLast = list.length == series.currentRoundNr
+            Ok(Json.obj("lastRound" -> isLast))
+          }
+      case None => Future(Ok(Json.obj("lastRound" -> false)))
+    }
+  }
+
+  def getActiveRoundOfSeries(seriesId: String) = Action.async{
+    seriesService.retrieveById(seriesId).flatMap{
+      case Some(series) => seriesRoundService
+                              .retrieveByFields(Json.obj("seriesId" -> seriesId, "roundNr" -> series.currentRoundNr))
+                              .map(showRetrieveRoundResult)
+      case _ => Future(BadRequest("De gevraagde reeks kon niet gevonden worden."))
+    }
+  }
+
+  private def showRetrieveRoundResult: Option[SeriesRound] => Result = {
+    case Some(round) => Ok(Json.toJson(round))
+    case _ => BadRequest("De gevraagde ronde kon niet gevonden worden.")
   }
 }

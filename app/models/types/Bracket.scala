@@ -3,30 +3,30 @@ package models.types
 
 sealed trait Bracket[+A] {
   def getValue: A = this match {
-    case NodeMatch(value, left, right) => value
-    case LeafMatch(value) => value
+    case BracketNode(value, left, right) => value
+    case BracketLeaf(value) => value
 
   }
 
 
   def map[B](f: (A) => B): Bracket[B] = this match {
-    case NodeMatch(value, left, right) => NodeMatch(f(value), left.map(f), right.map(f))
-    case LeafMatch(value) => LeafMatch(f(value))
+    case BracketNode(value, left, right) => BracketNode(f(value), left.map(f), right.map(f))
+    case BracketLeaf(value) => BracketLeaf(f(value))
   }
 
   def nodeMap[B](f: (Bracket[A]) => B): Bracket[B] = this match {
-    case n: NodeMatch[A] => NodeMatch[B](f(n), n.left.nodeMap(f), n.right.nodeMap(f))
-    case l: LeafMatch[A] => LeafMatch(f(l))
+    case n: BracketNode[A] => BracketNode[B](f(n), n.left.nodeMap(f), n.right.nodeMap(f))
+    case l: BracketLeaf[A] => BracketLeaf(f(l))
   }
 
   def fold[B](f: (A) => B)(g: (B, B) => B): B = this match {
-    case NodeMatch(value, left, right) => g(f(value), g(left.fold(f)(g), right.fold(f)(g)))
-    case LeafMatch(value) => f(value)
+    case BracketNode(value, left, right) => g(f(value), g(left.fold(f)(g), right.fold(f)(g)))
+    case BracketLeaf(value) => f(value)
   }
 
   def realFold[B](f: (A) => B)(g: (A, B, B) => B): B = this match {
-    case NodeMatch(value, left, right) => g(value, left.realFold(f)(g), right.realFold(f)(g))
-    case LeafMatch(value) => f(value)
+    case BracketNode(value, left, right) => g(value, left.realFold(f)(g), right.realFold(f)(g))
+    case BracketLeaf(value) => f(value)
   }
 
   def size = {
@@ -34,7 +34,7 @@ sealed trait Bracket[+A] {
   }
 
   def getRoundList(roundNr: Int): List[A] = this match {
-    case n: NodeMatch[A] =>
+    case n: BracketNode[A] =>
       if (roundNr > 0) {
         n.left.getRoundList(roundNr - 1) ::: n.right.getRoundList(roundNr - 1)
       } else if (roundNr == 0) {
@@ -42,17 +42,23 @@ sealed trait Bracket[+A] {
       } else {
         Nil
       }
-    case l: LeafMatch[A] =>
+    case l: BracketLeaf[A] =>
       if (roundNr == 0) {
         l.value :: Nil
       } else {
         Nil
       }
   }
+
+  def toList: List[A] = this match {
+    case b:BracketNode[A] => b.value :: b.left.toList ::: b.right.toList
+    case l:BracketLeaf[A] => List(l.value)
+
+  }
 }
 
 
-case class NodeMatch[A](value: A, left: Bracket[A], right: Bracket[A]) extends Bracket[A]
+case class BracketNode[A](value: A, left: Bracket[A], right: Bracket[A]) extends Bracket[A]
 
-case class LeafMatch[A](value: A) extends Bracket[A]
+case class BracketLeaf[A](value: A) extends Bracket[A]
 

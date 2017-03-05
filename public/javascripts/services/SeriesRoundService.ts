@@ -8,6 +8,22 @@ module TournamentManagement {
             this.roundsMap = {}
         }
 
+        getRound(roundId: string){
+            return this.$http.get("/round/" + roundId);
+        }
+        
+        proceedToNextRound(seriesId, roundNr){
+            return this.$http.get("/nextRound/"+seriesId + '/'+ roundNr);
+        }
+
+        previousRound(seriesId, roundNr){
+            return this.$http.get("/previousRound/"+seriesId+"/"+roundNr);
+        }
+
+        getMatchListOfRound(roundId: string){
+            return this.$http.get("/matchList/"+roundId);
+        }
+        
         createSeriesRound(seriesId: string) {
             return this.$http.post(this.base.url + "/seriesrounds/" + seriesId,{})
         }

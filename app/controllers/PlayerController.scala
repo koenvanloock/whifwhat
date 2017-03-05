@@ -136,4 +136,11 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
   }*/
 
 
+  def searchPlayers(searchString: Option[String]) = Action.async{
+    searchString match {
+      case Some(search) => playerService.findByString(search).map(players => Ok(Json.toJson(players)))
+      case None =>     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
+    }
+
+  }
 }

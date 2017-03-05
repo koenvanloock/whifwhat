@@ -89,6 +89,15 @@ object JsonUtils {
       (JsPath \ "tournamentId").read[String]
     ) (TournamentSeries.apply(UUID.randomUUID().toString,_, _, _, _, _, _, _, 1, _))
 
+  val singleSeriesReads: Reads[TournamentSeries] = (
+      (JsPath \ "seriesColor").read[String] and
+      (JsPath \ "numberOfSetsToWin").read[Int] and
+      (JsPath \ "setTargetScore").read[Int] and
+      (JsPath \ "playingWithHandicaps").read[Boolean] and
+      (JsPath \ "extraHandicapForRecs").read[Int] and
+      (JsPath \ "showReferees").read[Boolean]
+    ) (TournamentSeries.apply(UUID.randomUUID().toString,"replacedName", _, _, _, _, _, _, 1, "toBeReplacedId"))
+
 
   val tournamentWithSeriesWritesOnlyPlayers: Writes[TournamentWithSeries] = new Writes[TournamentWithSeries] {
     override def writes(o: TournamentWithSeries): JsValue = Json.obj(

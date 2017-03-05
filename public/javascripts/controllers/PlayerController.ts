@@ -1,8 +1,9 @@
 module TournamentManagement{
     import ITimeoutService = angular.ITimeoutService;
+    import IRootScopeService = angular.IRootScopeService;
     class PlayerController{
 
-        static $inject = ["PlayerService", "Upload","$timeout", "base"];
+        static $inject = ["PlayerService", "Upload","$timeout", "base", "alertService","$rootScope"];
 
         private ranks= [];
         private inserting: boolean;
@@ -10,6 +11,7 @@ module TournamentManagement{
         private playerToEdit: Player;
         private allPlayers: Array<Player>;
         private shownPlayers: Array<Player>;
+        private searchString: string;
 
         private editIndex = null;
         private emptyPlayer = {
@@ -26,7 +28,7 @@ module TournamentManagement{
         private progress: number;
 
 
-        constructor(private playerService: PlayerService, private Upload: any, private $timeout: ITimeoutService, private base: any){
+        constructor(private playerService: PlayerService, private Upload: any, private $timeout: ITimeoutService, private base: any, private alertService: AlertService, private $rootScope: IRootScopeService){
             this.inserting = true;
             this.allPlayers = [];
             playerService.getRanks().then(
@@ -34,7 +36,8 @@ module TournamentManagement{
                     result.data.map( (x) => {
                         this.ranks.push({'name': x.name, 'value': x.value})
                     });
-                }
+                },
+                (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
             );
 
             this.query = {
@@ -55,6 +58,13 @@ module TournamentManagement{
                     });
 
                 });
+
+            $rootScope.$watch( () => this.searchString, (newValue, oldValue) => {if(newValue != oldValue){
+                playerService.getPlayersBySearch(this.searchString).then(
+                    (success) => { this.allPlayers = success.data},
+                    (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+                )
+            }})
         }
 
 
@@ -98,42 +108,26 @@ module TournamentManagement{
 
         editPlayer(){
         this.playerToEdit.rank = this.ranks[this.playerToEdit.rank.value];
-        this.playerService.updatePlayer(this.playerToEdit).then(() =>{
-            this.allPlayers[this.editIndex] = this.playerToEdit;
+        this.playerService.updatePlayer(this.playerToEdit).then(
+            () =>{
+                    this.allPlayers[this.editIndex] = this.playerToEdit;
 
-            this.editing = false;
-            this.inserting = true;
-            this.playerToEdit = this.emptyPlayer;
-            this.editIndex = -1;
-        })
+                    this.editing = false;
+                    this.inserting = true;
+                    this.playerToEdit = this.emptyPlayer;
+                    this.editIndex = -1;
+                },
+            (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+
+        )
     };
 
         deletePlayer(playerIndex){
         var playerToDelete = this.allPlayers[playerIndex];
-        this.playerService.deletePlayer(playerToDelete.id).then(()=>{
-            this.allPlayers.splice(playerIndex, 1);
-        })
-        };
+        this.playerService.deletePlayer(playerToDelete.id).then(
+            ()=>{this.allPlayers.splice(playerIndex, 1);},
+            (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000}))};
 
-        upload(dataUrl: string, name: string, size: number){
-            var uploadDatablobfunc = this.Upload.urlToBlob;
-            this.Upload.upload({
-            url: this.base.url + "/uploadimage",
-            data: { file: uploadDatablobfunc(dataUrl)}
-            }).then(
-
-                (response) => {
-                this.$timeout( () => {
-                    this.result = response.data;
-                });
-                },
-                (response) => {if (response.status > 0) this.errorMsg = response.status + ': ' + response.data;
-                },
-                (evt: any) => {
-                    this.progress = parseInt((100.0 * evt.loaded / evt.total)+'')
-                }
-            )
-        }
 
     }
 

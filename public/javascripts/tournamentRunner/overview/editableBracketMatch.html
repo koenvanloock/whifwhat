@@ -23,11 +23,32 @@
     </div>
     <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
       <div layout="row" layout-align="start center" style="height:50px;">
-        <p ng-show="match.isHandicapForA">+ {{match.handicap}}</p>
+        <p >{{match.isHandicapForB ? '' : '+'+match.handicap}}</p>
       </div>
 
-      <div layout="row" layout-align="start center">
-        <p  ng-hide="match.isHandicapForA">+ {{match.handicap}}</p>
+      <div layout="row" layout-align="start center" style="height:50px;">
+        <p>{{match.isHandicapForB ? '+'+match.handicap : ' '}}</p>
+      </div>
+    </div>
+  </div>
+
+  <div layout="column" >
+    <div>
+      <h3>Sets</h3>
+    </div>
+    <div layout="row">
+      <div ng-repeat="game in match.games track by $index" style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
+        <div layout="row" layout-align="start center" style="height:50px;">
+          <md-input-container style="padding-top:20px;">
+          <input class="pointLabel" keep-focus ng-model="game.pointA" ng-blur="updatematch({roundId: seriesRoundId, match: match})" type="number" aria-label="pointInputA" aria-hidden="true"/>
+          </md-input-container>
+        </div>
+
+        <div layout="row" layout-align="start center" style="height:50px;">
+          <md-input-container>
+          <input class="pointLabel" keep-focus ng-model="game.pointB" ng-blur="updatematch({roundId: seriesRoundId, match: match})" type="number" aria-label="pointInputB" aria-hidden="true"/>
+            </md-input-container>
+        </div>
       </div>
     </div>
   </div>
@@ -39,13 +60,12 @@
 
     <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(28, 121, 120, 0.8)">
       <div layout="row" layout-align="start center" style="height:50px;">
-        <input type="number" ng-model="match.wonSetsA" ng-blur="updatematch({roundId: seriesRoundId, match: match})"/>
+        <p class="pointLabel">{{match.wonSetsA}}</p>
       </div>
 
       <div layout="row" layout-align="start center">
-        <input type="number" ng-model="match.wonSetsB" ng-blur="updatematch({roundId: seriesRoundId, match: match})"/>
+        <p class="pointLabel">{{match.wonSetsB}}</p>
       </div>
     </div>
 
-  </div>
 </md-card>
