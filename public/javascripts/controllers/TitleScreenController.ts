@@ -33,6 +33,10 @@ module TournamentManagement {
             this.$location.path("/playTournament")
         }
 
+        gotoHallViewer(){
+            this.$location.path("/hallViewer")
+        }
+
 
         loadTournament(){this.$location.path("/loadTournament")}
     }

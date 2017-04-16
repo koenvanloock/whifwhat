@@ -4,6 +4,7 @@ var tournamentmanager = angular.module("tournamentManager", [
     "managerControllers",
     "managerServices",
     'tournamentRunner',
+    'hallViewer',
     'ngRoute',
     'ngCookies',
     'ngMaterial',

@@ -32,6 +32,8 @@
     "public/javascripts/models/BracketNode.ts",
     "public/javascripts/models/SiteMatch.ts",
     "public/javascripts/models/Game.ts",
+    "public/javascripts/models/Table.ts",
+    "public/javascripts/models/Hall.ts",
 
 
     "public/javascripts/services/authService.ts",
@@ -63,6 +65,10 @@
     "public/javascripts/tournamentRunner/loadingTournament/loadingController.ts",
     "public/javascripts/tournamentRunner/overview/OverviewController.ts",
     "public/javascripts/tournamentRunner/services/loadingService.ts",
+
+    "public/javascripts/hallviewer/hallSetup/HallSetupController.ts",
+    "public/javascripts/hallviewer/hallSetup/hallService.ts",
+    "public/javascripts/hallviewer/overview/HallOverViewController.ts",
 
     "typings/angular-jwt/angular-jwt.d.ts",
     "typings/angularjs/angular-cookies.d.ts",

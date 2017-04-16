@@ -49,6 +49,8 @@ POST          /redraw                                        controllers.DrawCon
 POST          /login                                         controllers.LoginController.login
 POST          /user                                          controllers.LoginController.createUser
 
+GET           /hall                                          controllers.HallController.getAllHalls()
+
 GET           /ranks                                         controllers.PlayerController.getRanks
 
 #POST          /uploadimage                                   controllers.PlayerController.uploadPlayerImage

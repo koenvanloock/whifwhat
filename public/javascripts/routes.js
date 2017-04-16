@@ -75,6 +75,16 @@ angular.module('tournamentManager')
             controller: "OverviewController",
             controllerAs: "ctrl",
             requiresLogin: true
+          }).when("/hallViewer", {
+            templateUrl: "assets/javascripts/hallViewer/overview/hallOverview.html",
+            controller: "HallOverviewController",
+            controllerAs: "ctrl",
+            requiresLogin: true
+          }).when("/hallSetup", {
+            templateUrl: "assets/javascripts/hallViewer/hallSetup/hallSetup.html",
+            controller: "HallSetupController",
+            controllerAs: "ctrl",
+            requiresLogin: true
           }).otherwise({
             requiresLogin: true
           });
