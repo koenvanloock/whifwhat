@@ -16,11 +16,12 @@ object WebTokenUtils {
       authHeader => authHeader.filter(_ != '"').split(' ').drop(1).headOption
     }
 
-  def createJWT(username: String, role: Role): String = {
+  def createJWT(username: String, userId: String, role: Role): String = {
     val header = JwtHeader("HS256")
     val claimsSet = JwtClaimsSet(
       Map(
         "username" -> username,
+        "userId" -> userId,
         "role" -> role,
         "exp" -> LocalDateTime.now.plusSeconds(12 * 3600).toEpochSecond(ZoneOffset.UTC))
     )

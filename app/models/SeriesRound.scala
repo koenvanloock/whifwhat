@@ -18,25 +18,33 @@ sealed trait SeriesRound {
   def seriesId: String
 
   def roundNr: Int
+
+  def roundPlayers: List[SeriesPlayer]
+
+  def scoreKey: Option[List[Int]]
 }
 
 
-case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: String, roundNr: Int, bracketPlayers: List[SeriesPlayer], bracket: Bracket[SiteMatch], roundType: String="B") extends SeriesRound {
+case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: String, roundNr: Int, bracketPlayers: List[SeriesPlayer], bracket: Bracket[SiteMatch], scoreKey: Option[List[Int]]= None, roundType: String="B") extends SeriesRound {
   def getId(m: SiteBracketRound): Option[String] = Some(id)
 
   def setId(id: String)(m: SiteBracketRound): SiteBracketRound = m.copy(id = id)
 
   def isComplete = SiteBracket.isComplete(this.bracket)
 
+  def roundPlayers =  this.bracketPlayers
+
 }
 
 
-case class SiteRobinRound(id: String, numberOfRobinGroups: Int, seriesId: String, roundNr: Int, robinList: List[RobinGroup], roundType: String = "R") extends SeriesRound {
+case class SiteRobinRound(id: String, numberOfRobinGroups: Int, seriesId: String, roundNr: Int, robinList: List[RobinGroup], scoreKey: Option[List[Int]] = None, roundType: String = "R") extends SeriesRound {
   def getId(m: SiteRobinRound): Option[String] = Some(id)
 
   def setId(id: String)(m: SiteRobinRound): SiteRobinRound = m.copy(id = id)
 
   def isComplete = this.robinList.forall( robingroup => robingroup.robinMatches.forall(MatchChecker.isWon))
+
+  def roundPlayers = robinList.flatMap(_.robinPlayers)
 }
 
 
@@ -62,6 +70,7 @@ object SeriesRoundEvidence {
         (__ \ "roundNr").write[Int] and
         (__ \ "bracketPlayers").lazyWrite[List[SeriesPlayer]](Writes.list[SeriesPlayer](Json.writes[SeriesPlayer])) and
         (__ \ "bracketRounds").lazyWrite[Bracket[SiteMatch]](bracketSiteMatchWrites) and
+          (__ \ "scoreKey").writeNullable[List[Int]] and
           (__ \ "roundType").write[String]
       ) (unlift(SiteBracketRound.unapply))
 
@@ -72,8 +81,9 @@ object SeriesRoundEvidence {
         (__ \ "seriesId").read[String] and
         (__ \ "roundNr").read[Int] and
         (__ \ "bracketPlayers").lazyRead[List[SeriesPlayer]](Reads.list[SeriesPlayer](Json.reads[SeriesPlayer])) and
-        (__ \ "bracketRounds").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads)
-      ) (SiteBracketRound.apply(_, _, _, _, _, _))
+        (__ \ "bracketRounds").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads) and
+          (__ \ "scoreKey").readNullable[List[Int]]
+      ) (SiteBracketRound.apply(_, _, _, _, _, _, _))
 
 
     implicit val leafReads: Reads[BracketLeaf[SiteMatch]] = new Reads[BracketLeaf[SiteMatch]] {
@@ -120,6 +130,7 @@ object SeriesRoundEvidence {
         (__ \ "seriesId").write[String] and
         (__ \ "roundNr").write[Int] and
         (__ \ "robinRounds").lazyWrite[List[RobinGroup]](Writes.list[RobinGroup](Json.writes[RobinGroup])) and
+          (__ \ "scoreKey").writeNullable[List[Int]] and
         (__ \ "roundType").write[String]
       ) (unlift(SiteRobinRound.unapply))
 
@@ -128,8 +139,9 @@ object SeriesRoundEvidence {
         (__ \ "numberOfRobinGroups").read[Int] and
         (__ \ "seriesId").read[String] and
         (__ \ "roundNr").read[Int] and
-        (__ \ "robinRounds").lazyRead[List[RobinGroup]](Reads.list[RobinGroup](Json.reads[RobinGroup]))
-      ) (SiteRobinRound.apply(_, _, _, _, _))
+        (__ \ "robinRounds").lazyRead[List[RobinGroup]](Reads.list[RobinGroup](Json.reads[RobinGroup])) and
+        (__ \ "scoreKey").readNullable[List[Int]]
+      ) (SiteRobinRound.apply(_, _, _, _, _, _))
 
     override def getId(m: SeriesRound): Option[String] = m match {
       case r: SiteRobinRound => r.getId(r)

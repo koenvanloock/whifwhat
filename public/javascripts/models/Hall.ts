@@ -1,7 +1,7 @@
 module TournamentManagement{
     export interface Hall{
         id: string;
-        name: string;
+        hallName: string;
         rows: number;
         tablesPerRow: number;
 

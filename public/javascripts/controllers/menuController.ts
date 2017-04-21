@@ -2,14 +2,16 @@ module TournamentManagement{
 
 
     import ILocationService = angular.ILocationService;
+    import IScope = angular.IScope;
     
 
     class MenuController{
 
-        static $inject= ["$location", "authService"];
+        static $inject= ["$scope", "$location", "authService","TournamentService"];
         private theme: string;
+        private currentTournamentName: string;
         
-        constructor(private $location: ILocationService, private authservice: AuthService){
+        constructor(private $scope: IScope, private $location: ILocationService, private authservice: AuthService, private tournamentService: TournamentService){
         }
 
 

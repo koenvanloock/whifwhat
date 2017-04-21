@@ -26,10 +26,9 @@
                         <md-button style="color: white" ng-click="ctrl.gotoHome()"><i class="fa fa-home"></i> Start</md-button>
                     </md-menu-item>
                     <md-menu-divider></md-menu-divider>
-                    <md-menu-item>
+                    <!--<md-menu-item>
                         <md-switch ng-model="ctrl.theme" aria-label="Switch theme" ng-true-value="'default'" ng-false-value="'light'">donker thema</md-switch>
-                    </md-menu-item>
-                    <md-menu-divider></md-menu-divider>
+                    </md-menu-item>-->
                     <md-menu-item>
                         <md-button style="color: white" ng-click="ctrl.logout()"><i class="fa fa-user"></i> Afmelden</md-button>
                     </md-menu-item>
@@ -89,6 +88,7 @@
         <script src="@routes.Assets.versioned("javascripts/hallviewer/hallViewer.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/HallOverviewController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/HallSetupController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/HallLayoutController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/hallService.js")"></script>
 
     </body>

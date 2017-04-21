@@ -75,7 +75,7 @@ angular.module('tournamentManager')
             controller: "OverviewController",
             controllerAs: "ctrl",
             requiresLogin: true
-          }).when("/hallViewer", {
+          }).when("/hallOverview", {
             templateUrl: "assets/javascripts/hallViewer/overview/hallOverview.html",
             controller: "HallOverviewController",
             controllerAs: "ctrl",
@@ -83,6 +83,11 @@ angular.module('tournamentManager')
           }).when("/hallSetup", {
             templateUrl: "assets/javascripts/hallViewer/hallSetup/hallSetup.html",
             controller: "HallSetupController",
+            controllerAs: "ctrl",
+            requiresLogin: true
+          }).when("/hallLayout/:hallId", {
+            templateUrl: "assets/javascripts/hallViewer/hallSetup/hallLayout.html",
+            controller: "HallLayoutController",
             controllerAs: "ctrl",
             requiresLogin: true
           }).otherwise({

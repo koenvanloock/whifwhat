@@ -9,7 +9,6 @@ object RoundScoreCalculator {
 
   def calculatePlayerResults(isWithHandicap: Boolean, bracketPlayers: List[SeriesPlayer], updatedBracket: Bracket[SiteMatch]): List[SeriesPlayer] = {
     bracketPlayers.map(calculatePlayerScores(updatedBracket, isWithHandicap))
-
   }
 
   def calculatePlayerScores(updatedBracket: Bracket[SiteMatch], isWithHandicap: Boolean): (SeriesPlayer) => SeriesPlayer = { seriesPlayer =>
@@ -28,7 +27,7 @@ object RoundScoreCalculator {
 
   def calculateBracketResults(bracketRound: SiteBracketRound, isWithHandicap: Boolean): SiteBracketRound = {
     val updatedBracket = SiteBracket.updateMatchWithChildrenWinner(bracketRound.bracket)
-    val updatedPlayers = calculatePlayerResults(isWithHandicap, bracketRound.bracketPlayers, updatedBracket)
+    val updatedPlayers = applyScoreKey(calculatePlayerResults(isWithHandicap, bracketRound.bracketPlayers, updatedBracket), bracketRound.scoreKey)
     bracketRound.copy(bracket = updatedBracket, bracketPlayers = updatedPlayers)
   }
 
@@ -74,9 +73,14 @@ object RoundScoreCalculator {
 
   def calculatePlayerScore(isWithHandicap: Boolean, matchList: List[SiteMatch]): (SeriesPlayer) => SeriesPlayer = seriesPlayer => seriesPlayer.copy(playerScores = getScoresOfPlayer(isWithHandicap, matchList, seriesPlayer))
 
-  def calculateRobinGroupScores(isWithHandicap: Boolean, robinGroup: RobinGroup): RobinGroup = robinGroup.copy(robinPlayers = robinGroup.robinPlayers.map(calculatePlayerScore(isWithHandicap, robinGroup.robinMatches)))
+  def applyScoreKey(robinGroupPlayers: List[SeriesPlayer], scoreKeyOpt: Option[List[Int]]): List[SeriesPlayer] =  scoreKeyOpt match{
+    case Some(scoreKey) => robinGroupPlayers.zip(scoreKey).map{case (seriesPlayer, indexScore) => seriesPlayer.copy(playerScores = seriesPlayer.playerScores.copy(totalPoints = indexScore))}
+    case _ => robinGroupPlayers.map(player => player.copy(playerScores = player.playerScores.copy(totalPoints = player.playerScores.calculateScore.toInt)))
+  }
 
-  def calculateRobinResults(isWithHandicap: Boolean, robinRound: SiteRobinRound): SiteRobinRound = robinRound.copy(robinList = robinRound.robinList.map{ robinGroup => calculateRobinGroupScores(isWithHandicap, robinGroup)})
+  def calculateRobinGroupScores(isWithHandicap: Boolean, scoreKeyOpt: Option[List[Int]], robinGroup: RobinGroup): RobinGroup = robinGroup.copy(robinPlayers = applyScoreKey(robinGroup.robinPlayers.map(calculatePlayerScore(isWithHandicap, robinGroup.robinMatches)),scoreKeyOpt))
+
+  def calculateRobinResults(isWithHandicap: Boolean, robinRound: SiteRobinRound): SiteRobinRound = robinRound.copy(robinList = robinRound.robinList.map{ robinGroup => calculateRobinGroupScores(isWithHandicap, robinRound.scoreKey, robinGroup)})
 
 
 }

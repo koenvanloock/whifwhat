@@ -1,7 +1,11 @@
 module TournamentManagement {
     'use strict';
     export class AuthUser{
-        constructor(private username: string, private role: String){
+        constructor(private username: string, private userId : string, private role: String){
+        }
+
+        getUserId(){
+            return this.userId;
         }
 
         getRole(){
@@ -24,7 +28,7 @@ module TournamentManagement {
 
         tokenToAuthUser(token:string) {
             var tokenPayload: any = this.jwtHelper.decodeToken(token);
-            return new AuthUser(tokenPayload.username, tokenPayload.role);
+            return new AuthUser(tokenPayload.username, tokenPayload.id, tokenPayload.role);
         }
 
         getCurrentAuthUser() {

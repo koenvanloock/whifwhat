@@ -18,7 +18,7 @@ module TournamentRunner {
         private finalRanking:Array<Player>;
         private lastRound:boolean;
 
-        constructor(private loadingService:LoadingService, private $rootScope:IRootScopeService, private $location:ILocationService, private seriesRoundService:SeriesRoundService, private alertService:AlertService) {
+        constructor(private loadingService:LoadingService, private $rootScope:IRootScopeService, private $location:ILocationService, private seriesRoundService:SeriesRoundService, private alertService:AlertService, private $mdDialog:ng.material.IDialogService) {
             loadingService.isThereActiveTournament().then((result) => {
                 if (result.data.hasTournament) {
                     loadingService.getActiveTournament().then(
@@ -171,7 +171,11 @@ module TournamentRunner {
                     console.log(response.data.lastRound);
                     this.lastRound = response.data.lastRound;
                 },
-                (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+                (errorResponse) => this.alertService.addAlert({
+                    type: "error",
+                    msg: errorResponse.data,
+                    timeout: 3000
+                })
             );
         }
 
@@ -186,8 +190,29 @@ module TournamentRunner {
             }
         }
 
+        releaseActiveTournament(ev) {
+            var confirm = this.$mdDialog.confirm()
+                .title('Wil je het actieve tornooi stoppen?')
+                .textContent('Deze actie sluit het huidige tornooi')
+                .ariaLabel('stopTornooi')
+                .targetEvent(ev)
+                .ok('OK')
+                .cancel('annuleren');
+
+            this.$mdDialog.show(confirm).then(
+                () => {
+                    this.loadingService.releaseActiveTournament().then(
+                        () => this.$location.path("/playTournament"),
+                        (errorResponse) => this.alertService.addAlert({
+                            type: "error",
+                            msg: "Kon actief tornooi niet stoppen.",
+                            timeout: 3000
+                        })
+                    )
+                })
+        }
     }
 
 
-    angular.module("tournamentRunner").controller("OverviewController", ['loadingService', '$rootScope', '$location', 'SeriesRoundService', 'alertService', (loadingService, rootScope, $location, seriesRoundService, alertService) => new OverviewController(loadingService, rootScope, $location, seriesRoundService, alertService)])
+    angular.module("tournamentRunner").controller("OverviewController", ['loadingService', '$rootScope', '$location', 'SeriesRoundService', 'alertService', '$mdDialog', (loadingService, rootScope, $location, seriesRoundService, alertService, $mdDialog) => new OverviewController(loadingService, rootScope, $location, seriesRoundService, alertService, $mdDialog)])
 }

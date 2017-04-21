@@ -4,4 +4,14 @@
 
 <div>
 
+    <h1 style="color:white">Huidige zaal: <span id="hallName">{{ctrl.hall.hallName}}</span></h1>
+
+    <div style="background: grey">
+        <div ng-repeat="rowNr in ctrl.rowList" class="tableRow" layout>
+  <span ng-repeat="table in ctrl.hall.tables | filter: {row:  rowNr}" style="color:white; margin-left: 20px; margin-right: 20px;" flex="auto">
+    <pingpong-table table="table"></pingpong-table>
+  </span>
+        </div>
+    </div>
+
 </div>

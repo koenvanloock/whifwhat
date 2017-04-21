@@ -2,16 +2,13 @@
   <h2 ng-if="ctrl.error">{{ctrl.error}}</h2>
 
   <md-toolbar style="background: #009688" class="md-padding">
-  <h1 style="padding-bottom: 0; margin-bottom: 0">{{ctrl.tournament.tournamentName}}</h1>
-
-  <div layout="row" style="margin:0">
-    <div layout="column" flex="50">
-      <h2 style="margin-bottom: 0">Reeksen</h2>
-
+    <div style="padding:0" layout="row">
+    <h1 style="padding-bottom: 0; margin-bottom: 0">{{ctrl.tournament.tournamentName}}</h1> <md-button class="md-icon-button" ng-click="ctrl.releaseActiveTournament($event)"><i class="fa fa-close"></i></md-button>
+    </div>
+    <div layout="row" style="margin:0">
       <md-select ng-model="ctrl.selectedSeries" aria-label="selectedTournamentSeries" flex="50">
         <md-option ng-repeat="series in ctrl.seriesList" ng-value="series">{{series.seriesName}}</md-option>
       </md-select>
-    </div>
   </div>
   </md-toolbar>
 

@@ -3,7 +3,6 @@
 # ~~~~
 
 
-#GET           /players                                       controllers.PlayerController.getAllPlayers
 GET           /players                                       controllers.PlayerController.searchPlayers(searchString: Option[String])
 POST          /players                                       controllers.PlayerController.insertPlayer()
 PUT           /players                                       controllers.PlayerController.updatePlayer
@@ -19,6 +18,7 @@ GET           /tournaments                                   controllers.Tournam
 POST          /tournaments                                   controllers.TournamentController.createTournament()
 
 GET           /activeTournament                              controllers.TournamentController.getActiveTournament
+GET           /activeTournament/release                      controllers.TournamentController.releaseActiveTournament()
 PUT           /activeTournament/:tournamentId                controllers.TournamentController.activateTournament(tournamentId: String)
 GET           /hasActiveTournament                           controllers.TournamentController.hasActiveTournament
 
@@ -49,7 +49,15 @@ POST          /redraw                                        controllers.DrawCon
 POST          /login                                         controllers.LoginController.login
 POST          /user                                          controllers.LoginController.createUser
 
-GET           /hall                                          controllers.HallController.getAllHalls()
+GET           /hall/:hallId                                  controllers.HallController.getById(hallId: String)
+GET           /hall                                          controllers.HallController.getAllHalls
+POST          /hall                                          controllers.HallController.createHallIfNotExists
+PATCH         /hall                                          controllers.HallController.update
+
+POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
+GET           /activehall                                    controllers.HallController.updateHallActor
+
+GET           /stream                                         controllers.HallController.hallStream
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 

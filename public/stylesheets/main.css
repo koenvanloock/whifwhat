@@ -155,3 +155,85 @@ form .progress {
     font-size: 18px;
     font-weight: bold;
 }
+
+.pingpongTable{
+    background: grey;
+    padding: 5px;
+    display: inline-block;
+}
+
+.table{
+    height: 500px;
+    width: 300px;
+}
+
+.net{
+    height: 10px;
+    background: white;
+    width: 100%
+}
+
+.playerBox{
+    height: 245px;
+    width: 250px;
+    margin-left: 20px;
+    margin-right: 20px;
+    background: darkgreen;
+    border-left: solid white 5px;
+    border-right: solid white 5px;
+}
+
+.playerBox-top{
+    border-top: solid white 5px;
+}
+
+.playerBox-bottom{
+    border-bottom: solid white 5px;
+}
+
+.playerBox-left{
+    border-left: solid white 5px;
+}
+
+.playerBox-right{
+    border-right: solid white 5px;
+}
+
+
+.tableRow{
+    background: gray;
+    margin-bottom:60px;
+}
+
+.tableNr{
+    width: 20px;
+    height: 20px;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    font-weight: bold;
+    color: white;
+    background: darkred;
+    padding: 10px;
+}
+
+.horizontal-table{
+    width: 500px;
+    height: 300px;
+}
+
+.horizonal-net{
+    width: 10px;
+    background: white;
+    height: 100%
+}
+
+.playerBox-horizontal{
+    width: 245px;
+    height: 250px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    background: darkgreen;
+    border-top: solid white 5px;
+    border-bottom: solid white 5px;
+}

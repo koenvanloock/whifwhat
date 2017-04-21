@@ -1,0 +1,14 @@
+<md-toolbar>
+  <h2 style="margin-left: 20px">Zaaloverzicht opmaken</h2>
+</md-toolbar>
+<div style="background: grey">
+<div ng-repeat="rowNr in ctrl.rowList" class="tableRow" layout>
+  <span ng-repeat="table in ctrl.hall.tables | filter: {row:  rowNr}" style="color:white; margin-left: 20px; margin-right: 20px;" flex="auto">
+    <pingpong-table table="table"></pingpong-table>
+  </span>
+</div>
+</div>
+
+<md-button class="md-fab" style="position: absolute; right: 10px; bottom: 10px;" ng-click="ctrl.saveHall()">
+  <i class="fa fa-save"></i>
+</md-button>

@@ -4,6 +4,7 @@ import javax.inject.Inject
 
 import models.{Credentials, Role, User}
 import org.mindrot.jbcrypt.BCrypt
+import play.api.libs.json.Json
 import repositories.mongo.{RoleRepository, UserRepository}
 import utils.WebTokenUtils._
 
@@ -17,7 +18,7 @@ class LoginService @Inject()(userRepository: UserRepository, rolesRepository: Ro
         BCrypt.checkpw(credentials.password, user.passwordHash) match {
           case true =>
             getRoles(user).map { roles =>
-              roles.map(role => createJWT(user.username, role))
+              roles.map(role => createJWT(user.username, user.id, role))
             }
           case _ =>
             Future(None)
@@ -29,7 +30,7 @@ class LoginService @Inject()(userRepository: UserRepository, rolesRepository: Ro
   def createUser(user: User) = userRepository.create(user.copy(passwordHash = BCrypt.hashpw(user.passwordHash, BCrypt.gensalt)))
 
 
-  def getUser(username: String): Future[Option[User]] = userRepository.retrieveByField("username", username)
+  def getUser(username: String): Future[Option[User]] = userRepository.retrieveByFields(Json.obj("username" -> Json.obj("$regex" ->  ("^" + username), "$options" -> "-i")))
   def getRoles(user: User): Future[Option[Role]] = rolesRepository.retrieveById(user.roleId)
 
 }

@@ -67,8 +67,10 @@
     "public/javascripts/tournamentRunner/services/loadingService.ts",
 
     "public/javascripts/hallviewer/hallSetup/HallSetupController.ts",
+    "public/javascripts/hallviewer/hallSetup/HallLayoutController.ts",
     "public/javascripts/hallviewer/hallSetup/hallService.ts",
     "public/javascripts/hallviewer/overview/HallOverViewController.ts",
+    "public/javascripts/hallviewer/overview/HallSocket.ts",
 
     "typings/angular-jwt/angular-jwt.d.ts",
     "typings/angularjs/angular-cookies.d.ts",

@@ -13,6 +13,9 @@ var TournamentRunner;
             this.getActiveTournament = function () {
                 return this.$http.get(this.base.url + "/activeTournament");
             };
+            this.releaseActiveTournament = function () {
+                return this.$http.get(this.base.url + "/activeTournament/release");
+            };
             this.getSeriesOfTournament = function (tournamentId) {
                 return this.$http.get(this.base.url + "/series/" + tournamentId);
             };

@@ -3,7 +3,7 @@ package controllers
 import javax.inject.Inject
 
 import actors.TournamentActor
-import actors.TournamentActor.{GetActiveTournament, HasActiveTournament, LoadTournament}
+import actors.TournamentActor.{GetActiveTournament, HasActiveTournament, LoadTournament, ReleaseTournament}
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.StrictLogging
 import models.{SeriesWithPlayers, Tournament, TournamentSeries, TournamentWithSeries}
@@ -89,6 +89,9 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
       case Some(activeTournament) => Ok(Json.toJson(activeTournament))
       case _ => NotFound(Json.toJson("There is no active tournament"))
     }
+  }
 
+  def releaseActiveTournament = Action.async{
+    (activeTournamentActor ? ReleaseTournament).mapTo[Option[Tournament]].map{ response => Ok}
   }
 }

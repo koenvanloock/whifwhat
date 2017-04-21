@@ -16,6 +16,10 @@ module TournamentRunner{
             return this.$http.get(this.base.url + "/activeTournament");
         };
         
+        releaseActiveTournament = function(){
+            return this.$http.get(this.base.url + "/activeTournament/release")
+        };
+        
         getSeriesOfTournament = function(tournamentId){
             return this.$http.get(this.base.url + "/series/"+tournamentId);
         };

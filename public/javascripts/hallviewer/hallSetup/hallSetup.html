@@ -1,21 +1,36 @@
 <md-toolbar class="md-padding">
-    <h2>Zaalconfiguratie</h2>
+  <h2>Zaalconfiguratie</h2>
 </md-toolbar>
+<div class="md-padding">
+  <md-card>
+    <ul>
+    <li ng-repeat="hall in ctrl.halls">
+      <span flex="50">{{hall.hallName}}</span>
+      <span flex>{{' ' + hall.rows + ' x ' + hall.tablesPerRow}}</span>
+      <md-button class="md-button md-raised md-accent" ng-click="ctrl.showHall(hall.id)">
+        Toon zaal
+      </md-button>
+      <md-button class="md-button md-raised md-accent" ng-click="ctrl.chooseHallForLayout(hall.id)">
+        bepaal layout
+      </md-button>
+    </li>
+    </ul>
 
-<div>
+    <div layout-align="row">
     <md-input-container>
-        <label>Zaalnaam</label>
-        <input md-model="hallName">
+      <label>Zaalnaam</label>
+      <input ng-model="ctrl.hallName">
     </md-input-container>
 
     <md-input-container>
-        <label>Aantal rijen tafels</label>
-        <input type="number" md-model="numberOfTableRows">
+      <label>Aantal rijen tafels</label>
+      <input type="number" ng-model="ctrl.numberOfTableRows">
     </md-input-container>
     <md-input-container>
-        <label>Aantal tafels per rij</label>
-        <input type="number" md-model="numberOfTables">
+      <label>Aantal tafels per rij</label>
+      <input type="number" ng-model="ctrl.numberOfTables">
     </md-input-container>
-
-    <md-button>Opslaan</md-button>
+    </div>
+    <md-button class="md-button md-raised md-primary" ng-click="ctrl.createHall()">Opslaan</md-button>
+  </md-card>
 </div>

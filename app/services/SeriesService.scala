@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.player.{SeriesPlayer, SeriesPlayerWithRoundPlayers}
+import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import play.api.libs.json.Json
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository}
 
@@ -92,12 +92,23 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
       val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
       seriesRoundService.updateSeriesRound(updatedRound).map( _  => Right(updatedRound))
     }
-    case _ => Future(Left(roundRanking))
+    case _ => seriesPlayerRepository.retrieveAllSeriesPlayers(series.id)
+      .flatMap( playerList => Future.sequence{playerList.map(retrieveRoundPlayersAndAggregateScore)})
+      .map(playerList => Left(playerList.sortBy(-_.playerScores.totalPoints)))
   }
 
-  def drawnRoundOrError(seriesId: String): Option[SiteRobinRound] => Either[DrawError, (String, SiteRobinRound)] = robinOpt => robinOpt match {
-    case Some(drawnRobinRound) => Right(seriesId,drawnRobinRound)
+  def drawnRoundOrError(seriesId: String): Option[SiteRobinRound] => Either[DrawError, (String, SiteRobinRound)] = {
+    case Some(drawnRobinRound) => Right(seriesId, drawnRobinRound)
     case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
+  }
+
+  def retrieveRoundPlayersAndAggregateScore: (SeriesPlayer) => Future[SeriesPlayer] = seriesPlayer => {
+    seriesRoundService.retrieveAllByField("seriesId", seriesPlayer.seriesId).map{ seriesRoundList =>
+
+      val roundPlayerList = seriesRoundList.flatMap(_.roundPlayers.filter(_.player == seriesPlayer.player))
+      val calculatedScore = roundPlayerList.map(_.playerScores).fold(PlayerScores())(_ + _)
+      seriesPlayer.copy(playerScores =  calculatedScore)
+    }
   }
 
 }
