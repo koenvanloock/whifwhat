@@ -15,43 +15,37 @@ Vue.component("hall-overview", {
   mounted: function () {
     this.$http.get(window.location.origin + "/activeTournament").then(function(response){
       this.tournament = response.data;
-    }.bind(this), function (error) {
-      console.log(error.body);
-    });
+    }.bind(this),this.logError);
 
-    this.$http.get(window.location.origin + "/activehall").then(function(response){
-      this.hall = response.data;
+    this.$http.get(window.location.origin + "/activehall").then(function (hallResponse) {
+      this.hall = hallResponse.data;
       this.rowList = Array.apply(null, Array(this.hall.rows)).map(function(row, index) { return index + 1 });
-    }.bind(this), function (error) {
-      console.log(error.body);
-    });
+    }.bind(this), this.logError);
 
-    var source = new EventSource(window.location.origin + "/hallstream");
-    source.addEventListener('message', function (e) {
-      this.hall = JSON.parse(e.data);
-      this.rowList = Array.apply(null, Array(this.hall.rows)).map(function(row, index) { return index + 1 });
-    }.bind(this), false);
-
-    source.addEventListener('error', function (e) {
-      if (e.eventPhase == EventSource.CLOSED) {
-        console.log("Connection was closed on error: " + e);
-      } else {
-        console.log("Error occurred while streaming: " + e);
-      }
-    }, false);
+    var hallSource = new EventSource(window.location.origin + "/hallstream");
+    hallSource.addEventListener('message', this.updateHall, false);
+    hallSource.addEventListener('error', this.errorListener, false);
 
     var tournamentSource = new EventSource(window.location.origin + "/tournamentstream");
     tournamentSource.addEventListener('message', function (e) {
       this.tournament = JSON.parse(e.data);
     }.bind(this), false);
+    tournamentSource.addEventListener('error', this.errorListener, false);
+  },
+  methods: {
+    errorListener: function(e) {
+        if (e.eventPhase == EventSource.CLOSED) {
+          console.log("Connection was closed on error: " + e);
+        } else {
+          console.log("Error occurred while streaming: " + e);
+        }
+      },
+    updateHall: function (e) {
+      this.hall = JSON.parse(e.data);
+      this.rowList = Array.apply(null, Array(this.hall.rows)).map(function(row, index) { return index + 1 });
+    }.bind(this),
+    logError: function(errorResponse){ console.log(errorResponse.body)}
 
-    tournamentSource.addEventListener('error', function (e) {
-      if (e.eventPhase == EventSource.CLOSED) {
-        console.log("Connection was closed on error: " + e);
-      } else {
-        console.log("Error occurred while streaming: " + e);
-      }
-    }, false);
-  }
+    }
 });
 
