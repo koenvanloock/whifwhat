@@ -1,17 +1,21 @@
 <md-toolbar class="md-padding">
-    <h2>Zaaloverzicht</h2>
+  <h2>Zaaloverzicht</h2>
 </md-toolbar>
 
-<div>
+<div id="hallElement">
 
-    <h1 style="color:white">Huidige zaal: <span id="hallName">{{ctrl.hall.hallName}}</span></h1>
+  <vue-wrapper>
+    <hall-overview ng-non-bindable></hall-overview>
+  </vue-wrapper>
 
-    <div style="background: grey">
-        <div ng-repeat="rowNr in ctrl.rowList" class="tableRow" layout>
-  <span ng-repeat="table in ctrl.hall.tables | filter: {row:  rowNr}" style="color:white; margin-left: 20px; margin-right: 20px;" flex="auto">
+  <!--
+  <div style="background: grey">
+    <div ng-repeat="rowNr in ctrl.rowList" class="tableRow" layout>
+  <span ng-repeat="table in ctrl.hall.tables | filter: {row:  rowNr}"
+        style="color:white; margin-left: 20px; margin-right: 20px;" flex="auto">
     <pingpong-table table="table"></pingpong-table>
   </span>
-        </div>
     </div>
+  </div>-->
 
 </div>

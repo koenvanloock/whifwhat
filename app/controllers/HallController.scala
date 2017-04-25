@@ -75,7 +75,10 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
   def update() = Action.async { request =>
     request.body.asJson.flatMap { json =>
       json.validate[Hall].asOpt.map {
-        hall => hallService.update(hall).map(result => Ok(Json.toJson(result)))
+        hall => hallService.update(hall).map{ result =>
+          hallEventStreamActor ! ActivateHall(result)
+          Ok(Json.toJson(result))
+        }
       }
     }.getOrElse(Future(BadRequest("Het request kon niet geparset worden.")))
 
@@ -92,11 +95,6 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
       case _ => Future(BadRequest("De gevraagde zaal werd niet gevonden."))
     }
 
-  }
-
-
-  def updateHallActor: WebSocket = WebSocket.accept[Hall, Hall] { request =>
-    ActorFlow.actorRef(out => HallSocketActor.props(out, activeHallActor))
   }
 
   def hallStream = Action { implicit req =>

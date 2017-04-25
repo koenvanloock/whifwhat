@@ -10,3 +10,15 @@ hallViewer.directive("pingpongTable", function(){
     templateUrl: "assets/javascripts/hallViewer/pingpongTable/pingpongTable.html"
   }
 });
+
+hallViewer.directive("vueWrapper", function(){
+  return {
+    restrict: 'E',
+    link: function(scope, $element) {
+      scope.vm = new Vue({
+        el: 'hall-overview'
+      })
+    }
+  }
+
+});

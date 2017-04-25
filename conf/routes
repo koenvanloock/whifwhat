@@ -55,7 +55,6 @@ POST          /hall                                          controllers.HallCon
 PATCH         /hall                                          controllers.HallController.update
 
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
-GET           /activehall                                    controllers.HallController.updateHallActor
 
 GET           /stream                                         controllers.HallController.hallStream
 

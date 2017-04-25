@@ -158,6 +158,8 @@ form .progress {
 
 .pingpongTable{
     background: grey;
+    width: 500px;
+    height: 550px;
     padding: 5px;
     display: inline-block;
 }
@@ -206,11 +208,11 @@ form .progress {
 }
 
 .tableNr{
-    width: 20px;
-    height: 20px;
-    -webkit-border-radius: 50%;
-    -moz-border-radius: 50%;
-    border-radius: 50%;
+    height: 25px;
+    width: auto;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
     font-weight: bold;
     color: white;
     background: darkred;
@@ -225,14 +227,17 @@ form .progress {
 .horizonal-net{
     width: 10px;
     background: white;
+    float: left;
     height: 100%
 }
 
 .playerBox-horizontal{
-    width: 245px;
+    float: left;
+    width: 240px;
     height: 250px;
     margin-top: 20px;
     margin-bottom: 20px;
+    display: inline-block;
     background: darkgreen;
     border-top: solid white 5px;
     border-bottom: solid white 5px;
