@@ -34,7 +34,7 @@ module TournamentManagement {
         }
 
         gotoHallViewer(){
-            this.$location.path("/hallViewer")
+            this.$location.path("/hallSetup")
         }
 
 

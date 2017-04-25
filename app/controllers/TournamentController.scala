@@ -2,8 +2,9 @@ package controllers
 
 import javax.inject.Inject
 
-import actors.TournamentActor
+import actors.{TournamentActor, TournamentEventStreamActor}
 import actors.TournamentActor.{GetActiveTournament, HasActiveTournament, LoadTournament, ReleaseTournament}
+import actors.TournamentEventStreamActor.{ActivateTournament, Start}
 import akka.actor.ActorSystem
 import com.typesafe.scalalogging.StrictLogging
 import models.{SeriesWithPlayers, Tournament, TournamentSeries, TournamentWithSeries}
@@ -16,7 +17,11 @@ import models.TournamentEvidence._
 
 import scala.concurrent.duration._
 import akka.pattern.ask
+import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import play.api.libs.EventSource
+import play.api.libs.iteratee.Concurrent
+import play.api.libs.streams.Streams
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -24,7 +29,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class TournamentController @Inject()(system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository) extends Controller with StrictLogging{
   implicit val timeout = Timeout(5 seconds)
   val activeTournamentActor = system.actorOf(TournamentActor.props, "activeTournament-actor")
- val tournamentWrites = Json.format[Tournament]
+  val tournamentEventStreamActor = system.actorOf(TournamentEventStreamActor.props)
+
+  val (out, channel) = Concurrent.broadcast[Tournament]
+  tournamentEventStreamActor ! Start(channel)
+
+  val tournamentWrites = Json.format[Tournament]
 
   def createTournament() = Action.async{ request =>
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
@@ -71,7 +81,9 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
     tournamentRepository.retrieveById(tournamentId).flatMap {
       case Some(tournament) =>
         (activeTournamentActor ? LoadTournament(tournament)).mapTo[Either[String, Tournament]].map {
-          case Right(activeTournament) => Ok(Json.toJson(activeTournament))
+          case Right(activeTournament) =>
+            tournamentEventStreamActor ! ActivateTournament(activeTournament)
+            Ok(Json.toJson(activeTournament))
           case Left(message) => BadRequest(message)
         }
       case None => Future(BadRequest("The requested tournament doesn't exist"))
@@ -92,6 +104,16 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
   }
 
   def releaseActiveTournament = Action.async{
-    (activeTournamentActor ? ReleaseTournament).mapTo[Option[Tournament]].map{ response => Ok}
+    (activeTournamentActor ? ReleaseTournament).mapTo[Option[Tournament]].map{ response =>
+      tournamentEventStreamActor ! ReleaseTournament
+      Ok
+    }
   }
+
+  def activeTournamentStream = Action { implicit req =>
+    val source = Source.fromPublisher(Streams.enumeratorToPublisher(out.map(Json.toJson(_)(tournamentWrites))))
+
+    Ok.chunked(source via EventSource.flow).as("text/event-stream")
+  }
+
 }

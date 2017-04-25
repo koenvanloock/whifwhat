@@ -3,7 +3,7 @@ package controllers
 import java.util.UUID
 import javax.inject.Inject
 
-import actors.ActiveHallActor.SetActiveHall
+import actors.ActiveHallActor.{GetHall, SetActiveHall}
 import actors.HallEventStreamActor.{ActivateHall, Start}
 import actors.{ActiveHallActor, HallEventStreamActor, HallSocketActor}
 import akka.actor.ActorSystem
@@ -101,5 +101,12 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
     val source = Source.fromPublisher(Streams.enumeratorToPublisher(out.map(Json.toJson(_))))
 
     Ok.chunked(source via EventSource.flow).as("text/event-stream")
+  }
+
+  def getActiveHall() = Action.async{
+    (activeHallActor ? GetHall).mapTo[Option[Hall]].map{
+      case Some(hall) => Ok(Json.toJson(hall))
+      case _ => BadRequest("no hall active")
+    }
   }
 }

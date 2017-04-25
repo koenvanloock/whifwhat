@@ -54,9 +54,11 @@ GET           /hall                                          controllers.HallCon
 POST          /hall                                          controllers.HallController.createHallIfNotExists
 PATCH         /hall                                          controllers.HallController.update
 
+GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
 
-GET           /stream                                         controllers.HallController.hallStream
+GET           /hallstream                                         controllers.HallController.hallStream
+GET           /tournamentstream                                   controllers.TournamentController.activeTournamentStream
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 

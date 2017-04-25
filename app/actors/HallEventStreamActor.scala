@@ -15,7 +15,9 @@ class HallEventStreamActor  extends Actor {
   import HallEventStreamActor._
     var out: Option[Concurrent.Channel[Hall]] = None
     def receive = {
-      case Start(out)       => this.out = Some(out)
-      case ActivateHall(hall) => println("printing hall to stream: " + hall.hallName); this.out.foreach(_.push(hall))
+      case Start(outChannel)       => this.out = Some(outChannel)
+      case ActivateHall(hall) =>
+        println("printing hall to stream: " + hall.hallName)
+        this.out.foreach(_.push(hall))
     }
 }
