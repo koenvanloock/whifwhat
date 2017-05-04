@@ -19,7 +19,7 @@ class ActiveHallActor extends Actor{
   override def receive: Receive = {
     case SetActiveHall(hall) =>
       activeHall = Some(hall)
-      println(hall)
+      println(hall.tables.map(_.siteMatch).mkString("\n"))
       sender() ! activeHall
 
     case GetHall => sender() ! activeHall

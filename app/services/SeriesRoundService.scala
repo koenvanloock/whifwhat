@@ -3,11 +3,11 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.matches.SiteMatch
+import models.matches.PingpongMatch
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import play.api.libs.json.JsObject
 import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
-import utils.RoundScoreCalculator
+import utils.RoundScorer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -16,7 +16,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRoundRepository.retrieveAllByField(fieldKey, fieldValue)
   def retrieveByFields(jsObject: JsObject): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveByFields(jsObject)
 
-  def getMatchesOfRound(seriesRoundId: String): Future[List[SiteMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
+  def getMatchesOfRound(seriesRoundId: String): Future[List[PingpongMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
     case Some(bracketRound: SiteBracketRound) => bracketRound.bracket.toList
     case Some(robinRound: SiteRobinRound) => robinRound.robinList.flatMap( robinGroup => robinGroup.robinMatches)
     case None => List()
@@ -26,20 +26,20 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
 
   def calculateRoundResults(playingWithHandicaps: Boolean, seriesRound: SeriesRound): SeriesRound = seriesRound match{
-    case robinRound: SiteRobinRound => RoundScoreCalculator.calculateRobinResults(playingWithHandicaps, robinRound)
-    case bracketRound: SiteBracketRound => RoundScoreCalculator.calculateBracketResults(bracketRound, playingWithHandicaps)
+    case robinRound: SiteRobinRound => RoundScorer.calculateRobinResults(playingWithHandicaps, robinRound)
+    case bracketRound: SiteBracketRound => RoundScorer.calculateBracketResults(bracketRound, playingWithHandicaps)
   }
 
-  def updateMatchInRound(siteMatch: SiteMatch, round: SeriesRound): SeriesRound = round match{
+  def updateMatchInRound(siteMatch: PingpongMatch, round: SeriesRound): SeriesRound = round match{
     case robinRound: SiteRobinRound => robinRound.copy(robinList = robinRound.robinList.map(group => group.copy( robinMatches = group.robinMatches.map(matchToUpdateOrOriginalMatch(siteMatch)))))
     case bracketRound: SiteBracketRound => bracketRound.copy(bracket = bracketRound.bracket.map(matchToUpdateOrOriginalMatch(siteMatch)))
   }
 
-  def matchToUpdateOrOriginalMatch(siteMatch: SiteMatch): (SiteMatch) => SiteMatch = {
+  def matchToUpdateOrOriginalMatch(siteMatch: PingpongMatch): (PingpongMatch) => PingpongMatch = {
     matchTocheck => if (matchTocheck.id == siteMatch.id) siteMatch else matchTocheck
   }
 
-  def updateRoundWithMatch(siteMatch: SiteMatch, roundId: String): Future[Option[SeriesRound]] = {
+  def updateRoundWithMatch(siteMatch: PingpongMatch, roundId: String): Future[Option[SeriesRound]] = {
     seriesRoundRepository.retrieveById(roundId).flatMap{
       case Some(round) =>
         seriesRepository.retrieveById(round.seriesId).flatMap{
@@ -114,14 +114,14 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       ))
   }
 
-  def updateSeriesPlayerAfterMatch(seriesPlayer: SeriesPlayer, playerMatches: List[SiteMatch]) = {
+  def updateSeriesPlayerAfterMatch(seriesPlayer: SeriesPlayer, playerMatches: List[PingpongMatch]) = {
 
     val newPlayerScore = calculateRoundPlayerScore(seriesPlayer, playerMatches)
     seriesPlayer.copy(playerScores = newPlayerScore)
   }
 
-  def calculateRoundPlayerScore(seriesRoundPlayer: SeriesPlayer, playerMatches: List[SiteMatch]): PlayerScores = {
-    def PlayerScoresForA(acc: PlayerScores, siteMatch: SiteMatch): PlayerScores = {
+  def calculateRoundPlayerScore(seriesRoundPlayer: SeriesPlayer, playerMatches: List[PingpongMatch]): PlayerScores = {
+    def PlayerScoresForA(acc: PlayerScores, siteMatch: PingpongMatch): PlayerScores = {
       val matchWonPoints: Int = siteMatch.games.map(_.pointA).sum
       val matchLostPoints: Int = siteMatch.games.map(_.pointB).sum
       PlayerScores(
@@ -135,7 +135,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       )
     }
 
-    def PlayerScoresForB(acc: PlayerScores, siteMatch: SiteMatch): PlayerScores = {
+    def PlayerScoresForB(acc: PlayerScores, siteMatch: PingpongMatch): PlayerScores = {
       val matchWonPoints: Int = siteMatch.games.map(_.pointB).sum
       val matchLostPoints: Int = siteMatch.games.map(_.pointA).sum
       PlayerScores(
@@ -160,11 +160,11 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     }
   }
 
-  def isMatchWonForA(siteMatch: SiteMatch): Int = {
+  def isMatchWonForA(siteMatch: PingpongMatch): Int = {
     if (siteMatch.wonSetsA > siteMatch.wonSetsB && siteMatch.wonSetsA == siteMatch.numberOfSetsToWin) 1 else 0
   }
 
-  def isMatchWonForB(siteMatch: SiteMatch): Int = {
+  def isMatchWonForB(siteMatch: PingpongMatch): Int = {
     if (siteMatch.wonSetsB > siteMatch.wonSetsA && siteMatch.wonSetsB == siteMatch.numberOfSetsToWin) 1 else 0
   }
 

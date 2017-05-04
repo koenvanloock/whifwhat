@@ -1,5 +1,6 @@
 package controllers
 
+import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.Inject
 
@@ -13,6 +14,8 @@ import akka.stream.scaladsl.Source
 import akka.util.{ByteString, Timeout}
 import models.halls.Hall
 import models.halls.HallEvidence._
+import models.matches.{PingpongMatch, SiteGame}
+import models.player.{Player, Rank}
 import play.api.http.HttpEntity
 import play.api.libs.EventSource
 import play.api.libs.iteratee.Concurrent
@@ -21,6 +24,7 @@ import play.api.libs.streams.{ActorFlow, Streams}
 import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
 import services.HallService
+import utils.{ControllerUtils, JsonUtils}
 import utils.JsonUtils.ListWrites._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -30,6 +34,11 @@ import scala.concurrent.duration._
 class HallController @Inject()(hallService: HallService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
   implicit val timeout = Timeout(5 seconds)
   implicit val messageFlowTransformer = MessageFlowTransformer.jsonMessageFlowTransformer[Hall, Hall]
+  implicit val rankFormat = Json.format[Rank]
+  implicit val playerFormat = Json.format[Player]
+  implicit val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
+  implicit val gameWrites = Json.format[SiteGame]
+  val pingpongMatchReads = Json.reads[PingpongMatch]
 
   val activeHallActor = system.actorOf(ActiveHallActor.props)
   val hallEventStreamActor = system.actorOf(HallEventStreamActor.props)
@@ -53,14 +62,15 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
 
     val hallOpt = request.body.asJson.flatMap { json =>
       for {
-        numberOfRows <- (json \ "rows").asOpt[Int]
-        numberOfTablesPerRow <- (json \ "tablesPerRow").asOpt[Int]
-        name <- (json \ "hallName").asOpt[String]
-      } yield Hall(UUID.randomUUID().toString, name, numberOfRows, numberOfTablesPerRow, Nil)
+        numberOfRows          <- (json \ "rows").asOpt[Int]
+        numberOfTablesPerRow  <- (json \ "tablesPerRow").asOpt[Int]
+        name                  <- (json \ "hallName").asOpt[String]
+        isGreen               <- (json \ "isGreen").asOpt[Boolean]
+      } yield (Hall(UUID.randomUUID().toString, name, numberOfRows, numberOfTablesPerRow, Nil), isGreen)
     }
 
     hallOpt match {
-      case Some(hall) => hallService.createIfNotExists(hall).map(handleHallCreateResult)
+      case Some((hall, isGreen)) => hallService.createIfNotExists(hall, isGreen).map(handleHallCreateResult)
       case None => Future(BadRequest("Kon geen geldige zaal opbouwen"))
     }
   }
@@ -76,6 +86,7 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
     request.body.asJson.flatMap { json =>
       json.validate[Hall].asOpt.map {
         hall => hallService.update(hall).map{ result =>
+          activeHallActor ! SetActiveHall(hall)
           hallEventStreamActor ! ActivateHall(result)
           Ok(Json.toJson(result))
         }
@@ -108,5 +119,28 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
       case Some(hall) => Ok(Json.toJson(hall))
       case _ => BadRequest("no hall active")
     }
+  }
+
+  def deleteHall(hallId: String) = Action.async{
+    hallService.delete(hallId).map{
+      case () =>  NoContent
+      case _ => BadRequest("couldn't delete id "+hallId)
+    }
+  }
+
+  def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async{ request =>
+
+    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map{ pingpongMatch =>
+      hallService.setMatchToTable(hallId, row, column, pingpongMatch).map{
+        case Some(hall) =>
+          println(LocalDateTime.now + " printing hall")
+          hallEventStreamActor ! ActivateHall(hall)
+          activeHallActor ! SetActiveHall(hall)
+          Ok
+        case _ => BadRequest
+      }
+
+    }.getOrElse(Future(BadRequest))
+
   }
 }

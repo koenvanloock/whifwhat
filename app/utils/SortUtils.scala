@@ -2,7 +2,7 @@ package utils
 
 
 import models.{ScoreType, ScoreTypes}
-import models.matches.SiteMatch
+import models.matches.PingpongMatch
 import models.player.SeriesPlayer
 
 object SortUtils {

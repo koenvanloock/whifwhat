@@ -1,11 +1,11 @@
 package services
 
-import models.matches.{SiteGame, SiteMatch}
+import models.matches.{SiteGame, PingpongMatch}
 
 class MatchService {
-  def isMatchComplete(siteMatch: SiteMatch): Boolean = siteMatch.games.forall(_.isCorrect(siteMatch.targetScore))
+  def isMatchComplete(siteMatch: PingpongMatch): Boolean = siteMatch.games.forall(_.isCorrect(siteMatch.targetScore))
 
-  def calculateMatchStats(siteMatch: SiteMatch) = siteMatch.copy(
+  def calculateMatchStats(siteMatch: PingpongMatch) = siteMatch.copy(
       wonSetsA = calculateSetsForPlayer(siteMatch, 'A'),
       wonSetsB = calculateSetsForPlayer(siteMatch, 'B')
     )
@@ -17,7 +17,7 @@ class MatchService {
 
 
 
-  private def calculateSetsForPlayer(siteMatch: SiteMatch, playerChar: Char): Int = playerChar match{
+  private def calculateSetsForPlayer(siteMatch: PingpongMatch, playerChar: Char): Int = playerChar match{
       case 'A' => siteMatch.games.count(isForA(siteMatch.targetScore))
       case 'B' =>siteMatch.games.count(isForB(siteMatch.targetScore))
     }

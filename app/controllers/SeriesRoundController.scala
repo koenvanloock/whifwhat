@@ -9,14 +9,14 @@ import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller, Result}
 import services.{SeriesRoundService, SeriesService}
-import utils.{ControllerUtils, JsonUtils, RoundRankingCalculator}
+import utils.{ControllerUtils, JsonUtils, RoundRanker}
 import utils.JsonUtils.ListWrites._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
 import models.matches.MatchEvidence.matchIsModel._
-import models.matches.{MatchEvidence, SiteGame, SiteMatch}
+import models.matches.{MatchEvidence, SiteGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
 class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, seriesService: SeriesService) extends Controller{
@@ -102,13 +102,13 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
   def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map{_ => NoContent})
 
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, Json.reads[SiteMatch]).map{ siteMatch =>
+    ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
        val matchWithSetResults = calculateSets(siteMatch)
         seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
     }.getOrElse(Future(BadRequest))
   }
 
-  def calculateSets(siteMatch: SiteMatch): SiteMatch = {
+  def calculateSets(siteMatch: PingpongMatch): PingpongMatch = {
     val setTuple = siteMatch.games.foldRight((0,0))( (game, tuple) => if(game.isCorrect(siteMatch.targetScore) && game.pointA > game.pointB) (tuple._1 +1, tuple._2) else if(game.isCorrect(siteMatch.targetScore) && game.pointA < game.pointB) (tuple._1, tuple._2 +1) else tuple )
     siteMatch.copy(wonSetsA = setTuple._1, wonSetsB = setTuple._2)
   }
@@ -123,7 +123,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
     implicit val rankWrites = Json.writes[Rank]
     implicit val playerWrites = Json.writes[Player]
     implicit val gameWrites = Json.writes[SiteGame]
-    implicit val matchWrites = Json.writes[SiteMatch]
+    implicit val matchWrites = Json.writes[PingpongMatch]
     seriesRoundService.getMatchesOfRound(seriesRoundId).map( matchList => Ok(Json.listToJson(matchList)))
   }
 
@@ -132,7 +132,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
     val parsedScoreType = ScoreTypes.parseScoreType(scoreType)
     seriesRoundService.getRound(seriesRoundId).flatMap{
       case Some(seriesRound) => if(seriesRound.isComplete) {
-        val rankedPlayers = RoundRankingCalculator.calculateRoundResults(seriesRound, isWithHandicap, parsedScoreType)
+        val rankedPlayers = RoundRanker.calculateRoundResults(seriesRound, isWithHandicap, parsedScoreType)
         // todo add these results to seriesPlayer if needed and draw and return the next series
         Future(Ok)
       } else {
@@ -153,7 +153,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
   //todo move logic to service layer ???
   def checkCompleteAndAdvanceIfPossible(series: TournamentSeries, seriesRound: SeriesRound): Future[Either[String, Either[FinalRanking, SeriesRound]]] = {
     if (seriesRound.isComplete) {
-      val roundRanking = RoundRankingCalculator.calculateRoundResults(seriesRound, series.playingWithHandicaps, ScoreTypes.DIRECT_CONFRONTATION)
+      val roundRanking = RoundRanker.calculateRoundResults(seriesRound, series.playingWithHandicaps, ScoreTypes.DIRECT_CONFRONTATION)
       seriesService.advanceIfPossibleOrShowFinalRanking(series, roundRanking).map(Right(_))
     } else {
       Future(Left("The current round isn't complete"))

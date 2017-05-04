@@ -39,8 +39,10 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
 
         case Left(error) => Json.toJson(error)(Json.writes[DrawError])
         case Right(seriesRoundWithPlayersAndMatches) =>
-          Json.obj( "seriesId" -> seriesRoundWithPlayersAndMatches._1,
-                                                                  "round" -> Json.toJson(seriesRoundWithPlayersAndMatches._2))
+          Json.obj(
+            "seriesId" -> seriesRoundWithPlayersAndMatches._1,
+            "round" -> Json.toJson(seriesRoundWithPlayersAndMatches._2)
+          )
       }
 
       resultFut.map( result => Ok(Json.toJson(result)))

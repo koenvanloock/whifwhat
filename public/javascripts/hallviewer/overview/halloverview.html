@@ -1,5 +1,4 @@
-<md-toolbar class="md-padding">
-  <h2>Zaaloverzicht</h2>
+<md-toolbar> <h2 style="margin-left: 10px">Zaaloverzicht</h2>
 </md-toolbar>
 
 <div id="hallElement">
@@ -7,15 +6,5 @@
   <vue-wrapper>
     <hall-overview ng-non-bindable></hall-overview>
   </vue-wrapper>
-
-  <!--
-  <div style="background: grey">
-    <div ng-repeat="rowNr in ctrl.rowList" class="tableRow" layout>
-  <span ng-repeat="table in ctrl.hall.tables | filter: {row:  rowNr}"
-        style="color:white; margin-left: 20px; margin-right: 20px;" flex="auto">
-    <pingpong-table table="table"></pingpong-table>
-  </span>
-    </div>
-  </div>-->
 
 </div>

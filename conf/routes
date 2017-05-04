@@ -51,8 +51,10 @@ POST          /user                                          controllers.LoginCo
 
 GET           /hall/:hallId                                  controllers.HallController.getById(hallId: String)
 GET           /hall                                          controllers.HallController.getAllHalls
+PATCH         /hall/:hallId/:row/:column                     controllers.HallController.updateHallWithMatch(hallId: String, row: Int, column: Int)
 POST          /hall                                          controllers.HallController.createHallIfNotExists
 PATCH         /hall                                          controllers.HallController.update
+DELETE        /hall/:hallId                                  controllers.HallController.deleteHall(hallId: String)
 
 GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)

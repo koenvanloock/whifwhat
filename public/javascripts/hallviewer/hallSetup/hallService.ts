@@ -8,12 +8,16 @@ module HallOverview{
             return this.$http.get(this.base.url + '/hall')
         }
 
-        createHall(hallName, numberOfTableRows, numberOfTables){
-            return this.$http.post(this.base.url + '/hall', {hallName: hallName, rows: numberOfTableRows, tablesPerRow: numberOfTables})
+        createHall(hallName, numberOfTableRows, numberOfTables, isGreen){
+            return this.$http.post(this.base.url + '/hall', {hallName: hallName, rows: numberOfTableRows, tablesPerRow: numberOfTables, isGreen: isGreen})
         }
 
         getHallById(hallId){
             return this.$http.get(this.base.url + "/hall/"+hallId);
+        }
+
+        deleteLayout(hallId){
+            return this.$http.delete(this.base.url + "/hall/"+hallId);
         }
 
         update(hall: Hall){

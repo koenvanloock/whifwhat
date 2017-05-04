@@ -1,6 +1,6 @@
 package models
 
-import models.matches.{MatchChecker, SiteGame, SiteMatch}
+import models.matches.{MatchChecker, SiteGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 import models.types._
 import play.api.libs.functional.syntax._
@@ -11,6 +11,8 @@ import utils.JsonUtils
 import scala.language.postfixOps
 
 sealed trait SeriesRound {
+  def matches: List[PingpongMatch]
+
   def isComplete: Boolean
 
   def id: String
@@ -25,7 +27,7 @@ sealed trait SeriesRound {
 }
 
 
-case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: String, roundNr: Int, bracketPlayers: List[SeriesPlayer], bracket: Bracket[SiteMatch], scoreKey: Option[List[Int]]= None, roundType: String="B") extends SeriesRound {
+case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: String, roundNr: Int, bracketPlayers: List[SeriesPlayer], bracket: Bracket[PingpongMatch], scoreKey: Option[List[Int]]= None, roundType: String="B") extends SeriesRound {
   def getId(m: SiteBracketRound): Option[String] = Some(id)
 
   def setId(id: String)(m: SiteBracketRound): SiteBracketRound = m.copy(id = id)
@@ -33,6 +35,8 @@ case class SiteBracketRound(id: String, numberOfBracketRounds: Int, seriesId: St
   def isComplete = SiteBracket.isComplete(this.bracket)
 
   def roundPlayers =  this.bracketPlayers
+
+  def matches = this.bracket.toList
 
 }
 
@@ -45,6 +49,8 @@ case class SiteRobinRound(id: String, numberOfRobinGroups: Int, seriesId: String
   def isComplete = this.robinList.forall( robingroup => robingroup.robinMatches.forall(MatchChecker.isWon))
 
   def roundPlayers = robinList.flatMap(_.robinPlayers)
+
+  def matches = robinList.flatMap(robinGroup => robinGroup.robinMatches)
 }
 
 
@@ -57,9 +63,9 @@ object SeriesRoundEvidence {
     implicit val playerFormat = Json.format[Player]
     implicit val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
     implicit val gameWrites = Json.format[SiteGame]
-    implicit val matchWrites = Json.format[SiteMatch]
+    implicit val matchWrites = Json.format[PingpongMatch]
     implicit val listSeriesPlayerWrites = JsonUtils.listWrites(Json.writes[SeriesPlayer])
-    implicit val listMatchReads = JsonUtils.listReads(Json.reads[SiteMatch])
+    implicit val listMatchReads = JsonUtils.listReads(Json.reads[PingpongMatch])
     implicit val listSeriesPlayerReads = JsonUtils.listReads(Json.reads[SeriesPlayer])
 
 
@@ -69,7 +75,7 @@ object SeriesRoundEvidence {
         (__ \ "seriesId").write[String] and
         (__ \ "roundNr").write[Int] and
         (__ \ "bracketPlayers").lazyWrite[List[SeriesPlayer]](Writes.list[SeriesPlayer](Json.writes[SeriesPlayer])) and
-        (__ \ "bracketRounds").lazyWrite[Bracket[SiteMatch]](bracketSiteMatchWrites) and
+        (__ \ "bracketRounds").lazyWrite[Bracket[PingpongMatch]](bracketSiteMatchWrites) and
           (__ \ "scoreKey").writeNullable[List[Int]] and
           (__ \ "roundType").write[String]
       ) (unlift(SiteBracketRound.unapply))
@@ -81,46 +87,46 @@ object SeriesRoundEvidence {
         (__ \ "seriesId").read[String] and
         (__ \ "roundNr").read[Int] and
         (__ \ "bracketPlayers").lazyRead[List[SeriesPlayer]](Reads.list[SeriesPlayer](Json.reads[SeriesPlayer])) and
-        (__ \ "bracketRounds").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads) and
+        (__ \ "bracketRounds").lazyRead[Bracket[PingpongMatch]](bracketSiteMatchReads) and
           (__ \ "scoreKey").readNullable[List[Int]]
       ) (SiteBracketRound.apply(_, _, _, _, _, _, _))
 
 
-    implicit val leafReads: Reads[BracketLeaf[SiteMatch]] = new Reads[BracketLeaf[SiteMatch]] {
-      override def reads(json: JsValue): JsResult[BracketLeaf[SiteMatch]] = {
-        (json \ "value").validate[SiteMatch].map(x => BracketLeaf(x))
+    implicit val leafReads: Reads[BracketLeaf[PingpongMatch]] = new Reads[BracketLeaf[PingpongMatch]] {
+      override def reads(json: JsValue): JsResult[BracketLeaf[PingpongMatch]] = {
+        (json \ "value").validate[PingpongMatch].map(x => BracketLeaf(x))
       }
     }
 
-    implicit val leafWrites: Writes[BracketLeaf[SiteMatch]] = new Writes[BracketLeaf[SiteMatch]] {
-      override def writes(leafMatch: BracketLeaf[SiteMatch]): JsValue = {
+    implicit val leafWrites: Writes[BracketLeaf[PingpongMatch]] = new Writes[BracketLeaf[PingpongMatch]] {
+      override def writes(leafMatch: BracketLeaf[PingpongMatch]): JsValue = {
         Json.obj("value" -> leafMatch.value)
       }
     }
 
-    implicit val nodeReads: Reads[BracketNode[SiteMatch]] = (
-      (__ \ "value").read[SiteMatch] and
-        (__ \ "left").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads) and
-        (__ \ "right").lazyRead[Bracket[SiteMatch]](bracketSiteMatchReads)
-      ) (BracketNode[SiteMatch](_, _, _))
+    implicit val nodeReads: Reads[BracketNode[PingpongMatch]] = (
+      (__ \ "value").read[PingpongMatch] and
+        (__ \ "left").lazyRead[Bracket[PingpongMatch]](bracketSiteMatchReads) and
+        (__ \ "right").lazyRead[Bracket[PingpongMatch]](bracketSiteMatchReads)
+      ) (BracketNode[PingpongMatch](_, _, _))
 
     implicit val nodeWrites: Writes[SiteMatchNode] = (
-      (__ \ "value").write[SiteMatch] and
-        (__ \ "left").lazyWrite[Bracket[SiteMatch]](bracketSiteMatchWrites) and
-        (__ \ "right").lazyWrite[Bracket[SiteMatch]](bracketSiteMatchWrites)
+      (__ \ "value").write[PingpongMatch] and
+        (__ \ "left").lazyWrite[Bracket[PingpongMatch]](bracketSiteMatchWrites) and
+        (__ \ "right").lazyWrite[Bracket[PingpongMatch]](bracketSiteMatchWrites)
       )(unlift(SiteMatchNode.unapply))
 
-    implicit def bracketSiteMatchReads = new Reads[Bracket[SiteMatch]] {
-      override def reads(json: JsValue): JsResult[Bracket[SiteMatch]] = (json \ "left").asOpt[JsValue] match {
-        case Some(node) => Json.fromJson[BracketNode[SiteMatch]](json)(nodeReads)
-        case None => Json.fromJson[BracketLeaf[SiteMatch]](json)(leafReads)
+    implicit def bracketSiteMatchReads = new Reads[Bracket[PingpongMatch]] {
+      override def reads(json: JsValue): JsResult[Bracket[PingpongMatch]] = (json \ "left").asOpt[JsValue] match {
+        case Some(node) => Json.fromJson[BracketNode[PingpongMatch]](json)(nodeReads)
+        case None => Json.fromJson[BracketLeaf[PingpongMatch]](json)(leafReads)
       }
     }
 
-    implicit def bracketSiteMatchWrites = new Writes[Bracket[SiteMatch]] {
-      override def writes(bracket: Bracket[SiteMatch]): JsValue = bracket match {
-        case n: BracketNode[SiteMatch] => Json.toJson(SiteBracket.convertNodeToSiteMatchNode(n))(nodeWrites).asInstanceOf[JsObject]
-        case l: BracketLeaf[SiteMatch] => Json.toJson(l)(leafWrites)
+    implicit def bracketSiteMatchWrites = new Writes[Bracket[PingpongMatch]] {
+      override def writes(bracket: Bracket[PingpongMatch]): JsValue = bracket match {
+        case n: BracketNode[PingpongMatch] => Json.toJson(SiteBracket.convertNodeToSiteMatchNode(n))(nodeWrites).asInstanceOf[JsObject]
+        case l: BracketLeaf[PingpongMatch] => Json.toJson(l)(leafWrites)
       }
     }
 

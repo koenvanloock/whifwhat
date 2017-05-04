@@ -19,22 +19,28 @@ import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
+import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries, HallOverviewWrites}
+import models.matches.{PingpongMatch, SiteGame}
+import models.player.{Player, Rank}
 import play.api.libs.EventSource
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.streams.Streams
+import services.HallOverviewService
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TournamentController @Inject()(system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository) extends Controller with StrictLogging{
+class TournamentController @Inject()(system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository, hallOverviewService: HallOverviewService) extends Controller with StrictLogging{
   implicit val timeout = Timeout(5 seconds)
   val activeTournamentActor = system.actorOf(TournamentActor.props, "activeTournament-actor")
   val tournamentEventStreamActor = system.actorOf(TournamentEventStreamActor.props)
 
-  val (out, channel) = Concurrent.broadcast[Tournament]
+  val (out, channel) = Concurrent.broadcast[HallOverViewTournament]
   tournamentEventStreamActor ! Start(channel)
 
   val tournamentWrites = Json.format[Tournament]
+
+  implicit val halloverviewWrites = HallOverviewWrites.hallOverviewTournamentWrites
 
   def createTournament() = Action.async{ request =>
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
@@ -82,7 +88,9 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
       case Some(tournament) =>
         (activeTournamentActor ? LoadTournament(tournament)).mapTo[Either[String, Tournament]].map {
           case Right(activeTournament) =>
-            tournamentEventStreamActor ! ActivateTournament(activeTournament)
+            hallOverviewService.getHallOverviewTournament(activeTournament).map{ hallOverViewTournament =>
+              tournamentEventStreamActor ! ActivateTournament(hallOverViewTournament)
+            }
             Ok(Json.toJson(activeTournament))
           case Left(message) => BadRequest(message)
         }
@@ -97,9 +105,9 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
 
 
   def getActiveTournament() = Action.async{
-    (activeTournamentActor ? GetActiveTournament).mapTo[Option[Tournament]].map{
-      case Some(activeTournament) => Ok(Json.toJson(activeTournament))
-      case _ => NotFound(Json.toJson("There is no active tournament"))
+    (activeTournamentActor ? GetActiveTournament).mapTo[Option[Tournament]].flatMap{
+      case Some(activeTournament) => hallOverviewService.getHallOverviewTournament(activeTournament).map(tournament => Ok(Json.toJson(tournament)))
+      case _ => Future(NotFound(Json.toJson("There is no active tournament")))
     }
   }
 
@@ -111,7 +119,7 @@ class TournamentController @Inject()(system: ActorSystem, tournamentRepository: 
   }
 
   def activeTournamentStream = Action { implicit req =>
-    val source = Source.fromPublisher(Streams.enumeratorToPublisher(out.map(Json.toJson(_)(tournamentWrites))))
+    val source = Source.fromPublisher(Streams.enumeratorToPublisher(out.map(Json.toJson(_)(halloverviewWrites))))
 
     Ok.chunked(source via EventSource.flow).as("text/event-stream")
   }

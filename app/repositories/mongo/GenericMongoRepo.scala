@@ -40,7 +40,7 @@ class GenericMongoRepo[M: Model]
   def create(m: M): Future[M] = {
     val msg = s"create($m)"
     logger.debug(msg)
-    insert(beforeInsert(m))
+    insert(m)
   }
 
   // Retrieve

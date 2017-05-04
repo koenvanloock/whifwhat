@@ -2,19 +2,19 @@ package utils
 
 import models.player.SeriesPlayer
 import models._
-import models.matches.SiteMatch
+import models.matches.PingpongMatch
 
-object RoundRankingCalculator {
+object RoundRanker {
 
 
 
   def calculateBracketResults(bracketRound: SiteBracketRound, isWithHandicap: Boolean, scoreType: ScoreType) = {
-    val updatedRound = RoundScoreCalculator.calculateBracketResults(bracketRound, isWithHandicap)
+    val updatedRound = RoundScorer.calculateBracketResults(bracketRound, isWithHandicap)
     sortPlayers(isWithHandicap, updatedRound.bracketPlayers, bracketRound.bracket.toList, scoreType)
   }
 
   def calculateRobinResults(robinRound: SiteRobinRound, isWithHandicap: Boolean, scoreType: ScoreType) = {
-    val updatedRound = RoundScoreCalculator.calculateRobinResults(isWithHandicap, robinRound)
+    val updatedRound = RoundScorer.calculateRobinResults(isWithHandicap, robinRound)
     sortPlayers(isWithHandicap, updatedRound.robinList.flatMap(_.robinPlayers), updatedRound.robinList.flatMap(_.robinMatches), scoreType)
   }
 
@@ -24,7 +24,7 @@ object RoundRankingCalculator {
   }
 
 
-  def sortPlayers(isWithHandicap: Boolean, playerList: List[SeriesPlayer], matchList: List[SiteMatch], scoreType: ScoreType) =
+  def sortPlayers(isWithHandicap: Boolean, playerList: List[SeriesPlayer], matchList: List[PingpongMatch], scoreType: ScoreType) =
     if(scoreType == ScoreTypes.DIRECT_CONFRONTATION) {
       breakTiesWithDirectMatchup(isWithHandicap, playerList, matchList, playerList.length-1)
     }else {
@@ -33,7 +33,7 @@ object RoundRankingCalculator {
 
 
 
-  def breakTiesWithDirectMatchup(isWithHandicap: Boolean, playerList: List[SeriesPlayer], matchList: List[SiteMatch], currentNumberOfWins: Int, provisionalSortedList: List[SeriesPlayer]=Nil): List[SeriesPlayer] = {
+  def breakTiesWithDirectMatchup(isWithHandicap: Boolean, playerList: List[SeriesPlayer], matchList: List[PingpongMatch], currentNumberOfWins: Int, provisionalSortedList: List[SeriesPlayer]=Nil): List[SeriesPlayer] = {
 
     val playersWithCurrentNumberOfWins = playerList.filter(_.playerScores.wonMatches == currentNumberOfWins)
     if(currentNumberOfWins < 0 ){
@@ -44,12 +44,12 @@ object RoundRankingCalculator {
   }
 
 
-  def bothPlayersInList(siteMatch: SiteMatch, playersWithCurrentNumberOfWins: List[SeriesPlayer]) = {
+  def bothPlayersInList(siteMatch: PingpongMatch, playersWithCurrentNumberOfWins: List[SeriesPlayer]) = {
     siteMatch.playerA.exists(playersWithCurrentNumberOfWins.map(_.player).contains(_)) &&
       siteMatch.playerB.exists(playersWithCurrentNumberOfWins.map(_.player).contains(_))
   }
 
-  def addPlayersToProvisionalSorting(isWithHandicap: Boolean, playersWithCurrentNumberOfWins: List[SeriesPlayer], playerList: List[SeriesPlayer], matchList: List[SiteMatch], currentNumberOfWins: Int, provisionalSortedList: List[SeriesPlayer]): List[SeriesPlayer] = {
+  def addPlayersToProvisionalSorting(isWithHandicap: Boolean, playersWithCurrentNumberOfWins: List[SeriesPlayer], playerList: List[SeriesPlayer], matchList: List[PingpongMatch], currentNumberOfWins: Int, provisionalSortedList: List[SeriesPlayer]): List[SeriesPlayer] = {
     val matchesToConsider = matchList.filter(siteMatch => bothPlayersInList(siteMatch, playersWithCurrentNumberOfWins))
 
     playersWithCurrentNumberOfWins match {
@@ -58,7 +58,7 @@ object RoundRankingCalculator {
       case _                                                =>
 
         val tieOrder = playersWithCurrentNumberOfWins
-            .map(  seriesPlayer => (seriesPlayer,RoundScoreCalculator.getScoresOfPlayer(isWithHandicap, matchesToConsider,seriesPlayer).calculateScore) )
+            .map(  seriesPlayer => (seriesPlayer,RoundScorer.getScoresOfPlayer(isWithHandicap, matchesToConsider,seriesPlayer).calculateScore) )
             .sortBy( _._2)
 
 

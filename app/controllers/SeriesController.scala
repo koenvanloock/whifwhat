@@ -10,7 +10,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{Action, Controller, Result}
 import services.{SeriesRoundService, SeriesService}
 import utils.JsonUtils.ListWrites._
-import utils.{JsonUtils, RoundRankingCalculator}
+import utils.{JsonUtils, RoundRanker}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

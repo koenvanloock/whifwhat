@@ -10,6 +10,7 @@ module HallOverview{
         private hallName: string;
         private numberOfTableRows: number;
         private numberOfTables: number;
+        private isGreen: string;
 
 
         constructor(private hallService: HallService, private alertService: AlertService, private $location: ILocationService){
@@ -24,12 +25,19 @@ module HallOverview{
 
 
         createHall(){
-            this.hallService.createHall(this.hallName, this.numberOfTableRows, this.numberOfTables).then(
+            this.hallService.createHall(this.hallName, this.numberOfTableRows, this.numberOfTables, this.isGreen === 'green').then(
                 (result: any) => {this.addHall(result.data); this.clearInputs()},
                 (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
             )
         }
 
+        deleteLayout(hallId){
+            this.hallService.deleteLayout(hallId).then(
+                (result:any) => {this.halls.map((hall, index) => {if(hall.id == hallId){
+                    this.halls.splice(index, 1);
+                }})}
+            )
+        }
 
         addHall(createdHall){
             this.halls.push(createdHall);

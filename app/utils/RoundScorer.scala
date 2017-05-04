@@ -1,21 +1,21 @@
 package utils
 
-import models.matches.SiteMatch
+import models.matches.PingpongMatch
 import models.player.{PlayerScores, SeriesPlayer}
 import models._
 import models.types.Bracket
 
-object RoundScoreCalculator {
+object RoundScorer {
 
-  def calculatePlayerResults(isWithHandicap: Boolean, bracketPlayers: List[SeriesPlayer], updatedBracket: Bracket[SiteMatch]): List[SeriesPlayer] = {
+  def calculatePlayerResults(isWithHandicap: Boolean, bracketPlayers: List[SeriesPlayer], updatedBracket: Bracket[PingpongMatch]): List[SeriesPlayer] = {
     bracketPlayers.map(calculatePlayerScores(updatedBracket, isWithHandicap))
   }
 
-  def calculatePlayerScores(updatedBracket: Bracket[SiteMatch], isWithHandicap: Boolean): (SeriesPlayer) => SeriesPlayer = { seriesPlayer =>
+  def calculatePlayerScores(updatedBracket: Bracket[PingpongMatch], isWithHandicap: Boolean): (SeriesPlayer) => SeriesPlayer = { seriesPlayer =>
     seriesPlayer.copy(playerScores = updatedBracket.fold(getScoresOfMatch(isWithHandicap,seriesPlayer))(_ + _))
   }
 
-  def getScoresOfMatch(isWithHandicap: Boolean, playerToCheck: SeriesPlayer): (SiteMatch) => PlayerScores = siteMatch =>
+  def getScoresOfMatch(isWithHandicap: Boolean, playerToCheck: SeriesPlayer): (PingpongMatch) => PlayerScores = siteMatch =>
     if(siteMatch.playerA.contains(playerToCheck.player)) {
       addPlayerAscores(isWithHandicap, siteMatch)
     }else if(siteMatch.playerB.contains(playerToCheck.player)) {
@@ -31,7 +31,7 @@ object RoundScoreCalculator {
     bracketRound.copy(bracket = updatedBracket, bracketPlayers = updatedPlayers)
   }
 
-  def dealWithHandicap(isWithHandicap: Boolean, matchToAdd: SiteMatch, aOrB: String) =
+  def dealWithHandicap(isWithHandicap: Boolean, matchToAdd: PingpongMatch, aOrB: String) =
     if(isWithHandicap) {
       if (matchToAdd.isHandicapForB && aOrB == "B") {
         matchToAdd.handicap
@@ -43,7 +43,7 @@ object RoundScoreCalculator {
     } else { 0}
 
 
-  def addPlayerAscores(isWithHandicap: Boolean, matchToAdd: SiteMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
+  def addPlayerAscores(isWithHandicap: Boolean, matchToAdd: PingpongMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
     wonMatches = acc.wonMatches + (if(matchToAdd.wonSetsA == matchToAdd.numberOfSetsToWin) 1 else 0),
     lostMatches = acc.lostMatches + (if(matchToAdd.wonSetsB == matchToAdd.numberOfSetsToWin) 1 else 0),
     wonSets = acc.wonSets +  matchToAdd.wonSetsA,
@@ -52,7 +52,7 @@ object RoundScoreCalculator {
     lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfB) => pointsOfB + game.pointB - dealWithHandicap(isWithHandicap, matchToAdd, "B"))
   )
 
-  def addPlayerBscores(isWithHandicap: Boolean, matchToAdd: SiteMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
+  def addPlayerBscores(isWithHandicap: Boolean, matchToAdd: PingpongMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
     wonMatches = acc.wonMatches + (if(matchToAdd.wonSetsB == matchToAdd.numberOfSetsToWin) 1 else 0),
     lostMatches = acc.lostMatches + (if(matchToAdd.wonSetsA == matchToAdd.numberOfSetsToWin) 1 else 0),
     wonSets = acc.wonSets +  matchToAdd.wonSetsB,
@@ -61,7 +61,7 @@ object RoundScoreCalculator {
     lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfA) => pointsOfA + game.pointA - dealWithHandicap(isWithHandicap, matchToAdd, "A"))
   )
 
-  def getScoresOfPlayer(isWithHandicap: Boolean, matchList: List[SiteMatch], seriesPlayer: SeriesPlayer): PlayerScores = matchList.foldRight[PlayerScores](PlayerScores()){ (matchToAdd, acc) =>
+  def getScoresOfPlayer(isWithHandicap: Boolean, matchList: List[PingpongMatch], seriesPlayer: SeriesPlayer): PlayerScores = matchList.foldRight[PlayerScores](PlayerScores()){ (matchToAdd, acc) =>
       if(matchToAdd.playerA.exists(player => player.id == seriesPlayer.player.id)){
         addPlayerAscores(isWithHandicap, matchToAdd, acc)
       } else if(matchToAdd.playerB.exists(player => player.id == seriesPlayer.player.id)){
@@ -71,7 +71,7 @@ object RoundScoreCalculator {
       }
   }
 
-  def calculatePlayerScore(isWithHandicap: Boolean, matchList: List[SiteMatch]): (SeriesPlayer) => SeriesPlayer = seriesPlayer => seriesPlayer.copy(playerScores = getScoresOfPlayer(isWithHandicap, matchList, seriesPlayer))
+  def calculatePlayerScore(isWithHandicap: Boolean, matchList: List[PingpongMatch]): (SeriesPlayer) => SeriesPlayer = seriesPlayer => seriesPlayer.copy(playerScores = getScoresOfPlayer(isWithHandicap, matchList, seriesPlayer))
 
   def applyScoreKey(robinGroupPlayers: List[SeriesPlayer], scoreKeyOpt: Option[List[Int]]): List[SeriesPlayer] =  scoreKeyOpt match{
     case Some(scoreKey) => robinGroupPlayers.zip(scoreKey).map{case (seriesPlayer, indexScore) => seriesPlayer.copy(playerScores = seriesPlayer.playerScores.copy(totalPoints = indexScore))}

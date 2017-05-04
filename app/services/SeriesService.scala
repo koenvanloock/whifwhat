@@ -87,14 +87,17 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   }
 
   def returnRoundRankingOrNextRoundIfPresent(series: TournamentSeries, roundRanking: FinalRanking): Option[SeriesRound] => Future[Either[FinalRanking, SeriesRound]] = {
-    case Some(nextRound) => update(series.copy(currentRoundNr = series.currentRoundNr + 1)).flatMap{ _ =>
-
-      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
-      seriesRoundService.updateSeriesRound(updatedRound).map( _  => Right(updatedRound))
-    }
+    case Some(nextRound) => updateAndReturnNextRound(series, nextRound, roundRanking)
     case _ => seriesPlayerRepository.retrieveAllSeriesPlayers(series.id)
       .flatMap( playerList => Future.sequence{playerList.map(retrieveRoundPlayersAndAggregateScore)})
       .map(playerList => Left(playerList.sortBy(-_.playerScores.totalPoints)))
+  }
+
+  private def updateAndReturnNextRound(series: TournamentSeries, nextRound: SeriesRound, roundRanking: FinalRanking) = {
+    update(series.copy(currentRoundNr = series.currentRoundNr + 1)).flatMap { _ =>
+      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
+      seriesRoundService.updateSeriesRound(updatedRound).map(_ => Right(updatedRound))
+    }
   }
 
   def drawnRoundOrError(seriesId: String): Option[SiteRobinRound] => Either[DrawError, (String, SiteRobinRound)] = {

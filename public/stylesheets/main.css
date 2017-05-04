@@ -185,6 +185,16 @@ form .progress {
     border-right: solid white 5px;
 }
 
+.playerBoxBlue{
+    height: 245px;
+    width: 250px;
+    margin-left: 20px;
+    margin-right: 20px;
+    background: darkblue;
+    border-left: solid white 5px;
+    border-right: solid white 5px;
+}
+
 .playerBox-top{
     border-top: solid white 5px;
 }
@@ -231,7 +241,7 @@ form .progress {
     height: 100%
 }
 
-.playerBox-horizontal{
+.playerBoxHorizontal{
     float: left;
     width: 240px;
     height: 250px;
@@ -241,4 +251,20 @@ form .progress {
     background: darkgreen;
     border-top: solid white 5px;
     border-bottom: solid white 5px;
+}
+
+.playerBoxHorizontalBlue{
+    float: left;
+    width: 240px;
+    height: 250px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+    background: darkblue;
+    border-top: solid white 5px;
+    border-bottom: solid white 5px;
+}
+
+.matchesPresent{
+    min-width: 500px;
 }

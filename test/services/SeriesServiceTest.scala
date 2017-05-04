@@ -1,7 +1,7 @@
 package services
 
 import models._
-import models.matches.{SiteGame, SiteMatch}
+import models.matches.{SiteGame, PingpongMatch}
 import models.player._
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
@@ -125,7 +125,7 @@ class SeriesServiceTest extends PlaySpec {
     "returnRoundRankingOrNextRoundIfPresent returns the ranking if it's the last round of the tournament (no next round)" in {
       val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
       val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
-        SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
+        PingpongMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
           SiteGame(21, 15, 1),
           SiteGame(21, 15, 2))
         )))))), DEFAULT_DURATION)
@@ -138,7 +138,7 @@ class SeriesServiceTest extends PlaySpec {
     "returnRoundRankingOrNextRoundIfPresent returns the drawn next round if it exists" in {
       val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
       val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
-        SiteMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
+        PingpongMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
           SiteGame(21, 15, 1),
           SiteGame(21, 15, 2))
         )))))), DEFAULT_DURATION)
