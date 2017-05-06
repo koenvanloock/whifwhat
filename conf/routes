@@ -56,6 +56,8 @@ POST          /hall                                          controllers.HallCon
 PATCH         /hall                                          controllers.HallController.update
 DELETE        /hall/:hallId                                  controllers.HallController.deleteHall(hallId: String)
 
+PATCH        /hallMatch/:hallId/:row/:column                controllers.HallController.deleteHallMatch(hallId: String, row: Int, column: Int)
+
 GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
 

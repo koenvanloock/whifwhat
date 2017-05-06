@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 import play.api.libs.streams.{ActorFlow, Streams}
 import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
-import services.HallService
+import services.{HallService, SeriesRoundService}
 import utils.{ControllerUtils, JsonUtils}
 import utils.JsonUtils.ListWrites._
 
@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class HallController @Inject()(hallService: HallService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
+class HallController @Inject()(hallService: HallService, seriesRoundService: SeriesRoundService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
   implicit val timeout = Timeout(5 seconds)
   implicit val messageFlowTransformer = MessageFlowTransformer.jsonMessageFlowTransformer[Hall, Hall]
   implicit val rankFormat = Json.format[Rank]
@@ -62,10 +62,10 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
 
     val hallOpt = request.body.asJson.flatMap { json =>
       for {
-        numberOfRows          <- (json \ "rows").asOpt[Int]
-        numberOfTablesPerRow  <- (json \ "tablesPerRow").asOpt[Int]
-        name                  <- (json \ "hallName").asOpt[String]
-        isGreen               <- (json \ "isGreen").asOpt[Boolean]
+        numberOfRows <- (json \ "rows").asOpt[Int]
+        numberOfTablesPerRow <- (json \ "tablesPerRow").asOpt[Int]
+        name <- (json \ "hallName").asOpt[String]
+        isGreen <- (json \ "isGreen").asOpt[Boolean]
       } yield (Hall(UUID.randomUUID().toString, name, numberOfRows, numberOfTablesPerRow, Nil), isGreen)
     }
 
@@ -85,11 +85,12 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
   def update() = Action.async { request =>
     request.body.asJson.flatMap { json =>
       json.validate[Hall].asOpt.map {
-        hall => hallService.update(hall).map{ result =>
-          activeHallActor ! SetActiveHall(hall)
-          hallEventStreamActor ! ActivateHall(result)
-          Ok(Json.toJson(result))
-        }
+        hall =>
+          hallService.update(hall).map { result =>
+            activeHallActor ! SetActiveHall(hall)
+            hallEventStreamActor ! ActivateHall(result)
+            Ok(Json.toJson(result))
+          }
       }
     }.getOrElse(Future(BadRequest("Het request kon niet geparset worden.")))
 
@@ -114,24 +115,23 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
     Ok.chunked(source via EventSource.flow).as("text/event-stream")
   }
 
-  def getActiveHall() = Action.async{
-    (activeHallActor ? GetHall).mapTo[Option[Hall]].map{
+  def getActiveHall() = Action.async {
+    (activeHallActor ? GetHall).mapTo[Option[Hall]].map {
       case Some(hall) => Ok(Json.toJson(hall))
       case _ => BadRequest("no hall active")
     }
   }
 
-  def deleteHall(hallId: String) = Action.async{
-    hallService.delete(hallId).map{
-      case () =>  NoContent
-      case _ => BadRequest("couldn't delete id "+hallId)
+  def deleteHall(hallId: String) = Action.async {
+    hallService.delete(hallId).map {
+      case () => NoContent
     }
   }
 
-  def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async{ request =>
+  def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async { request =>
 
-    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map{ pingpongMatch =>
-      hallService.setMatchToTable(hallId, row, column, pingpongMatch).map{
+    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map { pingpongMatch =>
+      hallService.setMatchToTable(hallId, row, column, pingpongMatch).map {
         case Some(hall) =>
           println(LocalDateTime.now + " printing hall")
           hallEventStreamActor ! ActivateHall(hall)
@@ -142,5 +142,27 @@ class HallController @Inject()(hallService: HallService, implicit val system: Ac
 
     }.getOrElse(Future(BadRequest))
 
+  }
+
+  def deleteHallMatch(hallId: String, row: Int, column: Int) = Action.async { request =>
+    println(request.body)
+    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map { pingpongMatch =>
+      seriesRoundService.retrieveByFields(Json.obj("id" -> pingpongMatch.roundId)).flatMap {
+        case Some(round) =>
+          val updatedRound = seriesRoundService.updateMatchInRound(pingpongMatch, round)
+          deleteMatchInHall(hallId, row, column)
+
+        case _ => Future(BadRequest("round not found, update failed"))
+      }
+    }.getOrElse(Future(BadRequest("couldn't parse match")))
+  }
+
+  private def deleteMatchInHall(hallId: String, row: Int, column: Int): Future[Result] = {
+    hallService.deleteMatchInHall(hallId, row, column).map {
+      case Some(updatedHall) =>
+        hallEventStreamActor ! ActivateHall(updatedHall)
+        Ok
+      case _ => BadRequest
+    }
   }
 }

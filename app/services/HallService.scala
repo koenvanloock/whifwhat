@@ -13,22 +13,37 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class HallService @Inject()(hallRepository: HallRepository){
 
+  def deleteHallMatch(hall: Hall, row: Int, column: Int): Hall =  updateMatchInHall(hall, row, column, None)
+
+  def deleteMatchInHall(hallId: String, row: Int, column: Int): Future[Option[Hall]] = {
+    hallRepository.retrieveById(hallId).flatMap{
+      case Some(hall) =>
+      val updatedHall = deleteHallMatch(hall, row, column)
+        hallRepository.update(updatedHall).map(Some(_))
+      case None => Future(None)
+    }
+
+  }
+
+
   def setMatchToTable(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
     println(hallId)
     hallRepository.retrieveByField("id",hallId).map {
-      case Some(hall) => addMatchToHall(hall, row, column, pingpongMatch)
+      case Some(hall) => Some(updateMatchInHall(hall, row, column, Some(pingpongMatch)))
       case _ => None
     }.flatMap{
-      case Some(updatedHall) => println("updatedHall: " + updatedHall);hallRepository.update(updatedHall).map( hall => Some(hall))
+      case Some(updatedHall) =>
+        println("updatedHall: " + updatedHall)
+        hallRepository.update(updatedHall).map( hall => Some(hall))
       case _ => Future(None)
     }
   }
 
-  protected def addMatchToHall(hall: Hall, row: Int, column: Int, pingpongMatch: PingpongMatch): Option[Hall] =
-    Some(hall.copy(tables = hall.tables.map(originalOrMatchToInsert(row, column, pingpongMatch))))
+  protected def updateMatchInHall(hall: Hall, row: Int, column: Int, pingpongMatch: Option[PingpongMatch]): Hall =
+    hall.copy(tables = hall.tables.map(originalOrMatchToUpdate(row, column, pingpongMatch)))
 
-  protected def originalOrMatchToInsert(row: Int, column: Int, pingpongMatch: PingpongMatch): (HallTable) => HallTable =
-    hallTable => if(hallTable.row == row && hallTable.column == column) hallTable.copy( siteMatch = Some(pingpongMatch)) else hallTable
+  protected def originalOrMatchToUpdate(row: Int, column: Int, pingpongMatch: Option[PingpongMatch]): (HallTable) => HallTable =
+    hallTable => if(hallTable.row == row && hallTable.column == column) hallTable.copy( siteMatch = pingpongMatch) else hallTable
 
 
   def delete(hallId: String) = hallRepository.delete(hallId)

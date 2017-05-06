@@ -25,7 +25,7 @@ class DrawService @Inject()() {
       val ids = for (robinNr <- (0 until robinRound.numberOfRobinGroups).toList) yield (robinNr, UUID.randomUUID().toString)
       val robins: List[RobinGroup] = ids.map { tuple =>
         val playerGroup = robinPlayers.zipWithIndex.filter(couple => couple._2 % robinRound.numberOfRobinGroups == tuple._1).map(couple => SeriesPlayer(UUID.randomUUID().toString, couple._1.id, couple._1.player, PlayerScores()))
-        val matches = createRobinMatches(tuple._2, playerGroup, numberOfSetsToWin, setTargetScore)
+        val matches = createRobinMatches( robinRound.id, playerGroup, numberOfSetsToWin, setTargetScore)
         RobinGroup(tuple._2, playerGroup, matches)
       }
       Some(robinRound.copy(robinList = robins))
