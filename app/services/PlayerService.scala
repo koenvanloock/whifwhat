@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, seriesRepository: SeriesRepository, playerRepository: PlayerRepository) extends LazyLogging{
 
   def getSeriesOfPlayer(playerId: String, tournamentId: String) =
-    seriesRepository.retrieveAllByField("TOURNAMENT_ID", tournamentId).flatMap{ seriesList =>
+    seriesRepository.retrieveAllByField("tournamentId", tournamentId).flatMap{ seriesList =>
       Future.sequence(seriesList.map { series =>
         seriesPlayerRepository.getSubscriptionsOfPlayerInTournament(playerId, series.id).map( subscriptions => if(subscriptions.isEmpty) None else Some(series))
       })

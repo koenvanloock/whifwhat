@@ -4,14 +4,16 @@ module TournamentManagement {
         static $inject = ["TournamentService", "SeriesService", "PlayerService", "$location", "$routeParams", "alertService"];
 
         private tournament:Tournament;
-        private numberOfSeriesEntries:Array<any>;
         private allPlayers = [];
         private ranks:Array<Rank>;
         private inserting:boolean = true;
         private editing:boolean = false;
-        private seriesSubscriptions:Array<any>;
-        private subscription:any;
+
+        private seriesList:Array<any>;
+        private playerSubscriptions:Array<any>;
         private playerSelection:any;
+
+        private checkList: Array<boolean>;
         private subscriptionList:string;
         private query:any;
 
@@ -22,10 +24,9 @@ module TournamentManagement {
                     private $routeParams:IRouteParamsService,
                     private alertService: AlertService) {
             this.ranks = [];
-            this.seriesSubscriptions = [{seriesName: "uitschrijven", seriesId: ""}];
-            this.subscription = {
-                "seriesSubscriptions": []
-            };
+            this.seriesList = [];
+            this.checkList = [];
+            this.playerSubscriptions = [];
             this.query = {
                 page: 1,
                 limit: 5
@@ -64,15 +65,12 @@ module TournamentManagement {
 
                 )
             }
-
-
         }
 
         init() {
-            this.numberOfSeriesEntries = new Array(this.tournament.maximumNumberOfSeriesEntries);
             this.tournament.series.map((series) => {
                 series.query = {page: 1, limit: 5};
-                this.seriesSubscriptions.push(series)
+                this.seriesList.push(series)
             });
             this.tournament.series.map((series:Series) => {
                 this.seriesService.fetchSeriesPlayers(series.id).then(
@@ -85,34 +83,27 @@ module TournamentManagement {
                     (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
                 )
             });
-            this.createSubscriptions();
 
         }
 
-
-        createSubscriptions() {
-            for (var i = 0; i < this.tournament.maximumNumberOfSeriesEntries; i++) {
-                this.subscription.seriesSubscriptions[i] = null;
-            }
-        };
-
-        getSeriesSubscriptions() {
-            this.subscriptionList = "";
+        getPlayerSubscriptions() {
             if (this.playerSelection.selectedItem) {
-                this.playerService.getSeriesSubscriptionsOfPlayer(this.playerSelection.selectedItem.playerId, this.tournament.id).then(
+                console.log(this.playerSelection.selectedItem);
+                this.playerService.getSeriesSubscriptionsOfPlayer(this.playerSelection.selectedItem.id, this.tournament.id).then(
 
                     (response:any) => {
-
-                    this.subscription.seriesSubscriptions = response.data.map((series, index) => {
-                        this.getSubscriptionOfSeries(this.subscription.seriesSubscriptions, series, index)
-                    });
-                    this.subscriptionList = this.subscriptionList.substring(0, (this.subscriptionList.length - 2));
+                    this.playerSubscriptions = response.data;
+                    this.checkList = [];
+                    this.seriesList.map( (series) => this.checkList.push(this.isSubscribed(this.playerSubscriptions, series)));
                 },
                     (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
 
                 );
             }
+        }
 
+        isSubscribed(subscriptionList, series){
+            return subscriptionList.filter( (subscription) => subscription.id === series.id).length > 0;
         }
 
         calculateTournamentPlayers() {
@@ -125,23 +116,14 @@ module TournamentManagement {
             }
         }
 
-        getSubscriptionOfSeries(seriesSubscriptions, series, index) {
-            if (this.tournament.maximumNumberOfSeriesEntries > index) {
-
-                this.subscriptionList += series.seriesName + ", ";
-            }
-        };
-
         querySearch(query) {
             return query ? this.allPlayers.filter(this.createFilterFor(query)) : this.allPlayers;
         }
 
-
         createFilterFor(query) {
-            var lowercaseQueryList = angular.lowercase(query).split(' ');
+            let lowercaseQueryList = angular.lowercase(query).split(' ');
             return function filterFn(person) {
-                var contains = false;
-
+                let contains = false;
                 lowercaseQueryList.map(function (queryPart) {
                     contains = contains || (angular.lowercase(person.firstname).indexOf(queryPart) === 0) || (angular.lowercase(person.lastname).indexOf(queryPart) === 0);
                 });
@@ -150,19 +132,18 @@ module TournamentManagement {
         }
 
         enterPlayer() {
-            var seriesToSubscribe = [];
-            this.subscription.seriesSubscriptions.map(function (subscriptionId) {
-                    seriesToSubscribe.push(subscriptionId)
-                }
-            );
+            this.playerSubscriptions  = [];
+            this.checkList.map( (subscribeTo,index) => { if(subscribeTo){
+                this.playerSubscriptions.push(this.seriesList[index])
+            }
+            });
             this.createSubscription();
         };
 
         createSubscription() {
-            var selectedPlayer:any = this.playerSelection;
-            var subscriptionList = this.subscription.seriesSubscriptions.map((series) => series.id);
+            let subscriptionList = this.playerSubscriptions.map( (series) => series.id);
 
-            this.playerService.subscribePlayer(subscriptionList, this.tournament.series.map((series) => series.id), selectedPlayer.selectedItem).then((resp) => {
+            this.playerService.subscribePlayer(subscriptionList, this.tournament.series.map((series) => series.id), this.playerSelection.selectedItem).then((resp) => {
                 this.tournament.series.map((series) => {
                     this.seriesService.fetchSeriesPlayers(series.id).then(
                         (seriesPlayers:any) => {
@@ -173,11 +154,12 @@ module TournamentManagement {
                 });
                 this.playerSelection.searchText = null;
                 this.playerSelection.selectedItem = null;
-                this.createSubscriptions();
-                this.subscriptionList = "";
             })
         };
 
+        lessThanMaxEntries(){
+            return this.checkList.filter((isSubscribed) => isSubscribed).length < this.tournament.maximumNumberOfSeriesEntries;
+        }
 
         gotoSeriesSetup() {
             this.$location.path("tournament/" + this.$routeParams["tournamentId"] + "/seriesSetup")
@@ -186,8 +168,6 @@ module TournamentManagement {
         gotoRoundsSetup() {
             this.$location.path("/tournament/" + this.$routeParams['tournamentId'] + "/roundsSetup");
         };
-
-
     }
 
     angular.module("managerControllers").controller("PlayerSubscriptionController", PlayerSubscriptionController)

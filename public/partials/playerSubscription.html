@@ -8,7 +8,7 @@
                 ng-disabled="playerSubscrCtrl.playerSelection.isDisabled"
                 md-no-cache="playerSubscrCtrl.playerSelection.noCache"
                 md-selected-item="playerSubscrCtrl.playerSelection.selectedItem"
-                md-selected-item-change="playerSubscrCtrl.getSeriesSubscriptions()"
+                md-selected-item-change="playerSubscrCtrl.getPlayerSubscriptions()"
                 md-search-text="playerSubscrCtrl.playerSelection.searchText"
                 md-items="item in playerSubscrCtrl.querySearch(playerSubscrCtrl.playerSelection.searchText)"
                 md-item-text="item.firstname+' '+item.lastname+'\t'+item.rank.name"
@@ -29,18 +29,10 @@
 
                 <h2 layout-align="center center" flex="20">{{playerSubscrCtrl.ranks[playerSubscrCtrl.playerSelection.selectedItem.rank.value].rankName}}</h2>
             </div>
-            <div layout="row">
-                <md-select ng-repeat="nr in playerSubscrCtrl.numberOfSeriesEntries track by $index"
-                           ng-model="playerSubscrCtrl.subscription.seriesSubscriptions[$index]" placeholder="Kies een reeks" flex="33"
-                           ng-model-options="{trackBy: '$value.id'}"
-                           layout-align="center center">
-                    <md-option ng-repeat="seriesToSubscribe in playerSubscrCtrl.seriesSubscriptions"
-                               ng-value="seriesToSubscribe">
-                        {{seriesToSubscribe.seriesName}}
-                    </md-option>
-                </md-select>
+            <div layout="row" class="md-padding">
+                <md-checkbox ng-repeat="series in playerSubscrCtrl.seriesList track by $index" ng-model="playerSubscrCtrl.checkList[$index]" ng-disabled="!playerSubscrCtrl.checkList[$index] && !playerSubscrCtrl.lessThanMaxEntries()">{{ series.seriesName }}</md-checkbox>
             </div>
-            <md-button ng-click="playerSubscrCtrl.enterPlayer()">Schrijf speler in</md-button>
+            <md-button class="md-button md-raised md-primary" ng-click="playerSubscrCtrl.enterPlayer()">Schrijf speler in</md-button>
         </div>
     </section>
 
