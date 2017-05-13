@@ -4,7 +4,7 @@ import java.util.UUID
 import javax.inject.Inject
 
 import models._
-import models.matches.{SiteGame, PingpongMatch}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
 
 import scala.util.{Random, Try}
@@ -45,9 +45,9 @@ class DrawService @Inject()() {
     }
   }
 
-  def createSiteGameForMatch(numberOfSetsToWin: Int): List[SiteGame] = {
+  def createSiteGameForMatch(numberOfSetsToWin: Int): List[PingpongGame] = {
     for (setNr <- (1 to (numberOfSetsToWin * 2 - 1)).toList) yield {
-      SiteGame(0, 0, setNr)
+      PingpongGame(0, 0, setNr)
     }
   }
 

@@ -1,7 +1,7 @@
 package services
 
 import helpers.TestHelpers._
-import models.matches.{SiteGame, PingpongMatch}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, Ranks}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -19,7 +19,7 @@ class PingpongMatchServiceTest extends PlaySpec{
 
   "MatchService" should{
     "return a match by id" in {
-      val createdMatch =  Await.result(matchService.create(PingpongMatch("1", Some(koen), Some(hans), "1",3,true,21,2,0,0, List(SiteGame(0,0,1),SiteGame(0,0,2),SiteGame(0,0,3)))),DEFAULT_DURATION)
+      val createdMatch =  Await.result(matchService.create(PingpongMatch("1", Some(koen), Some(hans), "1",3,true,21,2,0,0, List(PingpongGame(0,0,1),PingpongGame(0,0,2),PingpongGame(0,0,3)))),DEFAULT_DURATION)
       val siteMatch =  waitFor(matchService.getMatch(createdMatch.id)).get
       siteMatch mustBe createdMatch
     }

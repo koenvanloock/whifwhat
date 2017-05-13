@@ -1,6 +1,6 @@
 package services
 
-import models.matches.{SiteGame, PingpongMatch}
+import models.matches.{PingpongGame, PingpongMatch}
 
 class MatchService {
   def isMatchComplete(siteMatch: PingpongMatch): Boolean = siteMatch.games.forall(_.isCorrect(siteMatch.targetScore))
@@ -12,8 +12,8 @@ class MatchService {
 
 
 
-  def isForA(targetScore: Int): (SiteGame) => Boolean = game => game.isCorrect(targetScore) && game.pointA > game.pointB
-  def isForB(targetScore: Int): (SiteGame) => Boolean = game => game.isCorrect(targetScore) && game.pointB > game.pointA
+  def isForA(targetScore: Int): (PingpongGame) => Boolean = game => game.isCorrect(targetScore) && game.pointA > game.pointB
+  def isForB(targetScore: Int): (PingpongGame) => Boolean = game => game.isCorrect(targetScore) && game.pointB > game.pointA
 
 
 

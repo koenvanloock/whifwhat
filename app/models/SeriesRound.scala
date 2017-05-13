@@ -1,6 +1,6 @@
 package models
 
-import models.matches.{MatchChecker, SiteGame, PingpongMatch}
+import models.matches.{MatchChecker, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 import models.types._
 import play.api.libs.functional.syntax._
@@ -62,7 +62,7 @@ object SeriesRoundEvidence {
     implicit val playerScoresFormat = Json.format[PlayerScores]
     implicit val playerFormat = Json.format[Player]
     implicit val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
-    implicit val gameWrites = Json.format[SiteGame]
+    implicit val gameWrites = Json.format[PingpongGame]
     implicit val matchWrites = Json.format[PingpongMatch]
     implicit val listSeriesPlayerWrites = JsonUtils.listWrites(Json.writes[SeriesPlayer])
     implicit val listMatchReads = JsonUtils.listReads(Json.reads[PingpongMatch])

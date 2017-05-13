@@ -1,6 +1,6 @@
 package utils
 
-import models.matches.{SiteGame, PingpongMatch}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -37,27 +37,27 @@ class RoundRankerTest extends PlaySpec {
 
 
     val matchListOfFive = List(
-      PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-      PingpongMatch("2", Some(koen.player), Some(luk.player), "123", 3, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-      PingpongMatch("3", Some(koen.player), Some(lode.player), "123", 7, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-      PingpongMatch("4", Some(koen.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(15, 21, 1), SiteGame(15, 21, 2))),
-      PingpongMatch("5", Some(hans.player), Some(luk.player), "123", 3, isHandicapForB = false, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-      PingpongMatch("6", Some(hans.player), Some(lode.player), "123", 1, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-      PingpongMatch("7", Some(hans.player), Some(aram.player), "123", 12, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2))),
-      PingpongMatch("8", Some(luk.player), Some(lode.player), "123", 4, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 14, 1), SiteGame(21, 13, 2))),
-      PingpongMatch("9", Some(luk.player), Some(aram.player), "123", 9, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2))),
-      PingpongMatch("10", Some(lode.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2)))
+      PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+      PingpongMatch("2", Some(koen.player), Some(luk.player), "123", 3, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+      PingpongMatch("3", Some(koen.player), Some(lode.player), "123", 7, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+      PingpongMatch("4", Some(koen.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(15, 21, 1), PingpongGame(15, 21, 2))),
+      PingpongMatch("5", Some(hans.player), Some(luk.player), "123", 3, isHandicapForB = false, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+      PingpongMatch("6", Some(hans.player), Some(lode.player), "123", 1, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+      PingpongMatch("7", Some(hans.player), Some(aram.player), "123", 12, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2))),
+      PingpongMatch("8", Some(luk.player), Some(lode.player), "123", 4, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 14, 1), PingpongGame(21, 13, 2))),
+      PingpongMatch("9", Some(luk.player), Some(aram.player), "123", 9, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2))),
+      PingpongMatch("10", Some(lode.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2)))
     )
 
 
 
     "A match with both players in the list is true" in {
-      val siteMatch = PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 0, 2, List(SiteGame(16, 21, 1), SiteGame(16, 21, 2)))
+      val siteMatch = PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 0, 2, List(PingpongGame(16, 21, 1), PingpongGame(16, 21, 2)))
       RoundRanker.bothPlayersInList(siteMatch, players) mustBe true
     }
 
     "A match with only one player in the filtered list is false" in {
-      val siteMatch = PingpongMatch("1", Some(koen.player), Some(Player("1", "Jules", "Martens", Ranks.Ng)), "123", 6, isHandicapForB = true, 21, 2, 0, 2, List(SiteGame(16, 21, 1), SiteGame(16, 21, 2)))
+      val siteMatch = PingpongMatch("1", Some(koen.player), Some(Player("1", "Jules", "Martens", Ranks.Ng)), "123", 6, isHandicapForB = true, 21, 2, 0, 2, List(PingpongGame(16, 21, 1), PingpongGame(16, 21, 2)))
       RoundRanker.bothPlayersInList(siteMatch, players) mustBe false
     }
 
@@ -77,16 +77,16 @@ class RoundRankerTest extends PlaySpec {
       val players = List(aram, lode, luk, hans, koen)
 
       val matchList = List(
-        PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(15, 21, 1), SiteGame(16, 21, 2))),
-        PingpongMatch("2", Some(koen.player), Some(luk.player), "123", 3, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(12, 21, 1), SiteGame(9, 21, 2))),
-        PingpongMatch("3", Some(koen.player), Some(lode.player), "123", 7, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(17, 21, 1), SiteGame(16, 21, 2))),
-        PingpongMatch("4", Some(koen.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(15, 21, 1), SiteGame(15, 21, 2))),
-        PingpongMatch("5", Some(hans.player), Some(luk.player), "123", 3, isHandicapForB = false, 21, 2, 2, 0, List(SiteGame(21, 15, 1), SiteGame(21, 16, 2))),
-        PingpongMatch("6", Some(hans.player), Some(lode.player), "123", 1, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(19, 21, 1), SiteGame(19, 21, 2))),
-        PingpongMatch("7", Some(hans.player), Some(aram.player), "123", 12, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2))),
-        PingpongMatch("8", Some(luk.player), Some(lode.player), "123", 4, isHandicapForB = true, 21, 2, 2, 0, List(SiteGame(21, 14, 1), SiteGame(21, 13, 2))),
-        PingpongMatch("9", Some(luk.player), Some(aram.player), "123", 9, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2))),
-        PingpongMatch("10", Some(lode.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(SiteGame(14, 21, 1), SiteGame(16, 21, 2)))
+        PingpongMatch("1", Some(koen.player), Some(hans.player), "123", 6, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(15, 21, 1), PingpongGame(16, 21, 2))),
+        PingpongMatch("2", Some(koen.player), Some(luk.player), "123", 3, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(12, 21, 1), PingpongGame(9, 21, 2))),
+        PingpongMatch("3", Some(koen.player), Some(lode.player), "123", 7, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(17, 21, 1), PingpongGame(16, 21, 2))),
+        PingpongMatch("4", Some(koen.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(15, 21, 1), PingpongGame(15, 21, 2))),
+        PingpongMatch("5", Some(hans.player), Some(luk.player), "123", 3, isHandicapForB = false, 21, 2, 2, 0, List(PingpongGame(21, 15, 1), PingpongGame(21, 16, 2))),
+        PingpongMatch("6", Some(hans.player), Some(lode.player), "123", 1, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(19, 21, 1), PingpongGame(19, 21, 2))),
+        PingpongMatch("7", Some(hans.player), Some(aram.player), "123", 12, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2))),
+        PingpongMatch("8", Some(luk.player), Some(lode.player), "123", 4, isHandicapForB = true, 21, 2, 2, 0, List(PingpongGame(21, 14, 1), PingpongGame(21, 13, 2))),
+        PingpongMatch("9", Some(luk.player), Some(aram.player), "123", 9, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2))),
+        PingpongMatch("10", Some(lode.player), Some(aram.player), "123", 6, isHandicapForB = false, 21, 2, 0, 2, List(PingpongGame(14, 21, 1), PingpongGame(16, 21, 2)))
       )
 
       RoundRanker.breakTiesWithDirectMatchup(isWithHandicap = true, players, matchList, 4) mustBe List(aram, hans, luk, lode, koen)

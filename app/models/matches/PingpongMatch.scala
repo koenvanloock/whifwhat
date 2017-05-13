@@ -1,9 +1,8 @@
 package models.matches
 
 import models.player.{Player, Rank}
-import models.{Crudable, Model}
+import models.Model
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
-import slick.jdbc.GetResult
 import utils.JsonUtils
 
 
@@ -18,7 +17,7 @@ case class PingpongMatch(
                       numberOfSetsToWin: Int,
                       wonSetsA: Int,
                       wonSetsB: Int,
-                      games: List[SiteGame])
+                      games: List[PingpongGame])
 
 object MatchEvidence{
 
@@ -30,15 +29,10 @@ object MatchEvidence{
     implicit val rankFormat = Json.format[Rank]
     implicit val playerFormat = Json.format[Player]
     val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
-    implicit val gameWrites = Json.format[SiteGame]
+    implicit val gameWrites = Json.format[PingpongGame]
     override def writes(o: PingpongMatch): JsObject = Json.format[PingpongMatch].writes(o)
 
     override def reads(json: JsValue): JsResult[PingpongMatch] = Json.format[PingpongMatch].reads(json)
-  }
-
-  implicit object MatchIsCrudable extends Crudable[PingpongMatch]{
-    override def getId(crudable: PingpongMatch): String = crudable.id
-    override implicit val getResult: GetResult[PingpongMatch] = GetResult(r => PingpongMatch(r.<<,None,None,r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, r.<<, List()))
   }
 }
 

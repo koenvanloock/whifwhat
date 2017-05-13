@@ -2,8 +2,8 @@ package models
 
 import java.util.UUID
 
-import models.matches.{SiteGame, PingpongMatch}
-import models.player.{Player, PlayerScores, SeriesPlayer}
+import models.matches.{PingpongGame, PingpongMatch}
+import models.player.Player
 import models.types.{Bracket, BracketLeaf, BracketNode, SiteMatchNode}
 
 object SiteBracket {
@@ -69,7 +69,7 @@ object SiteBracket {
     PingpongMatch(UUID.randomUUID().toString,None, None, "",0,true, targetScore, numberOfSetsToWin,0,0,createSets(numberOfSetsToWin))
   }
 
-  def createSets(numberOfSetsToWin: Int): List[SiteGame] = (1 to 2* numberOfSetsToWin -1).map(gameNr => SiteGame(0,0,gameNr)).toList
+  def createSets(numberOfSetsToWin: Int): List[PingpongGame] = (1 to 2* numberOfSetsToWin -1).map(gameNr => PingpongGame(0,0,gameNr)).toList
 
   def convertNodeToSiteMatchNode: (BracketNode[PingpongMatch]) => SiteMatchNode = node => SiteMatchNode(node.value, node.left, node.right)
 

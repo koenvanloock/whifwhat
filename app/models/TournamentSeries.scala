@@ -2,7 +2,6 @@ package models
 
 import models.player.SeriesPlayer
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
-import slick.jdbc.GetResult
 
 case class TournamentSeries(
                              id: String,
@@ -40,12 +39,3 @@ case class SeriesWithPlayers(seriesId: String,
                              currentRoundNr: Int=1,
                              seriesPlayers: List[SeriesPlayer],
                              tournamentId: String)
-
-
-object TournamentSeriesResultModel{
-  implicit object TournamentSeriesIsCrudable extends Crudable[TournamentSeries]{
-    override def getId(crudable: TournamentSeries): String = crudable.id
-
-    override implicit val getResult: GetResult[TournamentSeries] = GetResult(r => TournamentSeries(r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<,r.<<))
-  }
-}

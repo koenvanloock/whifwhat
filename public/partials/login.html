@@ -11,7 +11,7 @@
             </md-input-container>
         </div>
 
-        <div layout="row">
+        <div layout="row" ng-enter="loginCtrl.loginAction()">
             <md-input-container flex>
                 <label>Wachtwoord</label>
                 <input type="password" ng-model="loginCtrl.credentials.password"/>

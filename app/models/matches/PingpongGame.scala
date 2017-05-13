@@ -1,6 +1,6 @@
 package models.matches
 
-case class SiteGame(pointA: Int, pointB : Int, gameNr: Int) {
+case class PingpongGame(pointA: Int, pointB : Int, gameNr: Int) {
 
   def isCorrect(targetScore: Int): Boolean ={
     if(pointA > targetScore && pointA> pointB){

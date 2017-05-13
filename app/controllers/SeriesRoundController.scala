@@ -16,7 +16,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
 import models.matches.MatchEvidence.matchIsModel._
-import models.matches.{MatchEvidence, SiteGame, PingpongMatch}
+import models.matches.{MatchEvidence, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
 class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, seriesService: SeriesService) extends Controller{
@@ -122,7 +122,7 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
   def getMatchListOfRound(seriesRoundId: String) = Action.async{
     implicit val rankWrites = Json.writes[Rank]
     implicit val playerWrites = Json.writes[Player]
-    implicit val gameWrites = Json.writes[SiteGame]
+    implicit val gameWrites = Json.writes[PingpongGame]
     implicit val matchWrites = Json.writes[PingpongMatch]
     seriesRoundService.getMatchesOfRound(seriesRoundId).map( matchList => Ok(Json.listToJson(matchList)))
   }

@@ -20,7 +20,7 @@ import akka.pattern.ask
 import akka.stream.scaladsl.Source
 import akka.util.Timeout
 import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries, HallOverviewWrites}
-import models.matches.{PingpongMatch, SiteGame}
+import models.matches.{PingpongMatch, PingpongGame}
 import models.player.{Player, Rank}
 import play.api.libs.EventSource
 import play.api.libs.iteratee.Concurrent
@@ -32,8 +32,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TournamentController @Inject()(system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository, hallOverviewService: HallOverviewService) extends Controller with StrictLogging{
   implicit val timeout = Timeout(5 seconds)
-  val activeTournamentActor = system.actorOf(TournamentActor.props, "activeTournament-actor")
-  val tournamentEventStreamActor = system.actorOf(TournamentEventStreamActor.props)
+  val activeTournamentActor = system.actorOf(TournamentActor.props, "activeTournamentActor")
+  val tournamentEventStreamActor = system.actorOf(TournamentEventStreamActor.props, "tournamentEventStreamActor")
 
   val (out, channel) = Concurrent.broadcast[HallOverViewTournament]
   tournamentEventStreamActor ! Start(channel)

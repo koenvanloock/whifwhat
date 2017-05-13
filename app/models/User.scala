@@ -1,7 +1,6 @@
 package models
 
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
-import slick.jdbc.GetResult
 
 case class Role(id: String, roleName: String)
 
@@ -34,19 +33,3 @@ case class User(id: String, username: String, passwordHash: String, roleId: Stri
     }
 
   }
-
-object RoleResultModel{
-  implicit object RoleIsCrudable extends Crudable[Role]{
-    override def getId(crudable: Role): String = crudable.id
-
-    override implicit val getResult: GetResult[Role] = GetResult(r => Role(r.<<,r.<<))
-  }
-}
-
-object UserResultModel{
-  implicit object RoleIsCrudable extends Crudable[User]{
-    override def getId(crudable: User): String = crudable.roleId
-
-    override implicit val getResult: GetResult[User] = GetResult(r => User(r.<<,r.<<,r.<<,r.<<))
-  }
-}

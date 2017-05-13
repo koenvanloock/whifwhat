@@ -2,11 +2,8 @@ package models.halls
 
 import java.time.LocalDate
 
-import models.SeriesRoundEvidence.seriesRoundIsModel.bracketSiteMatchWrites
-import models.SiteBracketRound
-import models.matches.{PingpongMatch, SiteGame}
-import models.player.{Player, Rank, SeriesPlayer}
-import models.types.Bracket
+import models.matches.{PingpongMatch, PingpongGame}
+import models.player.{Player, Rank}
 import play.api.libs.functional.syntax.unlift
 import play.api.libs.json.{Json, Writes, __}
 import play.api.libs.functional.syntax._
@@ -24,7 +21,7 @@ object HallOverviewWrites{
   implicit val rankWrites = Json.writes[Rank]
   implicit val playerWrites = Json.writes[Player]
   implicit val optionWrites = JsonUtils.optionWrites[Player]
-  implicit val gameWrites = Json.writes[SiteGame]
+  implicit val gameWrites = Json.writes[PingpongGame]
   implicit val matchWrites = Json.writes[PingpongMatch]
   implicit val matchListWrites = JsonUtils.listWrites(matchWrites)
   implicit val hallRoundWrites = Json.writes[HallOverviewRound]

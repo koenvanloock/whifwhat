@@ -1,9 +1,7 @@
 package models.player
 
-import models.{Crudable, Model}
+import models.Model
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
-import slick.jdbc.GetResult
-import utils.RankConverter
 
 case class Player(id: String, firstname: String, lastname: String, rank: Rank, imagepath: Option[String]=None)
 
@@ -17,10 +15,5 @@ object PlayerEvidence{
     override def writes(o: Player): JsObject = Json.format[Player].writes(o)
 
     override def reads(json: JsValue): JsResult[Player] = Json.format[Player].reads(json)
-  }
-
-  implicit object PlayerIsCrudable extends Crudable[Player]{
-    override def getId(crudable: Player): String = crudable.id
-    override implicit val getResult: GetResult[Player] = GetResult(r => Player(r.<<,r.<<,r.<<,RankConverter.getRankOfInt(r.<<),r.<<))
   }
 }

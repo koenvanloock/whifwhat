@@ -1,6 +1,6 @@
 package utils
 
-import models.matches.{SiteGame, PingpongMatch}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -18,16 +18,16 @@ class RoundScorerTest extends PlaySpec{
 
         val matches = List(
           PingpongMatch("1", Some(player), None, "1", 2, isHandicapForB = true, 11, 3, 3, 1, List(
-            SiteGame(11, 8, 1),
-            SiteGame(11, 6, 2),
-            SiteGame(3, 11, 3),
-            SiteGame(12, 10, 4)
+            PingpongGame(11, 8, 1),
+            PingpongGame(11, 6, 2),
+            PingpongGame(3, 11, 3),
+            PingpongGame(12, 10, 4)
           )),
           PingpongMatch("1", None, Some(player), "1", 2, isHandicapForB = true, 11, 3, 3, 1, List(
-            SiteGame(11, 8, 1),
-            SiteGame(11, 6, 2),
-            SiteGame(3, 11, 3),
-            SiteGame(12, 10, 4)
+            PingpongGame(11, 8, 1),
+            PingpongGame(11, 6, 2),
+            PingpongGame(3, 11, 3),
+            PingpongGame(12, 10, 4)
           )
           ))
 
@@ -42,16 +42,16 @@ class RoundScorerTest extends PlaySpec{
 
       val matches = List(
         PingpongMatch("1", None, Some(player), "1", 2, isHandicapForB = true, 11, 3, 3, 1, List(
-          SiteGame(11, 8, 1),
-          SiteGame(11, 6, 2),
-          SiteGame(3, 11, 3),
-          SiteGame(12, 10, 4)
+          PingpongGame(11, 8, 1),
+          PingpongGame(11, 6, 2),
+          PingpongGame(3, 11, 3),
+          PingpongGame(12, 10, 4)
         )),
         PingpongMatch("1", None, Some(player), "1", 2, isHandicapForB = true, 11, 3, 3, 1, List(
-          SiteGame(11, 8, 1),
-          SiteGame(11, 6, 2),
-          SiteGame(3, 11, 3),
-          SiteGame(12, 10, 4)
+          PingpongGame(11, 8, 1),
+          PingpongGame(11, 6, 2),
+          PingpongGame(3, 11, 3),
+          PingpongGame(12, 10, 4)
         )
         ))
 

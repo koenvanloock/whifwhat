@@ -14,7 +14,7 @@ import akka.stream.scaladsl.Source
 import akka.util.{ByteString, Timeout}
 import models.halls.Hall
 import models.halls.HallEvidence._
-import models.matches.{PingpongMatch, SiteGame}
+import models.matches.{PingpongMatch, PingpongGame}
 import models.player.{Player, Rank}
 import play.api.http.HttpEntity
 import play.api.libs.EventSource
@@ -37,7 +37,7 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
   implicit val rankFormat = Json.format[Rank]
   implicit val playerFormat = Json.format[Player]
   implicit val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
-  implicit val gameWrites = Json.format[SiteGame]
+  implicit val gameWrites = Json.format[PingpongGame]
   val pingpongMatchReads = Json.reads[PingpongMatch]
 
   val activeHallActor = system.actorOf(ActiveHallActor.props)
