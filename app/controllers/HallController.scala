@@ -2,25 +2,25 @@ package controllers
 
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
-import actors.ActiveHallActor.{GetHall, SetActiveHall}
+import actors.TournamentEventActor._
 import actors.HallEventStreamActor.{ActivateHall, Start}
-import actors.{ActiveHallActor, HallEventStreamActor, HallSocketActor}
-import akka.actor.ActorSystem
+import actors.TournamentEventActor.Hallchanged
+import actors.{ActiveHallActor, HallEventStreamActor, HallSocketActor, TournamentEventActor}
+import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
 import akka.stream.scaladsl.Source
 import akka.util.{ByteString, Timeout}
 import models.halls.Hall
 import models.halls.HallEvidence._
-import models.matches.{PingpongMatch, PingpongGame}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, Rank}
-import play.api.http.HttpEntity
 import play.api.libs.EventSource
 import play.api.libs.iteratee.Concurrent
 import play.api.libs.json.Json
-import play.api.libs.streams.{ActorFlow, Streams}
+import play.api.libs.streams.Streams
 import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
 import services.{HallService, SeriesRoundService}
@@ -31,7 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class HallController @Inject()(hallService: HallService, seriesRoundService: SeriesRoundService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
+class HallController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, hallService: HallService, seriesRoundService: SeriesRoundService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
   implicit val timeout = Timeout(5 seconds)
   implicit val messageFlowTransformer = MessageFlowTransformer.jsonMessageFlowTransformer[Hall, Hall]
   implicit val rankFormat = Json.format[Rank]
@@ -40,7 +40,7 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
   implicit val gameWrites = Json.format[PingpongGame]
   val pingpongMatchReads = Json.reads[PingpongMatch]
 
-  val activeHallActor = system.actorOf(ActiveHallActor.props)
+  //val activeHallActor = system.actorOf(ActiveHallActor.props)
   val hallEventStreamActor = system.actorOf(HallEventStreamActor.props)
 
   val (out, channel) = Concurrent.broadcast[Hall]
@@ -87,7 +87,7 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
       json.validate[Hall].asOpt.map {
         hall =>
           hallService.update(hall).map { result =>
-            activeHallActor ! SetActiveHall(hall)
+            tournamentEventActor ! Hallchanged(hall)
             hallEventStreamActor ! ActivateHall(result)
             Ok(Json.toJson(result))
           }
@@ -98,7 +98,7 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
 
   def setActiveHall(hallId: String) = Action.async {
     hallService.retrieveById(hallId).flatMap {
-      case Some(hall) => (activeHallActor ? SetActiveHall(hall)).mapTo[Option[Hall]].map {
+      case Some(hall) => (tournamentEventActor ? Hallchanged(hall)).mapTo[Option[Hall]].map {
         case Some(hall) =>
           hallEventStreamActor ! ActivateHall(hall)
           NoContent
@@ -116,7 +116,7 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
   }
 
   def getActiveHall() = Action.async {
-    (activeHallActor ? GetHall).mapTo[Option[Hall]].map {
+    (tournamentEventActor ? GetHall).mapTo[Option[Hall]].map {
       case Some(hall) => Ok(Json.toJson(hall))
       case _ => BadRequest("no hall active")
     }
@@ -135,11 +135,10 @@ class HallController @Inject()(hallService: HallService, seriesRoundService: Ser
         case Some(hall) =>
           println(LocalDateTime.now + " printing hall")
           hallEventStreamActor ! ActivateHall(hall)
-          activeHallActor ! SetActiveHall(hall)
+          tournamentEventActor ! HallMatchUpdate(hallId, row, column, pingpongMatch)
           Ok
         case _ => BadRequest
       }
-
     }.getOrElse(Future(BadRequest))
 
   }

@@ -84,12 +84,11 @@ class DrawService @Inject()() {
   def drawBracket(players: List[SeriesPlayer], bracket: SiteBracketRound, numberOfSetsToWin: Int, setTargetScore: Int): Option[SiteBracketRound] = {
 
     if (bracket.numberOfBracketRounds > 0) {
-      val bracketId = UUID.randomUUID().toString
-      val bracketRounds = (0 until bracket.numberOfBracketRounds).toList.map(drawBracketRound(bracketId, players, numberOfSetsToWin, setTargetScore, bracket))
+      val bracketRounds = (0 until bracket.numberOfBracketRounds).toList.map(drawBracketRound(bracket.id, players, numberOfSetsToWin, setTargetScore, bracket))
       val bracketPlayers = players.take(Math.pow(2, bracket.numberOfBracketRounds).toInt).map {
-        convertToBracketPlayer(bracketId)
+        convertToBracketPlayer(bracket.id)
       }
-      val firstRoundMatches = drawFirstRoundOfBracket(bracket.numberOfBracketRounds, bracketId, bracketPlayers, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
+      val firstRoundMatches = drawFirstRoundOfBracket(bracket.numberOfBracketRounds, bracket.id, bracketPlayers, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
       Some(bracket.copy(bracketPlayers = bracketPlayers, bracket = SiteBracket.createBracket(firstRoundMatches)))
 
     } else None
@@ -106,7 +105,6 @@ class DrawService @Inject()() {
   }
 
 }
-
 
 case class DrawType(name: String)
 

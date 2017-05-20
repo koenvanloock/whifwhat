@@ -1,7 +1,6 @@
 package actors
 
 import akka.actor.{Actor, Props}
-import models.Tournament
 import models.halls._
 import models.matches.PingpongMatch
 import models.player.Player
@@ -12,10 +11,13 @@ object TournamentEventActor{
 
   case class Hallchanged(hall: Hall)
   case object HallRemoved
+  case object GetHall
   case class HallMatchUpdate(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch)
 
   case class ActiveTournamentChanged(tournament: HallOverViewTournament)
   case object ActiveTournamentRemoved
+  case object GetActiveTournament
+  case object HasActiveTournament
 
   case class MatchUpdate(pingpongMatch: PingpongMatch)
 }
@@ -32,16 +34,22 @@ class TournamentEventActor extends Actor{
 
 
   override def receive: Receive = {
-    case Hallchanged(newHall) => this.hall = Some(newHall)
+    case Hallchanged(newHall) =>
+            this.hall = Some(newHall)
+            sender ! hall
     case HallRemoved => this.hall = None
     case HallMatchUpdate(hallId, row, column, pingpongMatch) =>
                         updateHallTournament(pingpongMatch, getFreedPlayers(hallId, row, column))
                         updateHallMatch(hallId, row, column, pingpongMatch)
+    case GetHall => sender ! hall
     case ActiveTournamentChanged(newTournament) => tournament = Some(newTournament)
+                                                    sender ! tournament
     case ActiveTournamentRemoved => tournament = None
     case MatchUpdate(pingpongMatch) =>
       removeHallMatch(pingpongMatch)
       updateHallTournament(pingpongMatch, getMatchPlayers(pingpongMatch))
+    case GetActiveTournament => sender ! tournament
+    case HasActiveTournament => sender ! tournament.nonEmpty
 
   }
 
@@ -77,6 +85,7 @@ class TournamentEventActor extends Actor{
     tournament.foreach{ existingTournament =>
       val playerList = freedPlayers ++ existingTournament.freePlayers.filterNot(player => pingpongMatch.playerA.contains(player) || pingpongMatch.playerB.contains(player))
       tournament = Some(existingTournament.copy(freePlayers = playerList, series = filterMatchesToPlay(pingpongMatch, existingTournament.series)))
+      println(tournament)
     }
   }
 }
