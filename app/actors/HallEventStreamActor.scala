@@ -17,7 +17,7 @@ class HallEventStreamActor  extends Actor {
     def receive = {
       case Start(outChannel)       => this.out = Some(outChannel)
       case ActivateHall(hall) =>
-        println("printing hall to stream: " + hall.hallName)
+        //println("printing hall to stream: " + hall.hallName)
         this.out.foreach(_.push(hall))
     }
 }

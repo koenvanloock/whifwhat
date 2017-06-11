@@ -1,7 +1,6 @@
 package actors
 
 import akka.actor.{Actor, Props}
-import models.Tournament
 import models.halls.HallOverViewTournament
 import play.api.libs.iteratee.Concurrent
 
@@ -19,7 +18,7 @@ class TournamentEventStreamActor extends Actor {
   override def receive: Receive = {
     case Start(outChannel) => this.out = Some(outChannel)
     case ActivateTournament(tournament: HallOverViewTournament) =>
-      println("printing tournament to stream: " + tournament.tournamentName)
+      //println("printing tournament to stream: " + tournament.tournamentName)
       this.out.foreach(_.push(tournament))
 
   }

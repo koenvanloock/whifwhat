@@ -51,18 +51,17 @@ POST          /user                                          controllers.LoginCo
 
 GET           /hall/:hallId                                  controllers.HallController.getById(hallId: String)
 GET           /hall                                          controllers.HallController.getAllHalls
-PATCH         /hall/:hallId/:row/:column                     controllers.HallController.updateHallWithMatch(hallId: String, row: Int, column: Int)
 POST          /hall                                          controllers.HallController.createHallIfNotExists
+PATCH         /hall/:hallId/:row/:column                     controllers.HallController.updateHallWithMatch(hallId: String, row: Int, column: Int)
 PATCH         /hall                                          controllers.HallController.update
 DELETE        /hall/:hallId                                  controllers.HallController.deleteHall(hallId: String)
 
-PATCH        /hallMatch/:hallId/:row/:column                controllers.HallController.deleteHallMatch(hallId: String, row: Int, column: Int)
+PATCH         /hallMatch/:hallId/:row/:column                controllers.HallController.deleteHallMatch(hallId: String, row: Int, column: Int)
 
 GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
 
-GET           /hallstream                                         controllers.HallController.hallStream
-GET           /tournamentstream                                   controllers.TournamentController.activeTournamentStream
+GET           /eventstream                                   controllers.StreamController.eventStream
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 

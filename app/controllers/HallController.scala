@@ -40,7 +40,6 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
   implicit val gameWrites = Json.format[PingpongGame]
   val pingpongMatchReads = Json.reads[PingpongMatch]
 
-  //val activeHallActor = system.actorOf(ActiveHallActor.props)
   val hallEventStreamActor = system.actorOf(HallEventStreamActor.props)
 
   val (out, channel) = Concurrent.broadcast[Hall]
@@ -159,7 +158,7 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
   private def deleteMatchInHall(hallId: String, row: Int, column: Int): Future[Result] = {
     hallService.deleteMatchInHall(hallId, row, column).map {
       case Some(updatedHall) =>
-        hallEventStreamActor ! ActivateHall(updatedHall)
+        tournamentEventActor ! Hallchanged(updatedHall)
         Ok
       case _ => BadRequest
     }
