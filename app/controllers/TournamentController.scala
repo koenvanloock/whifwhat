@@ -2,13 +2,10 @@ package controllers
 
 import javax.inject.{Inject, Named}
 
-import actors.TournamentActor.ReleaseTournament
-import actors.{TournamentActor, TournamentEventStreamActor}
 import actors.TournamentEventActor._
-import actors.TournamentEventStreamActor.{ActivateTournament, Start}
 import akka.actor.{ActorRef, ActorSystem}
 import com.typesafe.scalalogging.StrictLogging
-import models.{SeriesWithPlayers, Tournament, TournamentSeries, TournamentWithSeries}
+import models.{SeriesWithPlayers, Tournament, TournamentWithSeries}
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, Controller, Request}
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, TournamentRepository}
@@ -18,15 +15,9 @@ import models.TournamentEvidence._
 
 import scala.concurrent.duration._
 import akka.pattern.ask
-import akka.stream.scaladsl.Source
 import akka.util.Timeout
-import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries}
+import models.halls.HallOverViewTournament
 import jsonconverters.HallTournamentOverviewWrites
-import models.matches.{PingpongGame, PingpongMatch}
-import models.player.{Player, Rank}
-import play.api.libs.EventSource
-import play.api.libs.iteratee.Concurrent
-import play.api.libs.streams.Streams
 import services.HallOverviewService
 
 import scala.concurrent.Future

@@ -5,22 +5,16 @@ import java.util.UUID
 import javax.inject.{Inject, Named}
 
 import actors.TournamentEventActor._
-import actors.HallEventStreamActor.{ActivateHall, Start}
 import actors.TournamentEventActor.Hallchanged
-import actors.{ActiveHallActor, HallEventStreamActor, HallSocketActor, TournamentEventActor}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
-import akka.stream.scaladsl.Source
 import akka.util.{ByteString, Timeout}
 import models.halls.Hall
 import models.halls.HallEvidence._
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, Rank}
-import play.api.libs.EventSource
-import play.api.libs.iteratee.Concurrent
 import play.api.libs.json.Json
-import play.api.libs.streams.Streams
 import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
 import services.{HallService, SeriesRoundService}
@@ -40,10 +34,6 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
   implicit val gameWrites = Json.format[PingpongGame]
   val pingpongMatchReads = Json.reads[PingpongMatch]
 
-  val hallEventStreamActor = system.actorOf(HallEventStreamActor.props)
-
-  val (out, channel) = Concurrent.broadcast[Hall]
-  hallEventStreamActor ! Start(channel)
 
   def getAllHalls: Action[AnyContent] = Action.async {
 
@@ -87,7 +77,6 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
         hall =>
           hallService.update(hall).map { result =>
             tournamentEventActor ! Hallchanged(hall)
-            hallEventStreamActor ! ActivateHall(result)
             Ok(Json.toJson(result))
           }
       }
@@ -99,19 +88,12 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     hallService.retrieveById(hallId).flatMap {
       case Some(hall) => (tournamentEventActor ? Hallchanged(hall)).mapTo[Option[Hall]].map {
         case Some(hall) =>
-          hallEventStreamActor ! ActivateHall(hall)
           NoContent
         case _ => BadRequest("Something went wrong...")
       }
       case _ => Future(BadRequest("De gevraagde zaal werd niet gevonden."))
     }
 
-  }
-
-  def hallStream = Action { implicit req =>
-    val source = Source.fromPublisher(Streams.enumeratorToPublisher(out.map(Json.toJson(_))))
-
-    Ok.chunked(source via EventSource.flow).as("text/event-stream")
   }
 
   def getActiveHall() = Action.async {
@@ -133,7 +115,6 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
       hallService.setMatchToTable(hallId, row, column, pingpongMatch).map {
         case Some(hall) =>
           println(LocalDateTime.now + " printing hall")
-          hallEventStreamActor ! ActivateHall(hall)
           tournamentEventActor ! HallMatchUpdate(hallId, row, column, pingpongMatch)
           Ok
         case _ => BadRequest
@@ -158,7 +139,7 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
   private def deleteMatchInHall(hallId: String, row: Int, column: Int): Future[Result] = {
     hallService.deleteMatchInHall(hallId, row, column).map {
       case Some(updatedHall) =>
-        tournamentEventActor ! Hallchanged(updatedHall)
+        tournamentEventActor ! HallMatchDelete(hallId, row, column)
         Ok
       case _ => BadRequest
     }

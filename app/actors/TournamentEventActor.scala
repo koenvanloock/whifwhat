@@ -1,13 +1,12 @@
 package actors
 
 import actors.StreamActor.{PublishActiveHall, PublishActiveTournament}
-import akka.actor.{Actor, ActorRef, Props}
+import akka.actor.{Actor, ActorRef}
 import models.halls._
-import models.matches.PingpongMatch
+import models.matches.{MatchChecker, PingpongMatch}
 import models.player.Player
 
 object TournamentEventActor {
-  def props = Props[TournamentEventActor]
 
   case class SetChannel(streamActor: ActorRef)
 
@@ -27,7 +26,8 @@ object TournamentEventActor {
 
   case object HasActiveTournament
 
-  case class MatchUpdate(pingpongMatch: PingpongMatch)
+  case class HallMatchDelete(hallId: String, row: Int, column: Int)
+  case class RoundAdvance(roundMatches: List[PingpongMatch])
 
 }
 
@@ -38,35 +38,57 @@ class TournamentEventActor extends Actor {
   private var streamActorRef: Option[ActorRef] = None
   private var hall: Option[Hall] = None
   private var tournament: Option[HallOverViewTournament] = None
+  private var occupiedPlayers: List[Player] = Nil
+  private var uncompletedTournamentMatches: List[PingpongMatch] = Nil
 
   def tableOrTableWithoutMatch(pingpongMatch: PingpongMatch): (HallTable) => HallTable = hallTable => if (hallTable.siteMatch.contains(pingpongMatch)) hallTable.copy(siteMatch = None) else hallTable
 
-  def removeHallMatch(pingpongMatch: PingpongMatch) = hall.foreach(existingHall => existingHall.copy(tables = existingHall.tables.map(tableOrTableWithoutMatch(pingpongMatch))))
+  def removeHallMatch(pingpongMatch: PingpongMatch) = hall.foreach { existingHall =>
+    this.hall = Some(existingHall.copy(tables = existingHall.tables.map(tableOrTableWithoutMatch(pingpongMatch))))
+    streamActorRef.foreach(existingRef => existingRef ! PublishActiveHall(this.hall.get))
+  }
 
 
   override def receive: Receive = {
     case SetChannel(streamActor) => streamActorRef = Some(streamActor)
     case Hallchanged(newHall) =>
       this.hall = Some(newHall)
+      this.occupiedPlayers = Nil
       streamActorRef.foreach(streamActor => streamActor ! PublishActiveHall(newHall))
       sender ! hall
-    case HallRemoved => this.hall = None
-    case HallMatchUpdate(hallId, row, column, pingpongMatch) =>
-      updateHallTournament(pingpongMatch, getFreedPlayers(hallId, row, column))
+    case HallRemoved =>
+      this.hall = None
+      this.occupiedPlayers = Nil
+    case HallMatchUpdate(hallId, row, column, pingpongMatch) => canPlayMatch(pingpongMatch)( pingpongMatch => {
+      updateHallTournament(pingpongMatch, isInsert = true)
       updateHallMatch(hallId, row, column, pingpongMatch)
+      Right(pingpongMatch)
+    })
+
     case GetHall => sender ! hall
-    case ActiveTournamentChanged(newTournament) => tournament = Some(newTournament)
+    case ActiveTournamentChanged(newTournament) =>
+      tournament = Some(newTournament)
+      this.uncompletedTournamentMatches = newTournament.matchesToPlay
       sender ! tournament
-    case ActiveTournamentRemoved => tournament = None; sender() ! None
-    case MatchUpdate(pingpongMatch) =>
-      removeHallMatch(pingpongMatch)
-      updateHallTournament(pingpongMatch, getMatchPlayers(pingpongMatch))
+    case ActiveTournamentRemoved =>
+      tournament = None
+      sender() ! None
+    case HallMatchDelete(hallId, row, column) => this.hall.map(existingHall =>
+      if(existingHall.id == hallId){
+        existingHall.tables.find(table => table.row == row && table.column == column).map(table =>  table.siteMatch.map{
+          existingMatch => removeHallMatch(existingMatch)
+            removeHallMatch(existingMatch)
+            updateHallTournament(existingMatch, isInsert = false)
+            Right(existingMatch)
+        })
+
+      } else { Left("wrong hall")}
+    )
+    case RoundAdvance(matches) => this.uncompletedTournamentMatches ++ matches
     case GetActiveTournament => sender ! tournament
     case HasActiveTournament => sender ! tournament.nonEmpty
-
+    case _ => sender() ! "method not accepted"
   }
-
-  def getMatchPlayers(pingpongMatch: PingpongMatch) = List(pingpongMatch.playerA, pingpongMatch.playerB).flatten
 
   def updateHallMatch(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Unit = hall.foreach {
     existingHall =>
@@ -81,23 +103,35 @@ class TournamentEventActor extends Actor {
     table.copy(siteMatch = Some(pingpongMatch))
   } else table
 
-  def getFreedPlayers(hallId: String, row: Int, column: Int): List[Player] = hall.flatMap { existingHall =>
-    if (existingHall.id == hallId) {
-      existingHall.tables.find(table => table.row == row && table.column == column).flatMap { hallTable =>
-        for {
-          ref <- hallTable.referee
-          playerA <- hallTable.siteMatch.flatMap(_.playerA)
-          playerB <- hallTable.siteMatch.flatMap(_.playerB)
-        } yield List(ref, playerA, playerB)
-      }
-    } else None
-  }.getOrElse(Nil)
-
-  def updateHallTournament(pingpongMatch: PingpongMatch, freedPlayers: List[Player]): Unit = {
+  def updateHallTournament(pingpongMatch: PingpongMatch, isInsert: Boolean): Unit = {
     tournament.foreach { existingTournament =>
-      val playerList = freedPlayers ++ existingTournament.freePlayers.filterNot(player => pingpongMatch.playerA.contains(player) || pingpongMatch.playerB.contains(player))
-      tournament = Some(existingTournament.copy(freePlayers = playerList, matchesToPlay = existingTournament.matchesToPlay.filterNot(matchToFilter => matchToFilter.id != pingpongMatch.id)))
+      if(MatchChecker.isWon(pingpongMatch)){
+        this.uncompletedTournamentMatches = uncompletedTournamentMatches.filterNot(_.id == pingpongMatch.id)
+      }
+      val playerList = if(isInsert) removeMatchPlayersFromList(pingpongMatch, existingTournament.freePlayers) else existingTournament.freePlayers ++ getMatchPlayers(pingpongMatch)
+      this.occupiedPlayers = if(isInsert) this.occupiedPlayers ++ getMatchPlayers(pingpongMatch) else removeMatchPlayersFromList(pingpongMatch, this.occupiedPlayers)
+      tournament = Some(existingTournament.copy(freePlayers = playerList, matchesToPlay = uncompletedTournamentMatches.filter(matchPlayersAreAvailable)))
       streamActorRef.foreach(existingRef => tournament.foreach(existingTournament => existingRef ! PublishActiveTournament(existingTournament)))
     }
+  }
+
+  def canPlayMatch(pingpongMatch: PingpongMatch)(pingpongMatchAction: PingpongMatch => Either[String,PingpongMatch]): Either[String, PingpongMatch] = {
+    if(matchPlayersAreAvailable(pingpongMatch)){
+        pingpongMatchAction(pingpongMatch)
+    } else
+      println("illegale match "+pingpongMatch)
+      Left("Deze wedstrijd kan niet gespeeld worden")
+  }
+
+  private def matchPlayersAreAvailable(pingpongMatch: PingpongMatch): Boolean = {
+    this.occupiedPlayers.forall(player =>
+      pingpongMatch.playerA.exists(a => a.id != player.id) &&
+      pingpongMatch.playerB.exists(b => b.id != player.id))
+  }
+
+  private def getMatchPlayers(pingpongMatch: PingpongMatch) = List(pingpongMatch.playerA, pingpongMatch.playerB).flatten
+
+  private def removeMatchPlayersFromList(pingpongMatch: PingpongMatch, playerList: List[Player]): List[Player] = {
+    playerList.filter( player =>  getMatchPlayers(pingpongMatch).forall( _.id != player.id))
   }
 }
