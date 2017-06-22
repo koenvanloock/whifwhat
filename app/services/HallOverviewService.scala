@@ -11,7 +11,7 @@ import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRoundRepository: SeriesRoundRepository) {
+class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRoundRepository: SeriesRoundRepository, seriesPlayerService: SeriesPlayerService) {
 
 
   def convertRoundToHallOverView: (SeriesRound) => (HallOverviewRound, List[PingpongMatch]) = seriesRound => {
@@ -24,10 +24,13 @@ class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRo
 
   def getHallOverviewTournament(tournament: Tournament): Future[HallOverViewTournament] = {
     retrieveHalloverviewSeriesList(tournament)
-      .map{ case(hallSeriesListWithMatchesToPlay) =>
+      .flatMap{ case(hallSeriesListWithMatchesToPlay) =>
         val hallSeriesList = hallSeriesListWithMatchesToPlay.map(_._1)
         val matchList = hallSeriesListWithMatchesToPlay.flatMap(_._2)
-        HallOverViewTournament(tournament.id, tournament.tournamentName, tournament.tournamentDate, hallSeriesList, Nil, matchList)}
+        seriesPlayerService.retrievePlayersOf(hallSeriesList.map(_.seriesId)).map{seriesPlayerList =>
+          val players = seriesPlayerList.map(_.player).distinct
+        HallOverViewTournament(tournament.id, tournament.tournamentName, tournament.tournamentDate, hallSeriesList, players, matchList)}
+      }
   }
 
   private def retrieveHalloverviewSeriesList(tournament: Tournament): Future[List[(HallOverviewSeries, List[PingpongMatch])]] = {

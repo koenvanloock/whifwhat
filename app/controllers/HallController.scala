@@ -115,7 +115,7 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
       hallService.setMatchToTable(hallId, row, column, pingpongMatch).map {
         case Some(hall) =>
           println(LocalDateTime.now + " printing hall")
-          tournamentEventActor ! HallMatchUpdate(hallId, row, column, pingpongMatch)
+          tournamentEventActor ! MoveMatchInHall(hallId, row, column, pingpongMatch)
           Ok
         case _ => BadRequest
       }
@@ -143,5 +143,27 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
         Ok
       case _ => BadRequest
     }
+  }
+
+  def deleteHallReferee(hallId: String, row: Int, column: Int) = Action.async { request =>
+    ControllerUtils.parseEntityFromRequestBody(request, playerFormat).map { referee =>
+      hallService.deleteHallRef(hallId, row, column, referee).map {
+        case Some(updatedHall) =>
+          tournamentEventActor ! HallRefereeDelete(hallId, row, column, referee)
+          Ok
+        case _ => BadRequest
+      }
+    }.getOrElse(Future(BadRequest))
+  }
+
+  def updateHallWithReferee(hallId: String, row: Int, column: Int) = Action.async { request =>
+    ControllerUtils.parseEntityFromRequestBody(request, playerFormat).map { referee =>
+      hallService.insertRefInHall(hallId, row, column, referee).map {
+        case Some(updatedHall) =>
+          tournamentEventActor ! HallRefereeInsert(hallId, row, column, referee)
+          Ok
+        case _ => BadRequest
+      }
+    }.getOrElse(Future(BadRequest))
   }
 }

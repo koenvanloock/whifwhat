@@ -1,28 +1,36 @@
 Vue.component("hall-overview", {
   template: '<div style="display: flex">' +
-  '<div id="matchOverlayPlaceHolder" style="height: 100%; min-height: 500px;" v-bind:class="{matchesPresent: matchPanelOpen}"></div>' +
-  '<match-panel :matches="matchList" style="min-height: 500px; position: absolute; left:0px;top:80px; background: #46ac60" v-bind:class="{matchesPresent: matchPanelOpen}" v-if="matchPanelOpen"></match-panel>' +
+  '<div id="matchOverlayPlaceHolder" style="height: 100%; min-height: 500px;" v-bind:class="{matchesPresent: panelOpen}"></div>' +
+  '<match-panel :matches="matchList" style="z-index: 10000;min-height: 500px; position: absolute; left:0px;top:80px; background: #46ac60" v-bind:class="{matchesPresent: panelOpen}" v-if="panelOpen && isMatchTab"></match-panel>' +
+  '<player-panel :players="freePlayers" style="z-index: 10000;min-height: 500px; position: absolute; left:0px;top:80px; background: #46ac60" v-if="panelOpen && !isMatchTab"></player-panel>' +
   '<div>' +
-  ' <div v-for="rowNr in rowList" style="min-width:100%;" v-bind:style="{width: canvasWidth()}">' +
+  ' <div v-for="rowNr in rowList" style="min-width:100%;z-index: 100;" v-bind:style="{width: canvasWidth()}">' +
   '   <table-row :table-row="hall.tables.filter(function(table){ return table.row === rowNr;})"></table-row>' +
   ' </div>' +
   '</div>' +
-  '<match-bar v-on:toggleMatchPanel="togglePanel" :activeTournament="tournament" style="height: 80px; position: absolute; top: 0px; width: 100%; border-top: 1px solid white;"></match-bar>' +
+  '<match-bar ' +
+  ' v-on:toggleMatchPanel="toggleMatchPanel"' +
+  ' v-on:togglePlayerPanel="togglePlayerPanel" ' +
+  ' :activeTournament="tournament" ' +
+  ' style="height: 80px; position: absolute; top: 0px; width: 100%; border-top: 1px solid white;"></match-bar>' +
   //'<tournament-bar v-on:toggleMatchPanel="togglePanel" :activeTournament="tournament"  style="position: absolute; bottom: 0; width: 100%; border-top: 1px solid white;"></tournament-bar>' +
   '</div>',
   data: function () {
     return {
       tournament: {},
+      freePlayers: [],
       rowList: [],
       hall: {tables: []},
-      matchPanelOpen: false,
+      panelOpen: false,
+      isMatchTab: true,
       matchList: []
     }
   },
   mounted: function () {
     this.$http.get(window.location.origin + "/activeTournament").then(function(response){
       this.tournament = response.data;
-      this.matchList = this.tournament.remainingMatches
+      this.matchList = this.tournament.remainingMatches;
+      this.freePlayers = this.tournament.freePlayers;
     }.bind(this),this.logError);
 
     this.$http.get(window.location.origin + "/activehall").then(function (hallResponse) {
@@ -37,6 +45,7 @@ Vue.component("hall-overview", {
         this.tournament = data.tournament;
         var activeRoundId = this.matchList && this.matchList[0] ? this.matchList[0].roundId : undefined;
                      this.matchList = this.tournament.remainingMatches;
+                     this.freePlayers = this.tournament.freePlayers;
       }
       if(data.hall){
         this.hall = this.hall = data.hall;
@@ -58,8 +67,12 @@ Vue.component("hall-overview", {
       this.rowList = Array.apply(null, Array(this.hall.rows)).map(function(row, index) { return index + 1 });
     }.bind(this),
     logError: function(errorResponse){ console.log(errorResponse.body)},
-    togglePanel: function(isOpen){
-      this.matchPanelOpen = isOpen;
+    toggleMatchPanel: function(isOpen){
+      this.panelOpen = isOpen;
+      this.isMatchTab = true;
+    },togglePlayerPanel: function(isOpen){
+      this.panelOpen = isOpen;
+      this.isMatchTab = false;
     },
     canvasWidth: function(){ return this.hall.tablesPerRow * 600 + 'px'}
 

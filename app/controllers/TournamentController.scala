@@ -12,10 +12,10 @@ import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, TournamentR
 import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
 import models.TournamentEvidence._
-
-import scala.concurrent.duration._
-import akka.pattern.ask
 import akka.util.Timeout
+import scala.concurrent.duration._
+
+import akka.pattern.ask
 import models.halls.HallOverViewTournament
 import jsonconverters.HallTournamentOverviewWrites
 import services.HallOverviewService
@@ -25,11 +25,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class TournamentController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository, hallOverviewService: HallOverviewService) extends Controller with StrictLogging{
   implicit val timeout = Timeout(5 seconds)
-  //val activeTournamentActor = system.actorOf(TournamentActor.props, "activeTournamentActor")
-
-
-
   val tournamentWrites = Json.format[Tournament]
+
+
 
   implicit val halloverviewWrites = HallTournamentOverviewWrites.hallOverviewTournamentWrites
 

@@ -1,15 +1,16 @@
 Vue.component("vue-pingpong-table", {
-  template: '<div class="pingpongTable" v-on:dragover="allowDrop" v-on:drop="dropMatch">'+
-
+  template: '<div style="background: gray">' +
   '<div class="tableNr" v-if="!table.hidden">' +
-    '<div v-if="notUpdating" v-on:click="startUpdating" style="float: left; width: 400px; height: 20px">{{ tableData.tableName }}</div>' +
+  '<div v-if="notUpdating" v-on:click="startUpdating" style="float: left; width: 400px; height: 20px">{{ tableData.tableName }}</div>' +
     '<div v-else><input v-model="tableData.tableName" style="float: left" v-on:blur="setNotUpdating" /></div>' +
-    '<button v-if="tableData.siteMatch" v-on:click="removeMatch" style="float: right"> <i class="fa fa-close"></i></button>' +
+  '<button v-if="tableData.siteMatch" v-on:click="removeMatch" style="float: right"> <i class="fa fa-close"></i></button>' +
   '</div>'+
-  '<div>'+
+  '<div>' +
+  '<div style="display: flex;flex-direction: row">' +
+  '<div class="pingpongTable" v-on:dragover="allowDrop" v-on:drop="dropMatch">'+
+
   '<!-- vertical-->'+
   '<div class="table" v-if="!(table.hidden || table.horizontal)">'+
-
   '<div class="playerBox-top" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.siteMatch">' +
   '{{tableData.siteMatch.playerA.firstname + " " + tableData.siteMatch.playerA.lastname}}' +
@@ -23,7 +24,6 @@ Vue.component("vue-pingpong-table", {
   '<input v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-bind="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
-
   '</div>'+
   '<!-- horizontal-->'+
   '<div class="horizontal-table" v-if="!table.hidden && table.horizontal">'+
@@ -42,6 +42,9 @@ Vue.component("vue-pingpong-table", {
   '</span>'+
   '</div>'+
 
+  '</div>'+
+  '</div>'+
+  '<referee-box style="position: relative;top: 160px; right: 10px;" :horizontal="true" :referee="table.referee" :hallId="tableData.hallId" :row="tableData.row" :column="tableData.column"></referee-box>'+
   '</div>'+
   '</div>'+
   '</div>',

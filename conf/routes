@@ -57,6 +57,8 @@ PATCH         /hall                                          controllers.HallCon
 DELETE        /hall/:hallId                                  controllers.HallController.deleteHall(hallId: String)
 
 PATCH         /hallMatch/:hallId/:row/:column                controllers.HallController.deleteHallMatch(hallId: String, row: Int, column: Int)
+POST          /hallRef/:hallId/:row/:column                  controllers.HallController.updateHallWithReferee(hallId: String, row: Int, column: Int)
+PATCH         /hallRef/:hallId/:row/:column                  controllers.HallController.deleteHallReferee(hallId: String, row: Int, column: Int)
 
 GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)

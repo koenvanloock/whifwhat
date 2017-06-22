@@ -1,7 +1,10 @@
 Vue.component("matchPanel", {
   template: '<div style="height: 85%">' +
   '<div style="position: relative">' +
-  '<input v-model="matchQuery" />' +
+  '<div class="input-container" style="padding: 2px;"> ' +
+  '<input v-model="matchQuery" class="form-control" v-bind:class="{hasValue: matchQuery.lengh>0}" />' +
+  '<label>Filter spelers</label>' +
+  '</div>' +
   '</div>' +
   '<div style="overflow-y: scroll; height: 95%">' +
   '<ul style="list-style-type: none; padding-left: 10px;">' +
