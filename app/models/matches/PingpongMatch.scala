@@ -37,8 +37,23 @@ object MatchEvidence{
 }
 
 object MatchChecker{
+  def calculateSets(pingpongMatch: PingpongMatch): PingpongMatch = {
+    val result = pingpongMatch.games.foldLeft[(Int, Int)]((0,0)){ (acc, game) => {
+      if(game.pointA == pingpongMatch.targetScore || (game.pointA - 2 == game.pointB && game.pointA> pingpongMatch.targetScore)){
+       (acc._1 + 1, acc._2)
+      } else if(game.pointB == pingpongMatch.targetScore || (game.pointB - 2 == game.pointA && game.pointB> pingpongMatch.targetScore)){
+        (acc._1 , acc._2 + 1)
+      } else {
+        acc
+      }
+    }}
+
+    pingpongMatch.copy(wonSetsA = result._1, wonSetsB = result._2)
+  }
+
   def isWon(pingpongMatch: PingpongMatch): Boolean = {
-    (pingpongMatch.wonSetsA > pingpongMatch.wonSetsB) && pingpongMatch.wonSetsA == pingpongMatch.numberOfSetsToWin ||
-      pingpongMatch.wonSetsA < pingpongMatch.wonSetsB && pingpongMatch.wonSetsB == pingpongMatch.numberOfSetsToWin
+    val checkecMatch = calculateSets(pingpongMatch)
+    (checkecMatch.wonSetsA > checkecMatch.wonSetsB) && checkecMatch.wonSetsA == checkecMatch.numberOfSetsToWin ||
+      checkecMatch.wonSetsA < checkecMatch.wonSetsB && checkecMatch.wonSetsB == checkecMatch.numberOfSetsToWin
   }
 }

@@ -3,7 +3,7 @@ Vue.component("matchPanel", {
   '<div style="position: relative">' +
   '<div class="input-container" style="padding: 2px;"> ' +
   '<input v-model="matchQuery" class="form-control" v-bind:class="{hasValue: matchQuery.lengh>0}" />' +
-  '<label>Filter spelers</label>' +
+  '<label>Filter wedstrijden</label>' +
   '</div>' +
   '</div>' +
   '<div style="overflow-y: scroll; height: 95%">' +
@@ -38,10 +38,10 @@ Vue.component("matchPanel", {
     },
     filterMatches: function (matchList, query) {
       return matchList.filter(function (match) {
-        return contains(match.playerA.firstname + ' ' + match.playerA.lastname, query) ||
+        return match.playerA && match.playerB && (contains(match.playerA.firstname + ' ' + match.playerA.lastname, query) ||
           contains(match.playerA.lastname + ' ' + match.playerA.firstname,query) ||
           contains(match.playerB.lastname + ' ' + match.playerB.firstname,query) ||
-          contains(match.playerB.lastname + ' ' + match.playerB.firstname, query);
+          contains(match.playerB.lastname + ' ' + match.playerB.firstname, query));
       });
     }
 

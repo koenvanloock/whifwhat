@@ -139,6 +139,7 @@ class TournamentEventActor extends Actor {
 
   def updateHallTournament(pingpongMatch: PingpongMatch, isInsert: Boolean): Unit = {
     tournament.foreach { existingTournament =>
+
       if(MatchChecker.isWon(pingpongMatch)){
         this.uncompletedTournamentMatches = uncompletedTournamentMatches.filterNot(_.id == pingpongMatch.id)
       }

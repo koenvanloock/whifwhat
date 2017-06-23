@@ -25,7 +25,7 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 coverageExcludedPackages := "<empty>;Reverse.*;router.*;views.*"
 
 addCommandAlias("scoverage", {
-  "clean coverage test"; "coverageReport"
+  ";clean coverage test;coverageReport"
 })
 
 javaOptions in Test += "-Dconfig.resource=test.conf"
