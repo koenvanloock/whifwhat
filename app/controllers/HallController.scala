@@ -129,18 +129,19 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
       seriesRoundService.retrieveByFields(Json.obj("id" -> pingpongMatch.roundId)).flatMap {
         case Some(round) =>
           val updatedRound = seriesRoundService.updateMatchInRound(pingpongMatch, round)
-          deleteMatchInHall(hallId, row, column)
+          deleteMatchInHall(hallId, row, column, pingpongMatch)
 
         case _ => Future(BadRequest("round not found, update failed"))
       }
     }.getOrElse(Future(BadRequest("couldn't parse match")))
   }
 
-  private def deleteMatchInHall(hallId: String, row: Int, column: Int): Future[Result] = {
+  private def deleteMatchInHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Future[Result] = {
     hallService.deleteMatchInHall(hallId, row, column).map {
       case Some(updatedHall) =>
-        tournamentEventActor ! HallMatchDelete(hallId, row, column)
-        Ok
+            seriesRoundService.updateHallMatch(pingpongMatch)
+            tournamentEventActor ! HallMatchDelete(hallId, row, column, pingpongMatch)
+            Ok
       case _ => BadRequest
     }
   }

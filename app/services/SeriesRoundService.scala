@@ -3,9 +3,9 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.matches.PingpongMatch
+import models.matches.{MatchChecker, PingpongMatch}
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
-import play.api.libs.json.JsObject
+import play.api.libs.json.{JsObject, Json}
 import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 import utils.RoundScorer
 
@@ -33,6 +33,14 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   def updateMatchInRound(siteMatch: PingpongMatch, round: SeriesRound): SeriesRound = round match{
     case robinRound: SiteRobinRound => robinRound.copy(robinList = robinRound.robinList.map(group => group.copy( robinMatches = group.robinMatches.map(matchToUpdateOrOriginalMatch(siteMatch)))))
     case bracketRound: SiteBracketRound => bracketRound.copy(bracket = bracketRound.bracket.map(matchToUpdateOrOriginalMatch(siteMatch)))
+  }
+
+  def updateHallMatch(pingpongMatch: PingpongMatch): Future[Option[SeriesRound]] = retrieveByFields(Json.obj("id" -> pingpongMatch.roundId)).map{
+    _.map{ round =>
+      val updatedRound = calculateRoundResults(pingpongMatch.handicap == 0, updateMatchInRound(MatchChecker.calculateSets(pingpongMatch), round))
+      seriesRoundRepository.update(updatedRound)
+      updatedRound
+    }
   }
 
   def matchToUpdateOrOriginalMatch(siteMatch: PingpongMatch): (PingpongMatch) => PingpongMatch = {

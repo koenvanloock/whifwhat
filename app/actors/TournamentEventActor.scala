@@ -19,7 +19,7 @@ object TournamentEventActor {
   case object HasActiveTournament
   case class HallRefereeInsert(hallId: String, row: Int, column: Int, insertedReferee: Player)
   case class HallRefereeDelete(hallId: String, row: Int, column: Int, deletedReferee: Player)
-  case class HallMatchDelete(hallId: String, row: Int, column: Int)
+  case class HallMatchDelete(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch)
   case class RoundAdvance(roundMatches: List[PingpongMatch])
 
 }
@@ -46,12 +46,12 @@ class TournamentEventActor extends Actor {
     case GetHall => sender ! hall
     case ActiveTournamentChanged(newTournament) => activateTournament(newTournament)
     case ActiveTournamentRemoved => clearTournament
-    case HallMatchDelete(hallId, row, column) => this.hall.map(existingHall =>
+    case HallMatchDelete(hallId, row, column, pingpongMatch) => this.hall.map(existingHall =>
       if(existingHall.id == hallId){
         existingHall.tables.find(table => table.row == row && table.column == column).map(table =>  table.siteMatch.map{
           existingMatch => removeHallMatch(existingMatch)
             removeHallMatch(existingMatch)
-            updateHallTournament(existingMatch, isInsert = false)
+            updateHallTournament(pingpongMatch, isInsert = false)
             Right(existingMatch)
         })
 
@@ -145,8 +145,8 @@ class TournamentEventActor extends Actor {
       }
       val playerList = if(isInsert) removeMatchPlayersFromList(pingpongMatch, existingTournament.freePlayers) else existingTournament.freePlayers ++ getMatchPlayers(pingpongMatch)
       this.occupiedPlayers = if(isInsert) this.occupiedPlayers ++ getMatchPlayers(pingpongMatch) else removeMatchPlayersFromList(pingpongMatch, this.occupiedPlayers)
-      tournament = Some(existingTournament.copy(freePlayers = playerList, matchesToPlay = uncompletedTournamentMatches.filter(matchPlayersAreAvailable)))
-      streamActorRef.foreach(existingRef => tournament.foreach(existingTournament => existingRef ! PublishActiveTournament(existingTournament)))
+      tournament = Some(existingTournament.copy(freePlayers = playerList, matchesToPlay = uncompletedTournamentMatches))
+      streamActorRef.foreach(existingRef => tournament.foreach(existingTournament => existingRef ! PublishActiveTournament(existingTournament.copy(matchesToPlay = this.uncompletedTournamentMatches.filter(matchPlayersAreAvailable)))))
     }
   }
 
