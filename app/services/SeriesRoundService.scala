@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository, seriesRepository: SeriesRepository) {
-  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRoundRepository.retrieveAllByField(fieldKey, fieldValue)
+  def retrieveAllByField(fieldKey: String, fieldValue: String): Future[List[SeriesRound]] = seriesRoundRepository.retrieveAllByField(fieldKey, fieldValue)
   def retrieveByFields(jsObject: JsObject): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveByFields(jsObject)
 
   def getMatchesOfRound(seriesRoundId: String): Future[List[PingpongMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
@@ -22,7 +22,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     case None => List()
   }
 
-  def getRound(roundId: String) = seriesRoundRepository.retrieveById(roundId)
+  def getRound(roundId: String): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveById(roundId)
 
 
   def calculateRoundResults(playingWithHandicaps: Boolean, seriesRound: SeriesRound): SeriesRound = seriesRound match{
@@ -66,10 +66,10 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   }
 
 
-  def updateSeriesRound(seriesRound: SeriesRound) = seriesRoundRepository.update(seriesRound)
+  def updateSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = seriesRoundRepository.update(seriesRound)
 
 
-  def getRoundsOfSeries(seriesId: String) = seriesRoundRepository.retrieveAllByField("seriesId", seriesId)
+  def getRoundsOfSeries(seriesId: String): Future[List[SeriesRound]] = seriesRoundRepository.retrieveAllByField("seriesId", seriesId)
 
 
   def updateRoundNrForDeletedNr(roundNrToDelete: Int): (SeriesRound) => Future[SeriesRound] = {
@@ -81,7 +81,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     round => if(round.roundNr > roundNrToDelete) updateSeriesRound(decreaseRoundNr(round)) else Future(round)
   }
 
-  def updateRoundNrs(round: SeriesRound) = {
+  def updateRoundNrs(round: SeriesRound): Future[List[SeriesRound]] = {
     val roundToDeleteNr = round.roundNr
     getRoundsOfSeries(round.seriesId).flatMap{ rounds => Future.sequence{
           rounds.map(updateRoundNrForDeletedNr(roundToDeleteNr))
@@ -114,7 +114,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       ))
   }
 
-  def updateSeriesPlayerAfterMatch(seriesPlayer: SeriesPlayer, playerMatches: List[PingpongMatch]) = {
+  def updateSeriesPlayerAfterMatch(seriesPlayer: SeriesPlayer, playerMatches: List[PingpongMatch]): SeriesPlayer = {
 
     val newPlayerScore = calculateRoundPlayerScore(seriesPlayer, playerMatches)
     seriesPlayer.copy(playerScores = newPlayerScore)

@@ -91,7 +91,7 @@ class TournamentEventActor extends Actor {
     sender ! tournament.map(applyOccupiedFilters)
   }
 
-  private def clearHall = {
+  private def clearHall: Unit = {
     this.hall = None
     this.occupiedPlayers = Nil
   }
@@ -150,7 +150,7 @@ class TournamentEventActor extends Actor {
     }
   }
 
-  def updateTournamentWith(updateFunc: HallOverViewTournament => HallOverViewTournament) = {
+  def updateTournamentWith(updateFunc: HallOverViewTournament => HallOverViewTournament): Unit = {
     this.tournament = tournament.map(updateFunc)
     streamActorRef.foreach(existingRef => tournament.foreach(existingTournament => existingRef ! PublishActiveTournament(existingTournament)))
   }
@@ -171,7 +171,7 @@ class TournamentEventActor extends Actor {
     } else table
   }
 
-  def removeHallMatch(pingpongMatch: PingpongMatch) = hall.foreach { existingHall =>
+  def removeHallMatch(pingpongMatch: PingpongMatch): Unit = hall.foreach { existingHall =>
     this.hall = Some(existingHall.copy(tables = existingHall.tables.map(tableOrTableWithoutMatch(pingpongMatch))))
     streamActorRef.foreach(existingRef => existingRef ! PublishActiveHall(this.hall.get))
   }

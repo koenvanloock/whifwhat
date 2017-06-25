@@ -14,14 +14,14 @@ Vue.component("vue-pingpong-table", {
   '<div class="playerBox-top" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.siteMatch">' +
   '{{tableData.siteMatch.playerA.firstname + " " + tableData.siteMatch.playerA.lastname}}' +
-  '<input v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-bind="tableData.siteMatch.games[index].pointA" style="margin-left: 10px; width:20px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.siteMatch.games[index].pointA" style="margin-left: 10px; width:20px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '<div class="net"></div>' +
   '<div class="playerBox-bottom" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.siteMatch">' +
   '{{tableData.siteMatch.playerB.firstname + " " + tableData.siteMatch.playerB.lastname}}' +
-  '<input v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-bind="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '</div>'+
@@ -31,14 +31,14 @@ Vue.component("vue-pingpong-table", {
   '<div class="playerBox-left" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
   '<span v-if="tableData.siteMatch">' +
   '{{tableData.siteMatch.playerA.firstname + " " + tableData.siteMatch.playerA.lastname}}' +
-  '<input v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-bind="tableData.siteMatch.games[index].pointA" style="width:20px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.siteMatch.games[index].pointA" style="width:20px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '<div class="horizonal-net"></div>'+
   '<div class="playerBox-right" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
   '<span v-if="tableData.siteMatch">' +
   '{{tableData.siteMatch.playerB.firstname + " " + tableData.siteMatch.playerB.lastname}}' +
-  '<input v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-bind="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
 
