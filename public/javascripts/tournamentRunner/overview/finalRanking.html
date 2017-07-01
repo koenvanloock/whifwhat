@@ -1,0 +1,33 @@
+<div layout-align="center center">
+<md-card>
+  <div hidden> {{nonPodiumRanks = finalRanking.slice(3,finalRanking.length)}}</div>
+  <ul class="finalRanking">
+    <li class="first">
+      <span>1</span>
+      <span flex></span>
+      <span>{{finalRanking[0].player.firstname}}</span>
+      <span>{{finalRanking[0].player.lastname}}</span>
+      <span flex></span>
+    </li>
+    <li class="second">
+      <span>2</span>
+      <span flex></span>
+      <span>{{finalRanking[1].player.firstname}}</span>
+      <span>{{finalRanking[1].player.lastname}}</span>
+    </li>
+    <li class="third">
+      <span>3</span>
+      <span flex></span>
+      <span>{{finalRanking[2].player.firstname}}</span>
+      <span>{{finalRanking[2].player.lastname}}</span>
+    </li>
+    <li class="ranking-elem" ng-repeat="player in nonPodiumRanks">
+      <span>{{$index + 4}}</span>
+      <span>{{player.player.firstname}}</span>
+      <span>{{player.player.lastname}}</span>
+    </li>
+
+  </ul>
+
+</md-card>
+</div>

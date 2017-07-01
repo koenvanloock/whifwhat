@@ -5,12 +5,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
-import repositories.Schema
 
 class PlayerControllerTest extends PlaySpec with OneAppPerTest{
-  val appBuilder = new GuiceApplicationBuilder().build()
-  val schema = appBuilder.injector.instanceOf[Schema]
-  schema.initSchema()
 
   "PlayerController" should {
     "return all players" in {

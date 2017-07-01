@@ -1,0 +1,28 @@
+<div class="pingpongTable">
+
+  <div class="tableNr"></div>
+  <md-button class="md-fab" ng-click="table.hidden = !table.hidden"><i class="fa fa-eye"></i></md-button>
+  <md-button class="md-fab" ng-click="table.horizontal = !table.horizontal"><i class="fa fa-refresh"></i></md-button>
+
+  <div>
+    <!-- vertical-->
+    <div class="table" ng-hide="table.hidden || table.horizontal">
+
+        <div class="playerBox-top" ng-class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}"></div>
+        <div class="net"></div>
+      <div class="playerBox-bottom" ng-class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}"></div>
+
+    </div>
+
+    <!-- horizontal-->
+    <div class="horizontal-table" ng-hide="table.hidden || !table.horizontal" layout="row">
+
+      <div class="playerBox-left" ng-class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}"></div>
+      <div class="horizonal-net"></div>
+      <div class="playerBox-right" ng-class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}"></div>
+
+    </div>
+
+  </div>
+
+</div>

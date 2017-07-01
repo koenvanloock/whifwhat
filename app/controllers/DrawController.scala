@@ -2,66 +2,21 @@ package controllers
 
 import javax.inject.Inject
 
-import models.matches.{SiteMatchWithGames, SiteGame, BracketMatchWithGames}
 import models.player._
 import models._
-import play.api.libs.json.{JsValue, Writes, Json}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.{Action, Controller}
-import services.{SeriesService, DrawService}
+import services.SeriesService
+import utils.JsonUtils
+import models.SeriesRoundEvidence._
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DrawController @Inject()(seriesService: SeriesService) extends Controller{
 
-    val matchWithGameWrites = new Writes[BracketMatchWithGames] {
-      override def writes(bracketMatchWithGames: BracketMatchWithGames): JsValue = Json.obj(
-        "bracketMatchId" -> bracketMatchWithGames.bracketMatchId,
-        "bracketId" -> bracketMatchWithGames.bracketId,
-        "bracketRoundNr" -> bracketMatchWithGames.bracketRoundNr,
-        "bracketMatchNr" -> bracketMatchWithGames.bracketMatchNr,
-        "matchId" -> bracketMatchWithGames.matchId,
-        "playerA" -> bracketMatchWithGames.playerA,
-        "playerB" -> bracketMatchWithGames.playerB,
-        "handicap" -> bracketMatchWithGames.handicap,
-        "isHandicapForB" -> bracketMatchWithGames.isHandicapForB,
-        "targetScore" -> bracketMatchWithGames.targetScore,
-        "numberOfSetsToWin" -> bracketMatchWithGames.numberOfSetsToWin,
-        "sets" -> bracketMatchWithGames.sets.map(Json.toJson(_)(Json.writes[SiteGame]))
-      )
-
-    }
-    implicit val scoreWrites = Json.writes[PlayerScores]
-    implicit val rankWrits = Json.writes[Rank]
-    implicit val gameWrites = Json.writes[SiteGame]
-
-    val robinGroupWrites = new Writes[RobinGroup] {
-      override def writes(robinGroup: RobinGroup) = Json.obj(
-        "robinGroupId" -> robinGroup.robinGroupId,
-        "robinPlayers" -> robinGroup.robinPlayers.map(Json.toJson(_)(Json.writes[SeriesRoundPlayer])),
-        "robinMatches" -> robinGroup.robinMatches.map(Json.toJson(_)(Json.writes[SiteMatchWithGames]))
-      )
-    }
-
-    val fullBracketWrites: Writes[Bracket] = new Writes[Bracket] {
-      override def writes(o: Bracket): JsValue = Json.obj(
-        "bracketId" -> o.bracketId,
-        "bracketPlayers" -> Json.toJson(o.bracketPlayers.map(Json.toJson(_)(Json.writes[BracketPlayer]))),
-        "bracketRounds" -> Json.toJson(o.bracketRounds.map(round => Json.toJson(round.map(Json.toJson(_)(matchWithGameWrites)))))
-      )
-    }
-
-    val fullRobinRoundWrites = new Writes[RobinRound] {
-      override def writes(robinRound: RobinRound): JsValue = Json.obj(
-        "robins" -> robinRound.robinList.map(Json.toJson(_)(robinGroupWrites))
-      )
-
-    }
-
-    val fullRoundWrites = new Writes[SeriesRoundWithPlayersAndMatches] {
-      override def writes(seriesRoundWithPlayersAndMatches: SeriesRoundWithPlayersAndMatches): JsValue  = seriesRoundWithPlayersAndMatches match{
-      case bracket:Bracket => Json.toJson(bracket)(fullBracketWrites)
-      case robin: RobinRound => Json.toJson(robin)(fullRobinRoundWrites)
-    }
-  }
+  implicit val rankFormat = Json.format[Rank]
+  implicit val playerFormat = Json.format[Player]
+  val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
 
   def drawSeriesOfTournament(tournamentId: String) = Action.async{
 
@@ -69,11 +24,28 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
       val result = drawnRoundsResults.map{
         case Left(error) => Json.toJson(error)(Json.writes[DrawError])
         case Right(seriesRoundWithPlayersAndMatches) => Json.obj("seriesId" -> seriesRoundWithPlayersAndMatches._1,
-                                                                  "round"   -> Json.toJson(seriesRoundWithPlayersAndMatches._2)(fullRoundWrites))
+                                                                  "round"   -> Json.toJson(seriesRoundWithPlayersAndMatches._2))
 
       }
 
       Ok(Json.toJson(result))
     }
+  }
+
+  def redraw = Action.async { request =>
+
+    JsonUtils.parseRequestBody(request)(seriesRoundIsModel.roundReads).map { round =>
+      val resultFut: Future[JsValue] = seriesService.drawRound(round).map {
+
+        case Left(error) => Json.toJson(error)(Json.writes[DrawError])
+        case Right(seriesRoundWithPlayersAndMatches) =>
+          Json.obj(
+            "seriesId" -> seriesRoundWithPlayersAndMatches._1,
+            "round" -> Json.toJson(seriesRoundWithPlayersAndMatches._2)
+          )
+      }
+
+      resultFut.map( result => Ok(Json.toJson(result)))
+    }.getOrElse(Future(BadRequest("Dataformaat incorrect")))
   }
 }

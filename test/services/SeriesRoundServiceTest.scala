@@ -1,157 +1,129 @@
 package services
 
 import helpers.TestHelpers._
-import models.{Bracket, RobinRound, RobinGroup, SiteRobinRound}
-import models.matches.{BracketMatchWithGames, SiteGame, SiteMatchWithGames}
+import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
+import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
+import models.types.{BracketLeaf, BracketNode}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{RoundPlayerRepository, Schema, SeriesRoundRepository}
-
-import scala.concurrent.Await
+import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 
 
 class SeriesRoundServiceTest extends PlaySpec{
 
   val appBuilder = new GuiceApplicationBuilder().build()
   val seriesRoundRepository = appBuilder.injector.instanceOf[SeriesRoundRepository]
-  val roundPlayerRepository = appBuilder.injector.instanceOf[RoundPlayerRepository]
-  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository, roundPlayerRepository)
-  val schema = appBuilder.injector.instanceOf[Schema]
-  schema.initSchema()
+  val seriesRepository = appBuilder.injector.instanceOf[SeriesRepository]
+  val seriesRoundService = new SeriesRoundService(new MatchService(), seriesRoundRepository, seriesRepository)
+
+
+  val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
 
   val players = List(
-    SeriesRoundPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores()),
-    SeriesRoundPlayer("2", "2","1", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
-    SeriesRoundPlayer("3", "3","1", "Luk", "Geraets", Ranks.D6,PlayerScores()),
-    SeriesRoundPlayer("4", "4","1", "Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+    SeriesPlayer("1", "1", Player("1","Koen", "Van Loock", Ranks.D0),PlayerScores()),
+    SeriesPlayer("2", "1", Player("2","Hans", "Van Bael", Ranks.E4),PlayerScores()),
+    SeriesPlayer("3", "1", Player("3","Luk", "Geraets", Ranks.D6),PlayerScores()),
+    SeriesPlayer("4", "1", Player("1","Lode", "Van Renterghem", Ranks.E6),PlayerScores())
   )
 
 
   "SeriesRoundService" should {
-    "return a single seriesRound" in {
 
-      val series = waitFor(seriesRoundService.getSeriesRound("1"))
-      series must contain(SiteRobinRound("1",2,"1",1))
-    }
-
-    /*
-    "create a seriesRound, he/she recieves an id" in {
-      val series = Await.result(seriesRoundService.create(RobinRound(Some("1"),2,"1",1)), DEFAULT_DURATION)
-      series.get.seriesId.get.length mustBe 36
-    }
-
-    "update a series" in {
-      val createdTournamentSeries = Await.result(seriesService.create(TournamentSeries(None, "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION)
-      val series = Await.result(seriesService.update(TournamentSeries(None, "Open zonder voorgift","#ffffff", 2,21,true,0,true,0,"1")), DEFAULT_DURATION).get
-      series.seriesName mustBe "Open zonder voorgift"
-    }*/
-
-    "delete a seriesRound" in {
-      // insert 5 here once integration works
-      waitFor(seriesRoundService.delete("5"))
-      val series = waitFor(seriesRoundService.getSeriesRound("5"))
-      series mustBe None
-    }
 
 
     "isRoundComplete of a complete robinRound returns true" in {
 
 
-      val matchesWithGames = List(
-        SiteMatchWithGames("1","1","2","1",6,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("2","1","3","1",3,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("3","1","4","1",7,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("4","2","3","1",3,false,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("5","2","4","1",1,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("6","3","4","1",4,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2)))
+      val matchesWithGames: List[PingpongMatch] = List(
+        PingpongMatch("1",None,None,"1",6,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+        PingpongMatch("2",None,None,"1",3,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+        PingpongMatch("3",None,None,"1",7,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+        PingpongMatch("4",None,None,"1",3,false,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+        PingpongMatch("5",None,None,"1",1,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+        PingpongMatch("6",None,None,"1",4,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2)))
       )
 
-      seriesRoundService.isRoundComplete(RobinRound(List(RobinGroup("1",players,matchesWithGames)))) mustBe true
+      seriesRoundService.isRoundComplete(SiteRobinRound("abc123",1,"123",1,List(RobinGroup("1",players,matchesWithGames)))) mustBe true
     }
   }
 
   "isRoundComplete of an incomplete robinRound returns false" in {
-    val matchesWithGames = List(
-      SiteMatchWithGames("1","1","2","1",6,true,21,2,1,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))),
-      SiteMatchWithGames("2","1","3","1",3,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("3","1","4","1",7,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("4","2","3","1",3,false,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("5","2","4","1",1,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2))),
-      SiteMatchWithGames("6","3","4","1",4,true,21,2,2,0,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,15,2)))
+    val matchesWithGames: List[PingpongMatch] = List(
+      PingpongMatch("1",None,None,"1",6,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(0,15,2))),
+      PingpongMatch("2",None,None,"1",3,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+      PingpongMatch("3",None,None,"1",7,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+      PingpongMatch("4",None,None,"1",3,false,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+      PingpongMatch("5",None,None,"1",1,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
+      PingpongMatch("6",None,None,"1",4,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2)))
     )
 
-    seriesRoundService.isRoundComplete(RobinRound(List(RobinGroup("1",players,matchesWithGames)))) mustBe false
+    seriesRoundService.isRoundComplete(SiteRobinRound("abc123",1,"123",1,List(RobinGroup("1",players,matchesWithGames)))) mustBe false
   }
 
   "isRoundComplete of a complete bracket returns true" in {
     val players = List(
-      BracketPlayer("1","1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
-      BracketPlayer("2","1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
-      BracketPlayer("3","1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
-      BracketPlayer("4","1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+      SeriesPlayer("1", "1", Player("1","Koen", "Van Loock", Ranks.D0),PlayerScores()),
+      SeriesPlayer("2", "2", Player("2", "Hans", "Van Bael", Ranks.E4),PlayerScores()),
+      SeriesPlayer("3", "3", Player("3", "Luk", "Geraets", Ranks.D6),PlayerScores()),
+      SeriesPlayer("4", "4", Player("4","Lode", "Van Renterghem", Ranks.E6),PlayerScores())
     )
 
     val matches =
-      List(
-        List(
-          BracketMatchWithGames("1","1",1,1,"1", Some("1"), Some("4"),7,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",22,20,2))),
-          BracketMatchWithGames("2","1",1,2,"1", Some("2"), Some("3"),3,false,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,10,2)))
-        ),
-        List(BracketMatchWithGames("3","1",2,1,"1", Some("1"), Some("2"),6,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",21,14,2))))
+      BracketNode[PingpongMatch](PingpongMatch("1", None, None,"3", 6,true,21,2, 2, 0,List(PingpongGame(21,16,1),PingpongGame(21,14,2))),
+        BracketLeaf[PingpongMatch](PingpongMatch("1", None, None, "1",7,true,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(22,20,2)))),
+        BracketLeaf(PingpongMatch("1", None, None, "1",3,false,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(21,10,2))))
       )
 
-    seriesRoundService.isRoundComplete(Bracket("1", players, matches)) mustBe true
+
+    seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe true
   }
 
   "isRoundComplete of an incomplete bracket returns false" in {
     val players = List(
-      BracketPlayer("1","1", "1","Koen", "Van Loock", Ranks.D0,PlayerScores()),
-      BracketPlayer("2","1", "2", "Hans", "Van Bael", Ranks.E4,PlayerScores()),
-      BracketPlayer("3","1", "3", "Luk", "Geraets", Ranks.D6,PlayerScores()),
-      BracketPlayer("4","1", "4","Lode", "Van Renterghem", Ranks.E6,PlayerScores())
+      SeriesPlayer("1","1", Player("1","Koen", "Van Loock", Ranks.D0),PlayerScores()),
+      SeriesPlayer("2","1", Player("2", "Hans", "Van Bael", Ranks.E4),PlayerScores()),
+      SeriesPlayer("3","1", Player("3", "Luk", "Geraets", Ranks.D6),PlayerScores()),
+      SeriesPlayer("4","1", Player("4","Lode", "Van Renterghem", Ranks.E6),PlayerScores())
     )
 
     val matches =
-      List(
-          List(
-            BracketMatchWithGames("1","1",1,1,"1", Some("1"), Some("4"),7,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))),
-            BracketMatchWithGames("2","1",1,2,"1", Some("2"), Some("3"),3,false,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2)))
-            ),
-          List(BracketMatchWithGames("3","1",2,1,"1", Some("1"), Some("2"),6,true,21,2,List(SiteGame("1","1",21,16,1),SiteGame("2","1",0,0,2))))
+      BracketNode[PingpongMatch](PingpongMatch("1", None, None,"3", 6,true,21,2, 1, 0,List(PingpongGame(21,16,1),PingpongGame(0,0,2))),
+        BracketLeaf[PingpongMatch](PingpongMatch("1", None, None, "1",7,true,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(22,20,2)))),
+        BracketLeaf(PingpongMatch("1", None, None, "1",3,false,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(21,10,2))))
       )
 
-    seriesRoundService.isRoundComplete(Bracket("1", players, matches)) mustBe false
+    seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe false
   }
 
   "calculate the correct score of a player in a series" in {
-    val playerWithRoundPlayers = SeriesPlayerWithRoundPlayers(SeriesPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()),
+    val playerWithRoundPlayers = SeriesPlayerWithRoundPlayers(SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores()),
       List(
-        SeriesRoundPlayer("1","1","1","Koen", "Van Loock", Ranks.D0, PlayerScores(3,0,6,2,84,40,304044)),
-        SeriesRoundPlayer("1","1","2","Koen", "Van Loock", Ranks.D0, PlayerScores(2,1,5,2,64,40,103024))
+        SeriesPlayer("1", "4", Player("1","Koen", "Van Loock", Ranks.D0), PlayerScores(3,0,6,2,84,40,304044)),
+        SeriesPlayer("1", "7", Player("2","Koen", "Van Loock", Ranks.D0), PlayerScores(2,1,5,2,64,40,103024))
       ))
 
-    seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1", "1","1", "Koen", "Van Loock", Ranks.D0,PlayerScores(5,1,11,4,148,80,407068))
+    seriesRoundService.calculatePlayerScore(playerWithRoundPlayers) mustBe SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0),PlayerScores(5,1,11,4,148,80,407068))
   }
 
   "calculate the roundScore of a winning player with a matchUpdate" in {
-    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
-      SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 2,1, List(SiteGame("1", "1", 21,0, 1), SiteGame("2", "1", 15,21, 2),SiteGame("3", "1", 21,19, 3))),
-      SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 2,0, List(SiteGame("4", "2", 21,15, 1), SiteGame("5", "2", 23,21, 2)))
-    )) mustBe SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(2,0,4,1,101,76,20402))
+    seriesRoundService.updateSeriesPlayerAfterMatch(SeriesPlayer("1","3", koen, PlayerScores()), List(
+      PingpongMatch("1", Some(koen), None, "1", 2, true, 21, 2, 2,1, List(PingpongGame(21,0, 1), PingpongGame(15,21, 2),PingpongGame(21,19, 3))),
+      PingpongMatch("2", Some(koen), None, "1", 5, true, 21, 2, 2,0, List(PingpongGame(21,15, 1), PingpongGame(23,21, 2)))
+    )) mustBe SeriesPlayer("1","3",Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores(2,0,4,1,101,76,20402))
   }
 
   "calculate the roundScore of a losing player with a matchUpdate" in {
-    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
-      SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 0,2, List(SiteGame("1", "1", 0,21, 1), SiteGame("2", "1", 9,21, 2))),
-      SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 1,2, List(SiteGame("3", "2", 21,23, 1), SiteGame("4", "2", 21,16, 2), SiteGame("5", "2", 19,21, 2)))
-    )) mustBe SeriesRoundPlayer("1","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(0,2,1,4,70,102,51))
+    seriesRoundService.updateSeriesPlayerAfterMatch(SeriesPlayer("1","1", Player("1","Koen", "Van Loock", Ranks.D0), PlayerScores()), List(
+      PingpongMatch("1", Some(koen), None, "1", 2, true, 21, 2, 0,2, List(PingpongGame(0,21, 1), PingpongGame(9,21, 2))),
+      PingpongMatch("2", Some(koen), None, "1", 5, true, 21, 2, 1,2, List(PingpongGame(21,23, 1), PingpongGame(21,16, 2), PingpongGame(19,21, 2)))
+    )) mustBe SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores(0,2,1,4,70,102,51))
   }
 
   "calculate wins for playerB with a matchUpdate" in {
-    seriesRoundService.updateSeriesRoundPlayerAfterMatch(SeriesRoundPlayer("2","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores()), List(
-    SiteMatchWithGames("1", "1", "2", "1", 2, true, 21, 2, 1,2, List(SiteGame("1", "1", 12,21, 1),SiteGame("2", "1", 21,0, 2), SiteGame("3", "1", 9,21, 3))),
-    SiteMatchWithGames("2", "1", "3", "1", 5, true, 21, 2, 1,2, List(SiteGame("4", "2", 21,23, 1), SiteGame("5", "2", 21,16, 2), SiteGame("6", "2", 19,21, 2)))
-  )) mustBe SeriesRoundPlayer("2","1","1", "Koen", "Van Loock", Ranks.D0, PlayerScores(1,0,2,1,42,42,10201))
+    seriesRoundService.updateSeriesPlayerAfterMatch(SeriesPlayer("1","1", Player("1","Koen", "Van Loock", Ranks.D0), PlayerScores()), List(
+    PingpongMatch("1", Some(koen), None, "1", 2, true, 21, 2, 1,2, List(PingpongGame(12,21, 1),PingpongGame(21,0, 2), PingpongGame(9,21, 3))),
+    PingpongMatch("2", None, Some(koen), "1", 5, true, 21, 2, 1,2, List(PingpongGame(21,23, 1), PingpongGame(21,16, 2), PingpongGame(19,21, 2)))
+  )) mustBe SeriesPlayer("1","1", Player("1", "Koen", "Van Loock", Ranks.D0), PlayerScores(1,1,3,3,102,103,10251))
   }
 }

@@ -3,53 +3,54 @@ package services
 import javax.inject.Inject
 
 import models._
-import models.player.{SeriesPlayerWithRoundPlayers, SeriesPlayer, Player}
-import repositories.{SeriesPlayerRepository, SeriesRepository}
+import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
+import play.api.libs.json.Json
+import repositories.mongo.{SeriesPlayerRepository, SeriesRepository}
 
-import scala.concurrent.{Future, Awaitable}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlayerRepository: SeriesPlayerRepository, seriesRepository: SeriesRepository, drawService: DrawService){
-  val series=  List(
-    TournamentSeries("1", "Open met voorgift","#ffffff", 2,21,true,0,true,0,"1")
-  )
+  type FinalRanking = List[SeriesPlayer]
 
-  def getTournamentSeries(seriesId: String): Future[Option[TournamentSeries]] = {
-    Future(series.find(series => series.seriesId.contains(seriesId)))
-  }
-  def getTournamentSeriesOfTournament(tournamentId: String): Future[List[TournamentSeries]] = {
-    Future(series.filter(series => series.seriesId.contains(tournamentId)))
-  }
+  def create(tournamentSeries: TournamentSeries) = seriesRepository.create(tournamentSeries)
+  def update(tournamentSeries: TournamentSeries) = seriesRepository.update(tournamentSeries)
+  def delete(seriesId: String) = seriesRepository.delete(seriesId)
 
-  def drawTournamentFirstRounds(tournamentId: String): Future[List[Either[DrawError, (String, SeriesRoundWithPlayersAndMatches)]]] = {
+  def retrieveById(seriesId: String) = seriesRepository.retrieveById(seriesId)
+  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRepository.retrieveAllByField(fieldKey, fieldValue)
+  def getTournamentSeriesOfTournament(tournamentId: String): Future[List[TournamentSeries]] = seriesRepository.retrieveAllByField("tournamentId", tournamentId)
+
+
+  def drawTournamentFirstRounds(tournamentId: String): Future[List[Either[DrawError, (String, SeriesRound)]]] = {
     getStartingRoundsOfTournament(tournamentId).flatMap { roundList =>
       Future.sequence {
-        roundList.map(round => drawRound(seriesRoundService.convertGenericToRound(round)))
+        roundList.map(round => drawRound(round))
       }
     }
   }
 
-  def getStartingRoundsOfTournament(tournamentId: String): Future[List[GenericSeriesRound]] = seriesRepository.retrieveAllByField("TOURNAMENT_ID", tournamentId).flatMap { seriesList =>
+
+  def getStartingRoundsOfTournament(tournamentId: String): Future[List[SeriesRound]] = seriesRepository.retrieveAllByField("tournamentId", tournamentId).flatMap { seriesList =>
     Future.sequence {
       seriesList.map {
-        series => seriesRoundService.getRoundsOfSeries(series.seriesId).map(_.sortBy(_.roundNr).headOption)
+        series => seriesRoundService.getRoundsOfSeries(series.id).map(_.sortBy(_.roundNr).headOption)
       }
     }
   }.map(_.flatten)
 
-  def drawRound(round: SeriesRound): Future[Either[DrawError, (String, SeriesRoundWithPlayersAndMatches)]] = round match {
-    case robinRound: SiteRobinRound => drawRobinRound(robinRound.getId, robinRound.seriesId, robinRound.numberOfRobinGroups)
-    case bracketRound: SiteBracketRound => drawBracketRound(bracketRound.getId, bracketRound.seriesId, bracketRound.numberOfBracketRounds)
+  def drawRound(round: SeriesRound): Future[Either[DrawError, (String, SeriesRound)]] = round match {
+    case robinRound: SiteRobinRound => drawRobinRound(robinRound.id, robinRound.seriesId, robinRound)
+    case bracketRound: SiteBracketRound => drawBracketRound(bracketRound.id, bracketRound.seriesId, bracketRound)
   }
 
-  def drawRobinRound(roundId: String, seriesId: String, numberOfRobinGroups: Int, drawType: DrawType = DrawTypes.RankedRandomOrder): Future[Either[DrawError, (String, RobinRound)]] = {
+  def drawRobinRound(roundId: String, seriesId: String, robinRound: SiteRobinRound, drawType: DrawType = DrawTypes.RankedRandomOrder): Future[Either[DrawError, (String, SiteRobinRound)]] = {
     seriesPlayerRepository.retrieveAllSeriesPlayers(seriesId).flatMap { seriesPlayers =>
       if (seriesPlayers.length > 1) {
         seriesRepository.retrieveById(seriesId).map {
-          case Some(series) => drawService.drawRobins(seriesPlayers, numberOfRobinGroups, series.setTargetScore, series.numberOfSetsToWin, drawType) match {
-            case Some(robinRound) => Right(seriesId,robinRound)
-            case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
-          }
+          case Some(foundSeries) =>
+                    val drawResult = drawService.drawRobins(seriesPlayers, robinRound, foundSeries.setTargetScore, foundSeries.numberOfSetsToWin, drawType)
+                    drawnRoundOrError(seriesId)(drawResult)
           case _ => Left(DrawError(seriesId, "Reeks niet gevonden!"))
         }
       } else {
@@ -58,11 +59,11 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
     }
   }
 
-  def drawBracketRound(roundId: String, seriesId: String, numberOfBracketRounds: Int): Future[Either[DrawError, (String, Bracket)]] = {
+  def drawBracketRound(roundId: String, seriesId: String, bracket: SiteBracketRound): Future[Either[DrawError, (String, SiteBracketRound)]] = {
     seriesPlayerRepository.retrieveAllSeriesPlayers(seriesId).flatMap { seriesPlayers =>
       if (seriesPlayers.length > 1) {
         seriesRepository.retrieveById(seriesId).map {
-          case Some(series) => drawService.drawBracket(seriesPlayers, numberOfBracketRounds, series.numberOfSetsToWin, series.setTargetScore) match {
+          case Some(foundSeries) => drawService.drawBracket(seriesPlayers, bracket, foundSeries.numberOfSetsToWin, foundSeries.setTargetScore) match {
             case Some(round) => Right(seriesId, round)
             case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
           }
@@ -74,13 +75,43 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
     }
   }
 
-  def advanceSeries(tournamentSeries: TournamentSeries, seriesRounds: List[SeriesRoundWithPlayersAndMatches]): TournamentSeries = {
-    if(seriesRounds.length > tournamentSeries.currentRoundNr) tournamentSeries.copy(currentRoundNr = tournamentSeries.currentRoundNr+1) else tournamentSeries
-  }
-
-
-
   def calculateSeriesScores(seriesPlayersWithRoundPlayers: List[SeriesPlayerWithRoundPlayers]) = {
     seriesPlayersWithRoundPlayers.map(seriesRoundService.calculatePlayerScore)
   }
+
+
+  def advanceIfPossibleOrShowFinalRanking(series: TournamentSeries, roundRanking: List[SeriesPlayer]): Future[Either[FinalRanking, SeriesRound]] = {
+    seriesRoundService
+      .retrieveByFields(Json.obj("roundNr" -> (series.currentRoundNr + 1), "seriesId" -> series.id))
+      .flatMap(returnRoundRankingOrNextRoundIfPresent(series, roundRanking))
+  }
+
+  def returnRoundRankingOrNextRoundIfPresent(series: TournamentSeries, roundRanking: FinalRanking): Option[SeriesRound] => Future[Either[FinalRanking, SeriesRound]] = {
+    case Some(nextRound) => updateAndReturnNextRound(series, nextRound, roundRanking)
+    case _ => seriesPlayerRepository.retrieveAllSeriesPlayers(series.id)
+      .flatMap( playerList => Future.sequence{playerList.map(retrieveRoundPlayersAndAggregateScore)})
+      .map(playerList => Left(playerList.sortBy(-_.playerScores.totalPoints)))
+  }
+
+  private def updateAndReturnNextRound(series: TournamentSeries, nextRound: SeriesRound, roundRanking: FinalRanking) = {
+    update(series.copy(currentRoundNr = series.currentRoundNr + 1)).flatMap { _ =>
+      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
+      seriesRoundService.updateSeriesRound(updatedRound).map(_ => Right(updatedRound))
+    }
+  }
+
+  def drawnRoundOrError(seriesId: String): Option[SiteRobinRound] => Either[DrawError, (String, SiteRobinRound)] = {
+    case Some(drawnRobinRound) => Right(seriesId, drawnRobinRound)
+    case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))
+  }
+
+  def retrieveRoundPlayersAndAggregateScore: (SeriesPlayer) => Future[SeriesPlayer] = seriesPlayer => {
+    seriesRoundService.retrieveAllByField("seriesId", seriesPlayer.seriesId).map{ seriesRoundList =>
+
+      val roundPlayerList = seriesRoundList.flatMap(_.roundPlayers.filter(_.player == seriesPlayer.player))
+      val calculatedScore = roundPlayerList.map(_.playerScores).fold(PlayerScores())(_ + _)
+      seriesPlayer.copy(playerScores =  calculatedScore)
+    }
+  }
+
 }

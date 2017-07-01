@@ -3,7 +3,7 @@
 # ~~~~
 
 
-GET           /players                                       controllers.PlayerController.getAllPlayers
+GET           /players                                       controllers.PlayerController.searchPlayers(searchString: Option[String])
 POST          /players                                       controllers.PlayerController.insertPlayer()
 PUT           /players                                       controllers.PlayerController.updatePlayer
 DELETE        /players/:playerId                             controllers.PlayerController.deletePlayer(playerId: String)
@@ -17,23 +17,59 @@ GET           /tournaments/:tournamentId                     controllers.Tournam
 GET           /tournaments                                   controllers.TournamentController.getAllTournaments
 POST          /tournaments                                   controllers.TournamentController.createTournament()
 
+GET           /activeTournament                              controllers.TournamentController.getActiveTournament
+GET           /activeTournament/release                      controllers.TournamentController.releaseActiveTournament()
+PUT           /activeTournament/:tournamentId                controllers.TournamentController.activateTournament(tournamentId: String)
+GET           /hasActiveTournament                           controllers.TournamentController.hasActiveTournament
+
 GET           /series/:tournamentId                          controllers.SeriesController.getSeriesOfTournament(tournamentId: String)
+GET           /singleSeries/:seriesId                        controllers.SeriesController.getSeries(seriesId: String)
 POST          /series                                        controllers.SeriesController.createSeries
 PUT           /series/:seriesId                              controllers.SeriesController.updateSeries(seriesId: String)
+DELETE        /series/:seriesId                              controllers.SeriesController.deleteSeries(seriesId: String)
 
+GET           /round/:roundId                                controllers.SeriesRoundController.getRound(roundId: String)
 GET           /seriesrounds/:seriesId                        controllers.SeriesRoundController.getRoundsOfSeries(seriesId: String)
-POST          /seriesrounds                                  controllers.SeriesRoundController.createSeriesRound
-PUT           /seriesrounds                                  controllers.SeriesRoundController.updateSeriesRound
+GET           /activeround/:seriesId                         controllers.SeriesRoundController.getActiveRoundOfSeries(seriesId: String)
+POST          /seriesrounds/:seriesId                        controllers.SeriesRoundController.createSeriesRound(seriesId: String)
+PUT           /seriesrounds                                  controllers.SeriesRoundController.fullUpdateSeriesRound
+PUT           /seriesroundsconfig                            controllers.SeriesRoundController.updateConfigSeriesRound
+PATCH         /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.updateRoundMatch(seriesRoundId: String)
+DELETE        /seriesrounds/:seriesRoundId                   controllers.SeriesRoundController.deleteSeriesRound(seriesRoundId: String)
+GET           /matchList/:seriesRoundId                      controllers.SeriesRoundController.getMatchListOfRound(seriesRoundId: String)
+
+GET           /nextRound/:seriesId/:roundNr                  controllers.SeriesRoundController.proceedToNextRound(seriesId: String, roundNr: Int)
+GET           /previousRound/:seriesId/:roundNr              controllers.SeriesRoundController.showPreviousRound(seriesId: String, roundNr: Int)
+GET           /isLastRound/:seriesId                         controllers.SeriesRoundController.isLastRoundOfSeries(seriesId: String)
+
 
 GET           /drawseries/:tournamentId                      controllers.DrawController.drawSeriesOfTournament(tournamentId: String)
+POST          /redraw                                        controllers.DrawController.redraw
 
 POST          /login                                         controllers.LoginController.login
+POST          /user                                          controllers.LoginController.createUser
+
+GET           /hall/:hallId                                  controllers.HallController.getById(hallId: String)
+GET           /hall                                          controllers.HallController.getAllHalls
+POST          /hall                                          controllers.HallController.createHallIfNotExists
+PATCH         /hall/:hallId/:row/:column                     controllers.HallController.updateHallWithMatch(hallId: String, row: Int, column: Int)
+PATCH         /hall                                          controllers.HallController.update
+DELETE        /hall/:hallId                                  controllers.HallController.deleteHall(hallId: String)
+
+PATCH         /hallMatch/:hallId/:row/:column                controllers.HallController.deleteHallMatch(hallId: String, row: Int, column: Int)
+POST          /hallRef/:hallId/:row/:column                  controllers.HallController.updateHallWithReferee(hallId: String, row: Int, column: Int)
+PATCH         /hallRef/:hallId/:row/:column                  controllers.HallController.deleteHallReferee(hallId: String, row: Int, column: Int)
+
+GET           /activehall                                    controllers.HallController.getActiveHall
+POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
+
+GET           /eventstream                                   controllers.StreamController.eventStream
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 
 #POST          /uploadimage                                   controllers.PlayerController.uploadPlayerImage
 
-GET           /                                              controllers.ManagerController.showMangager
+GET           /                                              controllers.ManagerController.showManager
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                  controllers.Assets.versioned(path="/public", file: Asset)

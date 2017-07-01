@@ -8,14 +8,20 @@ module TournamentManagement {
         }
 
 
-        addTournament(name, date, hasMultiple, maxEntries, showClub) {
+        addTournament(name, date, hasMultiple, maxEntries, showClub, setTargetScore, numberOfSetsToWin, playingWithHandicap, extraHandicapForRecs, seriesColor, showReferees) {
             return this.$http.post(this.base.url + '/tournaments',
                 {
                     'tournamentName': name,
                     'tournamentDate': this.getDate(date),
                     'hasMultipleSeries': hasMultiple ? hasMultiple : false,
                     'maximumNumberOfSeriesEntries': parseInt(maxEntries) ? parseInt(maxEntries) : 1,
-                    'showClub': showClub ? showClub : false
+                    'showClub': showClub ? showClub : false,
+                    'setTargetScore': setTargetScore,
+                    'numberOfSetsToWin': numberOfSetsToWin,
+                    'playingWithHandicaps': playingWithHandicap,
+                    'extraHandicapForRecs': extraHandicapForRecs,
+                    'seriesColor': seriesColor,
+                    'showReferees': showReferees
                 });
         }
 
@@ -27,8 +33,12 @@ module TournamentManagement {
             return this.$http.get(this.base.url + '/tournaments');
         }
 
+        getTwoDigitNumberString(number: number){
+            return (number <10) ? "0"+ number: number;
+        }
+
         getDate(date: Date){
-            return { day: date.getDate(), month: date.getMonth()+1, year:date.getFullYear()};
+            return  date.getFullYear() +"-"+ this.getTwoDigitNumberString(date.getMonth()+1)+"-"+ this.getTwoDigitNumberString(date.getDate());
         }
 
         setCurrentTournament(tournament: Tournament){

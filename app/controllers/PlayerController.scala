@@ -8,8 +8,7 @@ import models.TournamentSeries
 import models.player._
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
-import services.PlayerService
-import utils.JsonUtils
+import services.{SeriesPlayerService, PlayerService}
 import utils.JsonUtils.ListWrites._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -17,7 +16,7 @@ import play.api.libs.json.Reads._ // Custom validation helpers
 import play.api.libs.functional.syntax._ // Combinator syntax
 
 
-class PlayerController @Inject()(playerService: PlayerService) extends Controller{
+class PlayerController @Inject()(playerService: PlayerService, seriesPlayerService: SeriesPlayerService) extends Controller{
 
   implicit val rankWrites = Json.format[Rank]
   implicit val playerWrites = Json.format[Player]
@@ -31,8 +30,14 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
       (JsPath \ "rank").read[Rank]
     )(Player.apply (UUID.randomUUID().toString,_,_,_))
 
-  def getAllPlayers = Action.async{
+  val fullPlayerReads: Reads[Player] = (
+    (JsPath \ "id").read[String] and
+    (JsPath \ "firstname").read[String] and
+      (JsPath \ "lastname").read[String] and
+      (JsPath \ "rank").read[Rank]
+    )(Player.apply (_,_,_,_))
 
+  def getAllPlayers = Action.async{
     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
   }
 
@@ -48,8 +53,7 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     request.body.asJson.flatMap{ json =>
       json.validate[Player](playerReads).asOpt.map{  player =>
         playerService.createPlayer(player).map{
-          case Some(createdPlayer) => Created(Json.toJson(createdPlayer))
-          case _ => InternalServerError
+          createdPlayer => Created(Json.toJson(createdPlayer))
         }
       }
     }.getOrElse(Future(BadRequest))
@@ -59,8 +63,7 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     request.body.asJson.flatMap{ json =>
       json.validate[Player].asOpt.map{player =>
         playerService.updatePlayer(player).map{
-         case Some(updatedPlayer) => Ok(Json.toJson(updatedPlayer))
-         case _ => NotFound
+         updatedPlayer => Ok(Json.toJson(updatedPlayer))
         }
       }}.getOrElse(Future(BadRequest))
   }
@@ -78,20 +81,32 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
   def enterSubscriptions() = Action.async{ request =>
 
     request.body.asJson.flatMap{ json =>
-      deletePreviousTournamentSeriesSubscriptions(json).flatMap{ numberOfDeletes =>
-        (json \ "subscriptions").asOpt[JsArray].map { array =>
-          array.value.flatMap { jsVal => jsVal.validate[SeriesPlayer](JsonUtils.seriesPlayerInitReads).asOpt }
-        }.map{subscriptions =>
-          Future.sequence(subscriptions.map{ seriesPlayer => playerService.subscribe(seriesPlayer)}).map(_ => Created)}
+      deletePreviousTournamentSeriesSubscriptions(json).flatMap { numberOfDeletes =>
+
+        parseSeriesPlayers(json).map{ seriesPlayers =>
+          seriesPlayerService.subscribePlayers(seriesPlayers).map(_ => Created(Json.listToJson(seriesPlayers)(seriesPlayerWrites)))
         }
-    }.getOrElse(Future(BadRequest))
+      }
+    }.getOrElse(Future(BadRequest("Geef een geldige speler op.")))
+  }
+
+  def parseSeriesPlayers(json: JsValue): Option[List[SeriesPlayer]] = {
+    (json \ "player").asOpt[Player](fullPlayerReads).flatMap{ player =>
+      (json \ "subscriptions").asOpt[JsArray].map { array =>
+        array.value.map{  seriesSubscriptionIdJson =>
+          seriesSubscriptionIdJson.asOpt[String].map{ seriesSubscriptionId =>
+            SeriesPlayer(UUID.randomUUID().toString, seriesSubscriptionId, player, PlayerScores())
+          }
+        }.toList.flatten
+      }
+    }
   }
 
   def deletePreviousTournamentSeriesSubscriptions(json: JsValue): Option[Future[Seq[Int]]] = {
-    (json \ "playerId").asOpt[String].flatMap { playerId =>
+    (json \ "player").asOpt[Player](fullPlayerReads).flatMap { player =>
       (json \ "seriesList").asOpt[JsArray].map { array =>
         Future.sequence{array.value.flatMap { jsVal => jsVal.validate[String].asOpt }.map { seriesId =>
-          playerService.deleteSubscriptions(seriesId, playerId) }}
+          playerService.deleteSubscriptions(seriesId, player) }}
       }
     }
   }
@@ -102,20 +117,11 @@ class PlayerController @Inject()(playerService: PlayerService) extends Controlle
     }
   }
 
-  /* handle manually for now, just enter path at player create/update
-  def uploadPlayerImage = Action.async { request =>
-    request.body.asMultipartFormData
-      .flatMap { multiPart =>
-        multiPart.file("uploadFile").map { filePart =>
-         /* val path: String = saveFileToImageFolder(filePart)
-          filePart.contentType match {
-            case Some("text/csv") => parseCsvFile(fileEntity, entityId, path, delimiter, request)
-            case _ =>
-              deleteFile(path)*/
-              Future(Ok)
-          }
-      }.getOrElse(Future(BadRequest))
-  }*/
+  def searchPlayers(searchString: Option[String]) = Action.async{
+    searchString match {
+      case Some(search) => playerService.findByString(search).map(players => Ok(Json.toJson(players)))
+      case None =>     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
+    }
 
-
+  }
 }

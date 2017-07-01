@@ -27,20 +27,21 @@
     </md-input-container>
 
     <md-input-container style="color:#666666" layout="column" flex  ng-show="ctrl.selectedRound.roundType.type == 'B'">
-    <md-select ng-model="ctrl.selectedRound.numberOfBracketRounds" layout-padding aria-label="choose number of bracketrounds" placeholder="startronde"  ng-change="ctrl.updateRound()">
-        <md-option ng-repeat="bracketRound in ctrl.bracketRounds" value="{{bracketRound.value}}">
+    <md-select ng-model="ctrl.selectedNumberOfBracketRounds" layout-padding aria-label="choose number of bracketrounds" placeholder="startronde"  ng-change="ctrl.updateRound()">
+        <md-option ng-repeat="bracketRound in ctrl.bracketRounds" ng-value="bracketRound">
             {{bracketRound.name}}
         </md-option>
     </md-select>
     </md-input-container>
 
     <div flex></div>
-    <div class="column" style="width: 40px;">
+   <!-- <div class="column" style="width: 40px;">
         <md-button class="md-fab" aria-label="move-up" ng-show="ctrl.showMoveUp()" ng-click="ctrl.moveSeriesRoundUp(round)">
             <md-icon md-font-icon="fa fa-chevron-up"></md-icon>
         </md-button>
         <md-button class="md-fab" aria-label="move-down" ng-show="ctrl.showMoveDown()" ng-click="ctrl.moveSeriesRoundDown(round)">
             <md-icon md-font-icon="fa fa-chevron-down"></md-icon>
         </md-button>
-    </div>
+    </div>-->
+
 </md-card>

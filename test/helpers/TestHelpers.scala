@@ -9,7 +9,7 @@ import scala.concurrent.{Await, Awaitable}
   */
 object TestHelpers {
 
-  val DEFAULT_DURATION = Duration(3000, "millis")
+  val DEFAULT_DURATION = Duration(5000, "millis")
   def waitFor[T](block: Awaitable[T]): T = Await.result(block, DEFAULT_DURATION)
 
 

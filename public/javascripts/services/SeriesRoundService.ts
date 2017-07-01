@@ -2,35 +2,62 @@ module TournamentManagement {
 
 
     export class SeriesRoundService {
-        private roundsOfSelectedSeries:Array<SeriesRound>;
+        private roundsMap: Object;
 
         constructor(private $http:angular.IHttpService, private base:any) {
+            this.roundsMap = {}
         }
 
-        createSeriesRound(seriesRoundJson) {
-            return this.$http.post(this.base.url + "/seriesrounds", seriesRoundJson)
+        getRound(roundId: string){
+            return this.$http.get("/round/" + roundId);
+        }
+        
+        proceedToNextRound(seriesId, roundNr){
+            return this.$http.get("/nextRound/"+seriesId + '/'+ roundNr);
         }
 
-        updateSeriesRound(seriesRoundJson) {
+        previousRound(seriesId, roundNr){
+            return this.$http.get("/previousRound/"+seriesId+"/"+roundNr);
+        }
+
+        getMatchListOfRound(roundId: string){
+            return this.$http.get("/matchList/"+roundId);
+        }
+        
+        createSeriesRound(seriesId: string) {
+            return this.$http.post(this.base.url + "/seriesrounds/" + seriesId,{})
+        }
+
+        updateSeriesRound(seriesRoundJson){
             return this.$http.put(this.base.url + "/seriesrounds", seriesRoundJson)
         }
 
+        updateSeriesRoundConfig(seriesRoundJson) {
+            return this.$http.put(this.base.url + "/seriesroundsconfig", seriesRoundJson)
+        }
+
+        deleteSeriesRound(roundId){
+            return this.$http.delete(this.base.url + "/seriesrounds/"+ roundId)
+        }
+
         loadRoundsOfSeries(seriesId) {
-            return this.$http.get(this.base.url + "/seriesrounds/" + seriesId);
+            return this.$http.get(this.base.url + "/seriesrounds/" + seriesId).then((result) => {
+                this.roundsMap[seriesId] = result.data;
+                 return this.roundsMap[seriesId] ? this.roundsMap[seriesId] : [];
+            });
+
         }
 
-        setRoundsOfSeries(roundsOfSeries) {
-            this.roundsOfSelectedSeries = roundsOfSeries;
+
+        getRoundsOfSeries(seriesId) {
+            return this.roundsMap[seriesId] ? this.roundsMap[seriesId] : [];
         }
 
-        getRoundsOfSeries() {
-            return this.roundsOfSelectedSeries;
+        getRoundCountOfSeries(seriesId){
+            return this.roundsMap[seriesId] ? this.roundsMap[seriesId].length : 0;
         }
 
-        getRoundCount() {
-            return this.roundsOfSelectedSeries.length;
-        }
-
+        /*
         moveSeriesUp(roundToMove) {
             if (roundToMove.roundNr > 1) {
                 var roundNr = roundToMove.roundNr;
@@ -40,8 +67,8 @@ module TournamentManagement {
                 seriesToMoveDown.roundNr += 1;
                 this.roundsOfSelectedSeries[roundNr - 2] = this.convertRoundType(seriesToMoveUp);
                 this.roundsOfSelectedSeries[roundNr - 1] = this.convertRoundType(seriesToMoveDown);
-                this.updateSeriesRound(seriesToMoveUp);
-                this.updateSeriesRound(seriesToMoveDown);
+                this.updateSeriesRoundConfig(seriesToMoveUp);
+                this.updateSeriesRoundConfig(seriesToMoveDown);
             }
         }
 
@@ -51,11 +78,11 @@ module TournamentManagement {
             seriesToMoveDown.roundNr += 1;
             var seriesToMoveUp = this.roundsOfSelectedSeries[roundNr];
             seriesToMoveUp.roundNr -= 1;
-            this.updateSeriesRound(seriesToMoveUp);
-            this.updateSeriesRound(seriesToMoveDown);
+            this.updateSeriesRoundConfig(seriesToMoveUp);
+            this.updateSeriesRoundConfig(seriesToMoveDown);
             this.roundsOfSelectedSeries[roundNr - 1] = this.convertRoundType(seriesToMoveUp);
             this.roundsOfSelectedSeries[roundNr] = this.convertRoundType(seriesToMoveDown);
-        }
+        }*/
 
         convertRoundType(round) {
             if (round.roundType) {

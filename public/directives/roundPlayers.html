@@ -1,0 +1,29 @@
+<md-card>
+    <h2>Reeksspelers</h2>
+    <md-table-container>
+        <table md-table class="playerTable">
+            <tr>
+               <th>Naam</th>
+                <th>Klassement</th>
+                <th></th>
+                <th>WM</th>
+                <th>LM</th>
+                <th>WS</th>
+                <th>LS</th>
+                <th>WP</th>
+                <th>LP</th>
+            </tr>
+            <tr ng-repeat="roundPlayer in roundPlayers">
+                <td>{{roundPlayer.player.firstname}} {{roundPlayer.player.lastname}}</td>
+                <td>{{roundPlayer.player.rank.name}}</td>
+                <td></td>
+                <td>{{roundPlayer.playerScores.wonMatches}}</td>
+                <td>{{roundPlayer.playerScores.lostMatches}}</td>
+                <td>{{roundPlayer.playerScores.wonSets}}</td>
+                <td>{{roundPlayer.playerScores.lostSets}}</td>
+                <td>{{roundPlayer.playerScores.wonPoints}}</td>
+                <td>{{roundPlayer.playerScores.lostPoints}}</td>
+            </tr>
+        </table>
+    </md-table-container>
+</md-card>

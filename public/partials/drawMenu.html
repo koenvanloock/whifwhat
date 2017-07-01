@@ -1,24 +1,50 @@
 <div style="color:white">
-    <h1>{{drawCtrl.tournament.tournamentName}}</h1>
+  <h1>{{drawCtrl.tournament.tournamentName}}</h1>
 
-    <div ng-repeat="series in drawCtrl.tournament.series track by $index">
+  <div ng-repeat="series in drawCtrl.tournament.series track by $index">
 
-        <h2 style="color:white">{{series.seriesName}}</h2>
+    <h2 style="color:white">{{series.seriesName}}</h2>
 
-        <div ng-repeat="round in series.rounds">
 
-            <div class="robins" ng-repeat="robin in round.robins">
-            <table>
-                <tr ng-repeat="player in robin.robinPlayers">
-                    <td>{{player.firstname}}</td>
-                    <td>{{player.lastname}}</td>
-                    <td>{{player.rank.name}}</td>
-                </tr>
-            </table>
-            </div>
+    <div ng-repeat="round in series.rounds">
+
+      <div id="bracket" ng-if="round.roundType === 'B'" layout="row">
+
+        <div layout="column">
+        <round-players round-players="round.bracketPlayers"></round-players>
+
+        <bracket-node node="round.bracketRounds"></bracket-node>
         </div>
 
-        <h3 style="color:white">{{drawCtrl.errors[$index]}}</h3>
-    </div>
+        <div layout="column">
+          <md-button class="md-fab md-primary" ng-click="drawCtrl.updateSeriesRound(round)"><i class="fa fa-save"></i>
+          </md-button>
+          <md-button class="md-fab md-primary" ng-click="drawCtrl.redraw(round)"><i class="fa fa-refresh"></i>
+          </md-button>
+          </md-button> <md-button class="md-fab md-primary" ng-click="drawCtrl.printRound(round.id)"><i class="fa fa-print"></i>
+        </md-button>
+        </div>
+      </div>
 
+      <div id="robin" ng-if="round.roundType === 'R'">
+        <div class="robins" ng-repeat="robin in round.robinRounds">
+          <div layout="row">
+
+            <div layout="column">
+              <round-players round-players="robin.robinPlayers"></round-players>
+              <robin-matches robin-matches="robin.robinMatches"></robin-matches>
+            </div>
+
+            <md-button class="md-fab md-primary" ng-click="drawCtrl.updateSeriesRound(round)"><i class="fa fa-save"></i>
+            </md-button>
+            <md-button class="md-fab md-primary" ng-click="drawCtrl.redraw(round)"><i class="fa fa-refresh"></i>
+            </md-button> <md-button class="md-fab md-primary" ng-click="drawCtrl.printRound(round.id)"><i class="fa fa-print"></i>
+          </md-button>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="color:white">{{drawCtrl.errors[$index]}}</h3>
+    </div>
+  </div>
 </div>

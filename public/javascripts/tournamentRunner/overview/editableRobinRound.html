@@ -1,0 +1,16 @@
+<div class="md-padding">
+
+
+  <round-players round-players="robinround.robinPlayers" style="color:white"></round-players>
+
+  <div layout="row">
+    <md-button class="md-fab" ng-click="listView=false" aria-label="fullView" ng-disabled="!listView">
+      <i class="fa fa-indent"></i>
+    </md-button>
+    <md-button class="md-fab" ng-click="listView=true" aria-label="listView"  ng-disabled="listView">
+      <i class="fa fa-list"></i>
+    </md-button>
+  </div>
+  <editable-robin-matches list-view="listView" robin-matches="robinround.robinMatches" series-round-id="seriesRoundId" update-fn="updateFn({seriesRoundId: seriesRoundId, match: match})"></editable-robin-matches>
+
+</div>

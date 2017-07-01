@@ -1,19 +1,30 @@
-<section>
-    <div class="md-whiteframe-z2 seriesBox" ng-repeat="tournamentSeries in tournament.series" flex="33" style="background: grey;">
-        <md-toolbar>{{tournamentSeries.seriesName}} ( {{tournamentSeries.seriesPlayers.data.length + " spelers"}} )</md-toolbar>
-        <h2>Reeksspelers</h2>
-        <table>
-            <tr>
-                <th>Voornaam</th>
-                <th>Achternaam</th>
-                <th>Klassement</th>
-            </tr>
-            <tr ng-repeat="seriesPlayer in tournamentSeries.seriesPlayers.data">
-                <td>{{seriesPlayer.firstname}}</td>
-                <td>{{seriesPlayer.lastname}}</td>
-                <td>{{seriesPlayer.rank.name}}</td>
+<section ng-controller="TournamentOverviewController as ctrl" layout-wrap layout="row" layout-margin>
+        <div hidden>{{ctrl.tournament = tournament}}</div>
+    <div class="md-whiteframe-z2 seriesBox" ng-repeat="tournamentSeries in ctrl.tournament.series track by $index" style="background: grey;" flex="30">
+
+        <md-toolbar layout-align="center center">{{tournamentSeries.seriesName}} ( {{tournamentSeries.seriesPlayers.length + " spelers"}} )</md-toolbar>
+        <h2 class="left-pad">Reeksspelers</h2>
+        <md-table-container>
+        <table md-table>
+            <thead md-head>
+                <th></th>
+                <th md-column></th>
+                <th md-column></th>
+                <th md-column></th>
+
+            </thead>
+            <tbody md-body>
+            <tr ng-repeat="seriesPlayer in tournamentSeries.seriesPlayers | limitTo: tournamentSeries.query.limit: (tournamentSeries.query.page - 1) * tournamentSeries.query.limit">
+                <td style="text-align: center">{{$index + 1}}</td>
+                <td style="text-align: center">{{seriesPlayer.firstname}}</td>
+                <td style="text-align: center">{{seriesPlayer.lastname}}</td>
+                <td style="text-align: center">{{seriesPlayer.rank.name}}</td>
 
             </tr>
+            </tbody>
         </table>
+            <md-table-pagination md-limit="tournamentSeries.query.limit" md-limit-options="[5, 10, 15]" md-page="tournamentSeries.query.page" md-total="{{tournamentSeries.seriesPlayers.length}}" md-page-select></md-table-pagination>
+
+        </md-table-container>
     </div>
 </section>

@@ -2,40 +2,45 @@
 <html lang="en" ng-app="tournamentManager">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <head>
-    <title>Whif-Wut</title>
-    <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
+        <title>Whif-Wut</title>
+        <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/font-awesome/css/font-awesome.min.css")">
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/angular-material/angular-material.css")">
+        <link href="@routes.Assets.versioned("bower_components/angular-material-data-table/dist/md-data-table.min.css")" rel="stylesheet" type="text/css"/>
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/ng-img-crop/compile/minified/ng-img-crop.css")">
         <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/text-input.css")">
+        <link rel="stylesheet" media="print" href="@routes.Assets.versioned("stylesheets/printPage.css")">
     </head>
-    <body >
-            <div style="padding:20px;">
-                <h1 class="title">Whif-What</h1>
+    <body>
 
-            <div class="left-panel" ng-controller="TitleScreenController as titleScreenCtrl" ng-show="titleScreenCtrl.hasUser()">
-                <ul class="navList">
-                    <li class="navListItem" ><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentWizard()">Maak tornooi</md-button></li>
-                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoTournamentList()">Laad tornooi</md-button></li>
-                    <li class="navListItem"><md-button class="navElement md-raised md-primary" ng-click="titleScreenCtrl.gotoPlayerManagement()">Beheer spelers</md-button></li>
-                </ul>
+        <div md-theme="{{ctrl.theme}}" ng-controller="menuController as ctrl">
+            <md-menu style="float: right" md-position-mode="target-right target">
+                <md-button class="md-fab" md-menu-origin ng-mouseenter="ctrl.openMenu($mdOpenMenu, $event)" style="float: right;
+                    position: absolute;
+                    top 5px;
+                    right: 5px" aria-label="mainmenu">
+                    <i class="fa fa-bars"></i>
+                </md-button>
+                <md-menu-content width="4">
+                    <md-menu-item>
+                        <md-button style="color: white" ng-click="ctrl.gotoHome()"><i class="fa fa-home"></i> Start</md-button>
+                    </md-menu-item>
+                    <md-menu-divider></md-menu-divider>
+                    <!--<md-menu-item>
+                        <md-switch ng-model="ctrl.theme" aria-label="Switch theme" ng-true-value="'default'" ng-false-value="'light'">donker thema</md-switch>
+                    </md-menu-item>-->
+                    <md-menu-item>
+                        <md-button style="color: white" ng-click="ctrl.logout()"><i class="fa fa-user"></i> Afmelden</md-button>
+                    </md-menu-item>
+                </md-menu-content>
+            </md-menu>
 
-                <section class="user">
-
-                    <i class="fa fa-user"></i>
-                    <div>
-                        <md-button ng-click="titleScreenCtrl.logout()">{{titleScreenCtrl.currentUser.username}} Afmelden</md-button>
-                    </div>
-                </section>
-            </div>
-
-
-            </div>
-
-        <div ng-view class="viewField"></div>
-
+            <div ng-view class="viewField"></div>
+        </div>
         <script src="@routes.Assets.versioned("bower_components/angular/angular.js")"></script>
-        <script src="@routes.Assets.versioned("bower_components/angular-route/angular-route.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-route/angular-route.min.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-messages/angular-messages.min.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/angular-jwt/dist/angular-jwt.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/angular-cookies/angular-cookies.min.js")"></script>
 
@@ -44,22 +49,29 @@
         <script src="@routes.Assets.versioned("bower_components/angular-material/angular-material.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/ng-file-upload/ng-file-upload.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/ng-img-crop/compile/minified/ng-img-crop.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/angular-material-data-table/dist/md-data-table.min.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/vue/dist/vue.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/vue-resource/dist/vue-resource.js")"></script>
+        <script src="@routes.Assets.versioned("vendor/vue-drag-and-drop.js")"></script>
 
         <script src="@routes.Assets.versioned("javascripts/tournamentManager.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/routes.js")"></script>
 
 
         <script src="@routes.Assets.versioned("javascripts/controllers/LoginController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/MenuController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/CreateTournamentController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/DrawController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/SeriesSetupController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/SeriesRoundSetupController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/TournamentOverviewController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/RoundElementController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/CreateSeriesController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/PlayerSubscriptionController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/TitleScreenController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/TournamentListController.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/controllers/PlayerController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/controllers/PrintRoundController.js")"></script>
 
 
         <script src="@routes.Assets.versioned("javascripts/services/LoginRegisterService.js")"></script>
@@ -70,6 +82,29 @@
         <script src="@routes.Assets.versioned("javascripts/services/TournamentService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesService.js")"></script>
         <script src="@routes.Assets.versioned("javascripts/services/SeriesRoundService.js")"></script>
+
+
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/tournamentRunner.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/loadingTournament/loadingController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/overview/OverviewController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/tournamentRunner/services/loadingService.js")"></script>
+
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/hallViewer.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/HallOverviewController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/HallSetupController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/HallLayoutController.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/hallSetup/hallService.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/Hall.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/TableRow.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/Table.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/TournamentBar.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/SeriesPopupList.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/RoundPopupList.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/MatchPanel.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/MatchBar.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/MatchListElem.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/RefereeBox.js")"></script>
+        <script src="@routes.Assets.versioned("javascripts/hallviewer/overview/vue/PlayerPanel.js")"></script>
 
     </body>
 </html>

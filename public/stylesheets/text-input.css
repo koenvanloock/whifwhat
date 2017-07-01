@@ -1,0 +1,53 @@
+.input-container{
+    position:   relative;
+    margin:     17px auto;
+}
+
+.form-control, .form-control-green{
+    width:          100%;
+    height:         35px;
+    font-size:      16px;
+    border:         none;
+    border-bottom:  1px solid #d6d6d6 ;
+    background:     transparent;
+}
+
+.input-container label{
+    position:   absolute;
+    top:        10px;
+    left:       3px;
+    font-size:  16px;
+    color:      #d6d6d6 ;
+    transition: all .2s ease-out;
+}
+
+.form-control:focus, .form-control label:focus{
+    outline:        none;
+    border-width:   2px;
+    border-color:   yellow;
+    transition:     all .2s ease-out;
+}
+
+.form-control.hasValue:not(:focus) + label {
+    color:      #d6d6d6 ;
+}
+
+.form-control:focus + label, .form-control.hasValue + label {
+    top:        -15px;
+    color:      yellow;
+    font-size:  12px;
+}
+
+
+.form-control-green:focus, .form-control label:focus{
+    outline:        none;
+    border-width:   2px;
+    border-color:   #63B175 ;
+    transition:     all .2s ease-out;
+}
+
+.form-control-green:focus + label, .form-control-green.hasValue + label {
+    top:        -15px;
+    color:      #63B175 ;
+    font-size:  12px;
+}

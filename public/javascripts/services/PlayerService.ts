@@ -6,6 +6,10 @@ module TournamentManagement{
         getAllPlayers() {
         return this.$http.get(this.base.url + '/players');
     }
+        
+        getPlayersBySearch(searchString: string){
+            return this.$http.get(this.base.url + "/players?searchString="+searchString);
+        }
 
         getRanks() {
         return this.$http.get(this.base.url + '/ranks')
@@ -15,8 +19,8 @@ module TournamentManagement{
         return this.$http.post(this.base.url + '/players', player)
     }
 
-        subscribePlayer(seriesPlayerList, seriesList, playerId) {
-        return this.$http.post(this.base.url + '/seriesplayers', {"subscriptions": seriesPlayerList, seriesList: seriesList, playerId: playerId})
+        subscribePlayer(seriesPlayerList, seriesList, player) {
+        return this.$http.post(this.base.url + '/seriesplayers', {"subscriptions": seriesPlayerList, seriesList: seriesList, player: player})
     }
 
         updatePlayer(player) {

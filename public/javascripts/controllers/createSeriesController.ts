@@ -9,7 +9,7 @@ module TournamentManagement {
 
         constructor(private $mdDialog:ng.material.IDialogService, private tournament: Tournament) {
             this.series = {
-                "seriesId": null,
+                "id": null,
                 "seriesName": "",
                 "seriesColor": "#ffffff",
                 "setTargetScore": 21,
@@ -17,6 +17,7 @@ module TournamentManagement {
                 "playingWithHandicaps": false,
                 "extraHandicapForRecs": 0,
                 "showReferees": false,
+                "currentRoundNr": null,
                 "tournamentId": null
             };
         }
@@ -38,9 +39,6 @@ module TournamentManagement {
         };
 
         answer() {
-            //this.series.numberOfSetsToWin = parseInt(this.series.numberOfSetsToWin);
-            //this.series.setTargetScore = parseInt(this.series.setTargetScore);
-            console.log(this.series);
             this.$mdDialog.hide(this.series);
         };
 

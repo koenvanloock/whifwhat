@@ -4,7 +4,7 @@ module TournamentManagement {
     export class AlertService {
         alerts: Array<IAlert>;
 
-        constructor() {
+        constructor(private $mdToast: any) {
             this.alerts = new Array<IAlert>();
         }
 
@@ -21,7 +21,9 @@ module TournamentManagement {
                 errorInList = false;
             }
 
-            if(!errorInList) this.alerts.push(alert);
+            if(!errorInList){
+                this.showError(alert);
+            } 
         }
 
         getAlerts() {
@@ -31,9 +33,24 @@ module TournamentManagement {
         closeAlert(index: number) {
             this.alerts.splice(index, 1);
         }
+
+        showError(alert: IAlert){
+            this.$mdToast.show({
+                hideDelay   : alert.timeout,
+                controller: 'alertController',
+                position    : 'top left',
+                locals: { msg: alert.msg},
+                templateUrl : '../assets/directives/errorPopup.html'
+            });
+        }
+        
     }
 
-    angular.module("managerServices").factory("alertService", [() => {
-        return new AlertService();
+    angular.module("managerControllers").controller("alertController", ["$scope", "msg", ($scope, msg) => {
+        $scope.msg = msg;
+        console.log(msg)
+    }]);
+    angular.module("managerServices").factory("alertService", ["$mdToast", ($mdToast) => {
+        return new AlertService($mdToast);
     }]);
 }

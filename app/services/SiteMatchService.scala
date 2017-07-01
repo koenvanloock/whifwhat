@@ -3,24 +3,20 @@ package services
 
 import javax.inject.Inject
 
-import models.matches.SiteMatch
-import repositories.MatchRepository
+import models.matches.PingpongMatch
+import repositories.mongo.MatchRepository
 
-import scala.concurrent.{Future, Awaitable}
+import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class SiteMatchService @Inject()(matchRepository: MatchRepository){
-  val siteMatches = List(
-    SiteMatch("1","1","2","1",3,true,21,2,0,0)
-  )
 
-  def getMatch(matchId: String): Future[Option[SiteMatch]] = Future(siteMatches.find(siteMatch => siteMatch.matchId.contains(matchId)))
+  def getMatch(matchId: String) = matchRepository.retrieveById(matchId)
 
+  def create(siteMatch: PingpongMatch) = matchRepository.create(siteMatch)
 
-  def create(siteMatch: SiteMatch) = matchRepository.create(siteMatch)
-
-  def update(siteMatch: SiteMatch) = matchRepository.update(siteMatch)
+  def update(siteMatch: PingpongMatch) = matchRepository.update(siteMatch)
 
   def delete(siteMatchId: String) = matchRepository.delete(siteMatchId)
 }

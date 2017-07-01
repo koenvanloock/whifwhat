@@ -5,8 +5,10 @@ module TournamentManagement{
         roundNr: number;
         numberOfRobinGroups?: number;
         numberOfBracketRounds?: number;
-        seriesRoundId: string;
+        id: string;
         seriesId: string;
+        robinRounds? : Array<Object>; // todo add RobinGroup as type
+        bracket?: BracketNode
 
     }
 }

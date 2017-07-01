@@ -9,6 +9,7 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
   cache,
   ws,
+  "org.reactivemongo" %% "play2-reactivemongo" % "0.11.14",
   "mysql" % "mysql-connector-java" % "5.1.39",
   "com.h2database" % "h2" % "1.3.175",
   "com.jason-goodwin" %% "authentikat-jwt" % "0.4.1",
@@ -24,7 +25,7 @@ resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
 coverageExcludedPackages := "<empty>;Reverse.*;router.*;views.*"
 
 addCommandAlias("scoverage", {
-  "clean coverage test"; "coverageReport"
+  ";clean coverage test;coverageReport"
 })
 
 javaOptions in Test += "-Dconfig.resource=test.conf"
