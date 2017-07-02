@@ -5,20 +5,21 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.UUID
 
-import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 import models._
-import play.api.libs.json._
-import play.api.mvc.{AnyContent, Request}
+import models.matches.{PingpongGame, PingpongMatch}
+import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
+import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._ // Combinator syntax
+import play.api.libs.json._
+import play.api.mvc.{AnyContent, Request} // Combinator syntax
 
 
 object JsonUtils {
   def listWrites[T](implicit tWrites: Writes[T]) = {
-      new Writes[List[T]] {
-        override def writes(list: List[T]): JsValue = Json.toJson(list.map(Json.toJson(_)(tWrites)))
-      }
+    new Writes[List[T]] {
+      override def writes(list: List[T]): JsValue = Json.toJson(list.map(Json.toJson(_)(tWrites)))
     }
+  }
 
   def listReads[T](implicit tReads: Reads[T]) = {
     new Reads[List[T]] {
@@ -39,7 +40,7 @@ object JsonUtils {
     implicit val playerReads = Json.format[Player]
     (
       (JsPath \ "playerId").read[String](minLength[String](1) keepAnd maxLength[String](255)) and
-          (JsPath \ "seriesId").read[String] and
+        (JsPath \ "seriesId").read[String] and
         (JsPath \ "player").read[Player](playerReads)
       ) (SeriesPlayer.apply(_, _, _, PlayerScores()))
   }
@@ -57,9 +58,10 @@ object JsonUtils {
   }
 
   def parseRequestBody[T](request: Request[AnyContent])(implicit reads: Reads[T]): Option[T] = {
-      request.body.asJson.flatMap( json => {
-        println(json.toString())
-        json.validate[T](reads).asOpt})
+    request.body.asJson.flatMap(json => {
+      println(json.toString())
+      json.validate[T](reads).asOpt
+    })
   }
 
   implicit val localDateReads = new Reads[LocalDate] {
@@ -76,7 +78,7 @@ object JsonUtils {
       (JsPath \ "maximumNumberOfSeriesEntries").read[Int] and
       (JsPath \ "hasMultipleSeries").read[Boolean] and
       (JsPath \ "showClub").read[Boolean]
-    ) (Tournament.apply(UUID.randomUUID().toString,_, _, _, _, _))
+    ) (Tournament.apply(UUID.randomUUID().toString, _, _, _, _, _))
 
   val seriesReads: Reads[TournamentSeries] = (
     (JsPath \ "seriesName").read[String](minLength[String](1) keepAnd maxLength[String](255)) and
@@ -87,16 +89,16 @@ object JsonUtils {
       (JsPath \ "extraHandicapForRecs").read[Int] and
       (JsPath \ "showReferees").read[Boolean] and
       (JsPath \ "tournamentId").read[String]
-    ) (TournamentSeries.apply(UUID.randomUUID().toString,_, _, _, _, _, _, _, 1, _))
+    ) (TournamentSeries.apply(UUID.randomUUID().toString, _, _, _, _, _, _, _, 1, _))
 
   val singleSeriesReads: Reads[TournamentSeries] = (
-      (JsPath \ "seriesColor").read[String] and
+    (JsPath \ "seriesColor").read[String] and
       (JsPath \ "numberOfSetsToWin").read[Int] and
       (JsPath \ "setTargetScore").read[Int] and
       (JsPath \ "playingWithHandicaps").read[Boolean] and
       (JsPath \ "extraHandicapForRecs").read[Int] and
       (JsPath \ "showReferees").read[Boolean]
-    ) (TournamentSeries.apply(UUID.randomUUID().toString,"replacedName", _, _, _, _, _, _, 1, "toBeReplacedId"))
+    ) (TournamentSeries.apply(UUID.randomUUID().toString, "replacedName", _, _, _, _, _, _, 1, "toBeReplacedId"))
 
 
   val tournamentWithSeriesWritesOnlyPlayers: Writes[TournamentWithSeries] = new Writes[TournamentWithSeries] {
@@ -111,28 +113,48 @@ object JsonUtils {
     )
   }
 
-  val seriesWithPlayersWrites : Writes[SeriesWithPlayers] = new Writes[SeriesWithPlayers] {
+  val seriesWithPlayersWrites: Writes[SeriesWithPlayers] = new Writes[SeriesWithPlayers] {
     implicit val rankWrites = Json.writes[Rank]
     implicit val playerWrites = Json.writes[Player]
     implicit val scoreWrites = Json.writes[PlayerScores]
     implicit val seriesPlayerWrites = Json.writes[SeriesPlayer]
+
     override def writes(o: SeriesWithPlayers): JsValue = Json.obj(
       "id" -> o.seriesId,
       "seriesName" -> o.seriesName,
       "seriesColor" -> o.seriesColor,
-     "setTargetScore" -> o.setTargetScore,
+      "setTargetScore" -> o.setTargetScore,
       "numberOfSetsToWin" -> o.numberOfSetsToWin,
-    "playingWithHandicaps" -> o.playingWithHandicaps,
-    "extraHandicapForRecs" -> o.extraHandicapForRecs,
-    "showReferees" -> o.showReferees,
+      "playingWithHandicaps" -> o.playingWithHandicaps,
+      "extraHandicapForRecs" -> o.extraHandicapForRecs,
+      "showReferees" -> o.showReferees,
       "currentRoundNr" -> o.currentRoundNr,
-    "seriesPlayers" -> o.seriesPlayers.map{seriesPlayer => Json.toJson(seriesPlayer.player).asInstanceOf[JsObject]},
-    "tournamentId" -> o.tournamentId
+      "seriesPlayers" -> o.seriesPlayers.map { seriesPlayer => Json.toJson(seriesPlayer.player).asInstanceOf[JsObject] },
+      "tournamentId" -> o.tournamentId
     )
   }
 
-  def optionWrites[T](implicit tWrites: Writes[T]) = new Writes[Option[T]]{
-    override def writes(o: Option[T]): JsValue = o.map{ t =>
+
+  def pingpongMatchReads = {
+  implicit val rankFormat = Json.format[Rank]
+  implicit val playerFormat = Json.format[Player]
+    (
+      (JsPath \ "id").read[String] and
+        (JsPath \ "playerA").readNullable[Player] and
+        (JsPath \ "playerB").readNullable[Player] and
+        (JsPath \ "roundId").read[String] and
+        (JsPath \ "handicap").read[Int] and
+        (JsPath \ "isHandicapForB").read[Boolean] and
+        (JsPath \ "targetScore").read[Int] and
+        (JsPath \ "numberOfSetsToWin").read[Int] and
+        (JsPath \ "wonSetsA").read[Int] and
+        (JsPath \ "wonSetsB").read[Int] and
+        (JsPath \ "games").lazyRead[List[PingpongGame]](Reads.list[PingpongGame](Json.reads[PingpongGame]))
+      ) (PingpongMatch.apply(_, _, _, _, _, _, _, _, _, _, _))
+  }
+
+  def optionWrites[T](implicit tWrites: Writes[T]) = new Writes[Option[T]] {
+    override def writes(o: Option[T]): JsValue = o.map { t =>
       Json.toJson(t)
     }.getOrElse(JsNull)
   }

@@ -3,8 +3,8 @@ package jsonconverters
 import java.time.LocalDate
 
 import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries}
-import models.matches.{PingpongGame, PingpongMatch}
-import models.player.{Player, Rank}
+import models.matches.{PingpongGame, PingpongMatch, ViewablePingpongMatch}
+import models.player.{Player, Rank, ViewablePlayer}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, Writes, __}
 import utils.JsonUtils
@@ -24,8 +24,8 @@ object HallTournamentOverviewWrites{
       (__ \ "tournamentName").write[String] and
       (__ \ "tournamentDate").write[LocalDate] and
       (__ \ "series").lazyWrite[List[HallOverviewSeries]](Writes.list[HallOverviewSeries](Json.writes[HallOverviewSeries])) and
-      (__ \ "freePlayers").lazyWrite[List[Player]](Writes.list[Player](Json.writes[Player])) and
-        (__ \ "remainingMatches").lazyWrite[List[PingpongMatch]](Writes.list[PingpongMatch](matchWrites))
+      (__ \ "freePlayers").lazyWrite[List[ViewablePlayer]](Writes.list[ViewablePlayer](Json.writes[ViewablePlayer])) and
+        (__ \ "remainingMatches").lazyWrite[List[ViewablePingpongMatch]](Writes.list[ViewablePingpongMatch](Json.writes[ViewablePingpongMatch]))
     ) (unlift(HallOverViewTournament.unapply))
 
 }

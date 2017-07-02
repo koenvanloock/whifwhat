@@ -2,14 +2,10 @@ package models.halls
 
 import java.time.LocalDate
 
-import models.matches.{PingpongMatch, PingpongGame}
-import models.player.{Player, Rank}
-import play.api.libs.functional.syntax.unlift
-import play.api.libs.json.{Json, Writes, __}
-import play.api.libs.functional.syntax._
-import utils.JsonUtils
+import models.matches.{PingpongGame, PingpongMatch, ViewablePingpongMatch}
+import models.player.{Player, Rank, ViewablePlayer}
 
 
-case class HallOverViewTournament(id: String, tournamentName: String, tournamentDate: LocalDate, series: List[HallOverviewSeries], freePlayers: List[Player], matchesToPlay: List[PingpongMatch])
+case class HallOverViewTournament(id: String, tournamentName: String, tournamentDate: LocalDate, series: List[HallOverviewSeries], players: List[ViewablePlayer], matchesToPlay: List[ViewablePingpongMatch])
 case class HallOverviewSeries(seriesId: String, seriesName: String, seriesColor: String, rounds: List[HallOverviewRound])
 case class HallOverviewRound(roundId: String, seriesId: String, roundName: String, completePercentage: Double)

@@ -3,7 +3,7 @@ Vue.component("vue-pingpong-table", {
   '<div class="tableNr" v-if="!table.hidden">' +
   '<div v-if="notUpdating" v-on:click="startUpdating" style="float: left; width: 400px; height: 20px">{{ tableData.tableName }}</div>' +
     '<div v-else><input v-model="tableData.tableName" style="float: left" v-on:blur="setNotUpdating" /></div>' +
-  '<button v-if="tableData.siteMatch" v-on:click="removeMatch" style="float: right"> <i class="fa fa-close"></i></button>' +
+  '<button v-if="tableData.pingpongMatch" v-on:click="removeMatch" style="float: right"> <i class="fa fa-close"></i></button>' +
   '</div>'+
   '<div>' +
   '<div style="display: flex;flex-direction: row">' +
@@ -12,16 +12,16 @@ Vue.component("vue-pingpong-table", {
   '<!-- vertical-->'+
   '<div class="table" v-if="!(table.hidden || table.horizontal)">'+
   '<div class="playerBox-top" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
-  '<span v-if="tableData.siteMatch">' +
-  '{{tableData.siteMatch.playerA.firstname + " " + tableData.siteMatch.playerA.lastname}}' +
-  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.siteMatch.games[index].pointA" style="margin-left: 10px; width:20px; font-weight:bold"/>' +
+  '<span v-if="tableData.pingpongMatch">' +
+  '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.pingpongMatch.games[index].pointA" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '<div class="net"></div>' +
   '<div class="playerBox-bottom" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
-  '<span v-if="tableData.siteMatch">' +
-  '{{tableData.siteMatch.playerB.firstname + " " + tableData.siteMatch.playerB.lastname}}' +
-  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
+  '<span v-if="tableData.pingpongMatch">' +
+  '<p style="font-weight: bold; text-align: center; margin-top: 0">{{tableData.pingpongMatch.playerB.firstname + " " + tableData.pingpongMatch.playerB.lastname}}</p>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '</div>'+
@@ -29,16 +29,16 @@ Vue.component("vue-pingpong-table", {
   '<div class="horizontal-table" v-if="!table.hidden && table.horizontal">'+
 
   '<div class="playerBox-left" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
-  '<span v-if="tableData.siteMatch">' +
-  '{{tableData.siteMatch.playerA.firstname + " " + tableData.siteMatch.playerA.lastname}}' +
-  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.siteMatch.games[index].pointA" style="width:20px; font-weight:bold"/>' +
+  '<span v-if="tableData.pingpongMatch">' +
+  '<p style="font-weight: bold; text-align: center;">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.pingpongMatch.games[index].pointA" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '<div class="horizonal-net"></div>'+
   '<div class="playerBox-right" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
-  '<span v-if="tableData.siteMatch">' +
-  '{{tableData.siteMatch.playerB.firstname + " " + tableData.siteMatch.playerB.lastname}}' +
-  '<input type="number" v-for="(game,index) in tableData.siteMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.siteMatch.games[index].pointB" style="width:20px; font-weight:bold"/>' +
+  '<span v-if="tableData.pingpongMatch">' +
+  '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
 
@@ -46,6 +46,7 @@ Vue.component("vue-pingpong-table", {
   '</div>'+
   '<referee-box style="position: relative;top: 160px; right: 10px;" :horizontal="true" :referee="table.referee" :hallId="tableData.hallId" :row="tableData.row" :column="tableData.column"></referee-box>'+
   '</div>'+
+  '<div style="position: relative; bottom: 150px; left: 210px; background: red; height: 40px; width: 100px;"/> ' +
   '</div>'+
   '</div>',
   props: ['table'],
@@ -64,7 +65,7 @@ Vue.component("vue-pingpong-table", {
       event.preventDefault();
     },
     removeMatch: function(){
-      Vue.http.patch("hallMatch/"+ this.table.hallId+'/'+ this.table.row + '/' +  this.table.column, this.tableData.siteMatch).then(function(){}, function(){});
+      Vue.http.patch("hallMatch/"+ this.table.hallId+'/'+ this.table.row + '/' +  this.table.column, this.tableData.pingpongMatch).then(function(){}, function(){});
     }
   },
   watch: {

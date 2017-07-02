@@ -22,13 +22,16 @@ Vue.component("matchPanel", {
   data: function () {
     return {
       matchQuery: '',
-      matchList: this.matches,
-      filteredMatches: this.matches
+      matchList: this.matches
+          .filter( function(viewableMatch){ return !( viewableMatch.isWon || viewableMatch.isOccupied)})
+          .map(function(viewableMatch){return viewableMatch.pingpongMatch})
     }
   },
   watch: {
     matches: function (newMatches) {
-      this.matchList = newMatches;
+      this.matchList = newMatches
+          .filter( function(viewableMatch){ return !( viewableMatch.isWon || viewableMatch.isOccupied)})
+          .map(function(viewableMatch){return viewableMatch.pingpongMatch});
     }
   },
 

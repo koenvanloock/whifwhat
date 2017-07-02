@@ -42,6 +42,11 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
 
 }
 
+  def deleteMatchInHall(hallId: String, matchId: String): Future[Option[Hall]] =  hallRepository.retrieveById(hallId).flatMap {
+    case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == matchId)) table.copy(pingpongMatch = None) else table)).map(Some(_))
+    case _ => Future(None)
+  }
+
 
   def setMatchToTable (hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
   hallRepository.retrieveByField ("id", hallId).map {
@@ -57,7 +62,7 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
   protected def updateTable (hall: Hall) (updateFunc: (HallTable) => HallTable): Hall = hall.copy (tables = hall.tables.map (updateFunc) )
 
   protected def originalOrMatchToUpdate (row: Int, column: Int, pingpongMatch: Option[PingpongMatch] ): (HallTable) => HallTable =
-  hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (siteMatch = pingpongMatch) else hallTable
+  hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (pingpongMatch = pingpongMatch) else hallTable
 
   protected def originalOrRefToUpdate (row: Int, column: Int, referee: Option[Player] ): (HallTable) => HallTable =
   hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (referee = referee) else hallTable

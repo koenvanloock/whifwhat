@@ -111,10 +111,9 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
 
   def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async { request =>
 
-    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map { pingpongMatch =>
+    ControllerUtils.parseEntityFromRequestBody(request, JsonUtils.pingpongMatchReads).map { pingpongMatch =>
       hallService.setMatchToTable(hallId, row, column, pingpongMatch).map {
         case Some(hall) =>
-          println(LocalDateTime.now + " printing hall")
           tournamentEventActor ! MoveMatchInHall(hallId, row, column, pingpongMatch)
           Ok
         case _ => BadRequest

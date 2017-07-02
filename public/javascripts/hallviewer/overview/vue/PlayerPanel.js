@@ -22,12 +22,12 @@ Vue.component("playerPanel", {
   data: function () {
     return {
       playerQuery: '',
-      playerList: this.players
+      playerList: this.players.filter(function(viewablePlayer){ return !viewablePlayer.occupied }).map(function(viewablePlayer){ return viewablePlayer.player})
     }
   },
   watch: {
     players: function (newPlayers) {
-      this.playerList = newPlayers;
+      this.playerList = newPlayers.filter(function(viewablePlayer){ return !viewablePlayer.occupied }).map(function(viewablePlayer){ return viewablePlayer.player});
     }
   },
 

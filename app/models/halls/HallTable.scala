@@ -7,7 +7,7 @@ case class HallTable(
                       hallId: String,
                       row: Int,
                       column: Int,
-                      siteMatch: Option[PingpongMatch],
+                      pingpongMatch: Option[PingpongMatch],
                       referee: Option[Player],
                       horizontal: Boolean=false,
                       hidden: Boolean =false,

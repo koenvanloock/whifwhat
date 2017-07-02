@@ -1,26 +1,37 @@
 package controllers
 
 import java.util.UUID
-import javax.inject.Inject
+import javax.inject.{Inject, Named}
 
 import models._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller, Result}
-import services.{SeriesRoundService, SeriesService}
+import services.{HallOverviewService, HallService, SeriesRoundService, SeriesService}
 import utils.{ControllerUtils, JsonUtils, RoundRanker}
 import utils.JsonUtils.ListWrites._
+import akka.pattern.ask
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
+import actors.ActiveHall.GetHall
+import actors.TournamentEventActor
+import actors.TournamentEventActor.MatchCompleted
+import akka.actor.ActorRef
+import akka.util.Timeout
+import models.halls.Hall
 import models.matches.MatchEvidence.matchIsModel._
 import models.matches.{MatchEvidence, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
-class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, seriesService: SeriesService) extends Controller{
+import scala.concurrent.duration._
+
+class SeriesRoundController @Inject()(@Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService) extends Controller{
   type FinalRanking = List[SeriesPlayer]
+  implicit val timeout = Timeout(5 seconds)
+
 
   implicit val robinInitReads: Reads[SiteRobinRound] = (
     (JsPath \ "numberOfRobinGroups").read[Int] and
@@ -104,6 +115,11 @@ class SeriesRoundController @Inject()(seriesRoundService: SeriesRoundService, se
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
        val matchWithSetResults = calculateSets(siteMatch)
+        tournamentStream ! MatchCompleted(matchWithSetResults)
+      (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
+        case Some(hall) => hallService.deleteMatchInHall(hall.id, matchWithSetResults.id)
+        case _ => None
+      }
         seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
     }.getOrElse(Future(BadRequest))
   }
