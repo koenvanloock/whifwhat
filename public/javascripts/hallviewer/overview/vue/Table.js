@@ -5,7 +5,7 @@ Vue.component("vue-pingpong-table", {
     '<div v-else><input v-model="tableData.tableName" style="float: left" v-on:blur="setNotUpdating" /></div>' +
   '<button v-if="tableData.pingpongMatch" v-on:click="removeMatch" style="float: right"> <i class="fa fa-close"></i></button>' +
   '</div>'+
-  '<div>' +
+  '<div style="display: flex" v-bind:style="{flexDirection: flexDirection()}" >' +
   '<div style="display: flex;flex-direction: row">' +
   '<div class="pingpongTable" v-on:dragover="allowDrop" v-on:drop="dropMatch">'+
 
@@ -26,7 +26,7 @@ Vue.component("vue-pingpong-table", {
   '</div>'+
   '</div>'+
   '<!-- horizontal-->'+
-  '<div class="horizontal-table" v-if="!table.hidden && table.horizontal">'+
+  '<div class="horizontal-table" v-if="!tableData.hidden && tableData.horizontal">'+
 
   '<div class="playerBox-left" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
   '<span v-if="tableData.pingpongMatch">' +
@@ -41,12 +41,10 @@ Vue.component("vue-pingpong-table", {
   '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
-
   '</div>'+
   '</div>'+
-  '<referee-box style="position: relative;top: 160px; right: 10px;" :horizontal="true" :referee="table.referee" :hallId="tableData.hallId" :row="tableData.row" :column="tableData.column"></referee-box>'+
   '</div>'+
-  '<div style="position: relative; bottom: 150px; left: 210px; background: red; height: 40px; width: 100px;"/> ' +
+  '<referee-box :horizontal="tableData.horizontal" :referee="tableData.referee" :hallId="tableData.hallId" :row="tableData.row" :column="tableData.column" :visible="!tableData.hidden"></referee-box>'+
   '</div>'+
   '</div>',
   props: ['table'],
@@ -66,6 +64,9 @@ Vue.component("vue-pingpong-table", {
     },
     removeMatch: function(){
       Vue.http.patch("hallMatch/"+ this.table.hallId+'/'+ this.table.row + '/' +  this.table.column, this.tableData.pingpongMatch).then(function(){}, function(){});
+    },
+    flexDirection: function () {
+      return this.table.horizontal? "column":"row";
     }
   },
   watch: {

@@ -67,5 +67,4 @@ class ActiveTournament extends Actor{
       pingpongMatch.pingpongMatch.playerA.exists(a => a.id != player.id) &&
         pingpongMatch.pingpongMatch.playerB.exists(b => b.id != player.id))
   }
-
 }

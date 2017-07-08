@@ -158,7 +158,7 @@ form .progress {
 
 .pingpongTable{
     background: grey;
-    width: 500px;
+    width: 400px;
     height: 550px;
     padding: 5px;
     display: inline-block;
@@ -278,4 +278,14 @@ form .progress {
     -ms-transform: rotate(90deg);
     /* Opera */
     -o-transform: rotate(90deg);
+}
+
+.flex-2 {
+    /* This will be twice as big as the small item. */
+    -webkit-flex: 2 0 0;
+    flex: 2 0 0;
+}
+.flex-1 {
+    -webkit-flex: 1 0 0;
+    flex: 1 0 0;
 }

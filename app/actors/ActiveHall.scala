@@ -46,7 +46,7 @@ class ActiveHall extends Actor {
     case DeleteMatchById(matchId) => deleteMatchInHall(matchId)
     case MoveRefereeToTable(hallId, row, column, player) => updateRef(hallId, row, column, Some(player))
     case DeleteRefereeFromTable(hallId, row, column, player) => updateRef(hallId, row, column, None)
-    case _ => "method not supported!"
+    case _ => sender() ! "method not supported!"
   }
 
   private def deleteMatchInHall(matchId: String) = {

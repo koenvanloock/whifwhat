@@ -4,7 +4,7 @@ Vue.component("hall-overview", {
   '<match-panel :matches="matchList" style="z-index: 10000;min-height: 500px; position: absolute; left:0px;top:80px; background: #46ac60" v-bind:class="{matchesPresent: panelOpen}" v-if="panelOpen && isMatchTab"></match-panel>' +
   '<player-panel :players="freePlayers" style="z-index: 10000;min-height: 500px; position: absolute; left:0px;top:80px; background: #46ac60" v-if="panelOpen && !isMatchTab"></player-panel>' +
   '<div>' +
-  ' <div v-for="rowNr in rowList" style="min-width:100%;z-index: 100;" v-bind:style="{width: canvasWidth()}">' +
+  ' <div v-for="rowNr in rowList" style="min-width:100%;" v-bind:style="{width: canvasWidth()}">' +
   '   <table-row :table-row="hall.tables.filter(function(table){ return table.row === rowNr;})"></table-row>' +
   ' </div>' +
   '</div>' +
@@ -13,7 +13,6 @@ Vue.component("hall-overview", {
   ' v-on:togglePlayerPanel="togglePlayerPanel" ' +
   ' :activeTournament="tournament" ' +
   ' style="height: 80px; position: absolute; top: 0px; width: 100%; border-top: 1px solid white;"></match-bar>' +
-  //'<tournament-bar v-on:toggleMatchPanel="togglePanel" :activeTournament="tournament"  style="position: absolute; bottom: 0; width: 100%; border-top: 1px solid white;"></tournament-bar>' +
   '</div>',
   data: function () {
     return {
