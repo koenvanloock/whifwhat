@@ -23,7 +23,7 @@ import akka.actor.ActorRef
 import akka.util.Timeout
 import models.halls.Hall
 import models.matches.MatchEvidence.matchIsModel._
-import models.matches.{MatchEvidence, PingpongGame, PingpongMatch}
+import models.matches.{MatchChecker, MatchEvidence, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
 import scala.concurrent.duration._
@@ -115,11 +115,20 @@ class SeriesRoundController @Inject()(@Named("tournament-event-actor") tournamen
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
        val matchWithSetResults = calculateSets(siteMatch)
-        tournamentStream ! MatchCompleted(matchWithSetResults)
-      (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
-        case Some(hall) => hallService.deleteMatchInHall(hall.id, matchWithSetResults.id)
-        case _ => None
-      }
+        if(MatchChecker.isWon(siteMatch)) {
+          tournamentStream ! MatchCompleted(matchWithSetResults)
+          (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
+            case Some(hall) => hallService.deleteMatchAndRefInHall(hall.id, matchWithSetResults)
+            case _ => None
+          }
+        } else {
+          tournamentStream ! TournamentEventActor.MatchUpdated(matchWithSetResults)
+          (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
+            case Some(hall) => hallService.updateMatchInHall(hall.id, matchWithSetResults)
+            case _ => None
+          }
+        }
+
         seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
     }.getOrElse(Future(BadRequest))
   }

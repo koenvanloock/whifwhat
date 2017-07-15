@@ -149,7 +149,7 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     ControllerUtils.parseEntityFromRequestBody(request, playerFormat).map { referee =>
       hallService.deleteHallRef(hallId, row, column, referee).map {
         case Some(updatedHall) =>
-          tournamentEventActor ! HallRefereeDelete(hallId, row, column, referee)
+          tournamentEventActor ! HallRefereeDelete(hallId, row, column, referee, completed = false)
           Ok
         case _ => BadRequest
       }

@@ -2,35 +2,48 @@ package actors
 
 import javax.inject.Inject
 
-import actors.ActiveHall.{ActivateHall, MoveMatchToHall, RemoveActiveHall}
+import actors.ActiveHall.{ActivateHall, MoveMatchToHall, RemoveActiveHall, UpdateMatchInHall}
 import actors.ActiveTournament._
-import actors.StreamActor.{PublishActiveHall, PublishActiveTournament}
 import akka.actor.{Actor, ActorRef, ActorSystem}
-import models.halls._
-import models.matches.{MatchChecker, PingpongMatch}
-import models.player.Player
-import akka.pattern.ask
 import akka.util.Timeout
+import models.halls._
+import models.matches.PingpongMatch
+import models.player.Player
+
 import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object TournamentEventActor {
 
   case class SetChannel(streamActor: ActorRef)
+
   case class Hallchanged(hall: Hall)
+
   case object HallRemoved
+
   case object GetHall
+
   case class MoveMatchInHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch)
+
   case class ActiveTournamentChanged(tournament: HallOverViewTournament)
+
   case object ActiveTournamentRemoved
+
   case object GetActiveTournament
+
   case object HasActiveTournament
+
   case class HallRefereeInsert(hallId: String, row: Int, column: Int, insertedReferee: Player)
-  case class HallRefereeDelete(hallId: String, row: Int, column: Int, deletedReferee: Player)
+
+  case class HallRefereeDelete(hallId: String, row: Int, column: Int, deletedReferee: Player, completed: Boolean)
+
   case class HallMatchDelete(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch)
+
   case class RoundAdvance(roundMatches: List[PingpongMatch])
+
   case class MatchCompleted(pingpongMatch: PingpongMatch)
+
+  case class MatchUpdated(matchWithSetResults: PingpongMatch)
 
 }
 
@@ -43,20 +56,16 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
   private val activeTournament = system.actorOf(ActiveTournament.props)
 
   private var occupiedPlayers: List[Player] = Nil
+  private var referees: Map[Player, Int] = Map()
 
   override def receive: Receive = {
     case SetChannel(streamActor) =>
       activeHall ! ActiveHall.SetChannel(streamActor)
       activeTournament ! SetStreamActor(streamActor)
-    case Hallchanged(newHall) =>
-      activeHall ! ActivateHall(newHall, sender())
-      occupyPlayers(occupiedHallPlayers(newHall))
-      activeTournament ! NewOccupiedPlayers(occupiedPlayers)
+    case Hallchanged(newHall) => updateHall(newHall)
     case HallRemoved => activeHall ! RemoveActiveHall
     case MoveMatchInHall(hallId, row, column, pingpongMatch) =>
-      activeHall ! MoveMatchToHall(hallId, row, column, pingpongMatch)
-      occupyPlayers(getMatchPlayers(pingpongMatch))
-      activeTournament ! NewOccupiedPlayers(occupiedPlayers)
+      withInvolvedFreePlayers(getMatchPlayers(pingpongMatch))(putMatchInHall(hallId, row, column, pingpongMatch))
     case GetHall => activeHall ! ActiveHall.GetHall(sender)
     case ActiveTournamentChanged(newTournament) => activeTournament ! ActivateTournament(newTournament, occupiedPlayers, sender())
     case ActiveTournamentRemoved => activeTournament ! RemoveTournament
@@ -64,19 +73,22 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
       activeHall ! ActiveHall.DeleteMatchInHall(hallId, row, column)
       freePlayers(getMatchPlayers(pingpongMatch))
       activeTournament ! ActiveTournament.UpdateMatchInTournament(pingpongMatch, occupiedPlayers)
+    case MatchUpdated(matchWithSetResults: PingpongMatch) =>
+      activeHall ! UpdateMatchInHall(matchWithSetResults)
+      activeTournament ! UpdateMatchInTournament(matchWithSetResults, occupiedPlayers)
     case MatchCompleted(pingpongMatch) =>
-      activeHall ! ActiveHall.DeleteMatchById(pingpongMatch.id)
+      activeHall ! ActiveHall.DeleteMatchById(pingpongMatch.id, completed = true)
       freePlayers(getMatchPlayers(pingpongMatch))
       activeTournament ! ActiveTournament.UpdateMatchInTournament(pingpongMatch, occupiedPlayers)
     case HallRefereeInsert(hallId, row, column, insertedReferee) =>
       activeHall ! ActiveHall.MoveRefereeToTable(hallId, row, column, insertedReferee)
       occupyPlayers(List(insertedReferee))
       activeTournament ! NewOccupiedPlayers(occupiedPlayers)
-    case HallRefereeDelete(hallId, row, column, deletedReferee: Player) =>
+    case HallRefereeDelete(hallId, row, column, deletedReferee: Player, completed) =>
+      if(completed) upRefereeCount(deletedReferee)
       activeHall ! ActiveHall.DeleteRefereeFromTable(hallId, row, column, deletedReferee)
       freePlayers(List(deletedReferee))
       activeTournament ! NewOccupiedPlayers(occupiedPlayers)
-
     case RoundAdvance(matches) => ???
     case GetActiveTournament =>
       val safeSender = sender()
@@ -87,16 +99,39 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
     case _ => sender() ! "method not accepted"
   }
 
+  private def updateHall(newHall: Hall) = {
+    activeHall ! ActivateHall(newHall, sender())
+    occupyPlayers(occupiedHallPlayers(newHall))
+    activeTournament ! NewOccupiedPlayers(occupiedPlayers)
+  }
+
+  private def putMatchInHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch) = {
+    activeHall ! MoveMatchToHall(hallId, row, column, pingpongMatch) // todo what if there is a match on target??? block or overwrite?
+    occupyPlayers(getMatchPlayers(pingpongMatch))
+    activeTournament ! NewOccupiedPlayers(occupiedPlayers)
+  }
+
   private def getMatchPlayers(pingpongMatch: PingpongMatch): List[Player] = {
 
     val players = pingpongMatch.playerA.toList ++ pingpongMatch.playerB.toList
     println(players)
     players
   }
+
   private def occupyPlayers(playerList: List[Player]) = occupiedPlayers = occupiedPlayers ++ playerList
 
   private def freePlayers(playerList: List[Player]) = occupiedPlayers = occupiedPlayers.filterNot(playerList.contains)
+
   private def occupiedHallPlayers(hall: Hall): List[Player] = {
     hall.tables.flatMap(_.pingpongMatch.toList.flatMap(getMatchPlayers))
+  }
+
+  private def withInvolvedFreePlayers(players: List[Player])(f: Unit) = if (occupiedPlayers.forall(occupiedPlayer => !players.contains(occupiedPlayer))) f
+
+  private def upRefereeCount(player: Player) {
+    referees.get(player) match {
+      case None => referees += (player -> 1)
+      case Some(number) => referees += (player -> (number + 1))
+    }
   }
 }

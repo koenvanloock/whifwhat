@@ -10,6 +10,20 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class HallService @Inject()(hallRepository: HallRepository) {
+  def deleteMatchAndRefInHall(hallId: String, pingpongMatch: PingpongMatch) = hallRepository.retrieveById(hallId).flatMap {
+    case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = None, referee = None) else table)).map(Some(_))
+    case _ => Future(None)
+}
+
+  def updateMatchInHall(hallId: String, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
+    hallRepository.retrieveById(hallId).flatMap {
+      case Some(hallToUpdate) =>
+        val newHall = hallToUpdate.copy(tables  = hallToUpdate.tables.map{ table => if(table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = Some(pingpongMatch)) else table })
+        hallRepository.update(newHall).map(Some(_))
+      case None => Future(None)
+    }
+  }
+
   def insertRefInHall(hallId: String, row: Int, column: Int, referee: Player): Future[Option[Hall]] = {
     hallRepository.retrieveById(hallId).map { hallOpt =>
       val newHallOpt = addRefereeToHall(row, column, referee)(hallOpt)

@@ -22,11 +22,13 @@ object ActiveHall {
 
   case class DeleteMatchInHall(hallId: String, row: Int, column: Int)
 
+  case class UpdateMatchInHall(pingpongMatch: PingpongMatch)
+
   case class MoveRefereeToTable(hallId: String, row: Int, column: Int, player: Player)
 
   case class DeleteRefereeFromTable(hallId: String, row: Int, column: Int, player: Player)
 
-  case class DeleteMatchById(id: String)
+  case class DeleteMatchById(id: String, completed: Boolean)
 
 }
 
@@ -43,14 +45,15 @@ class ActiveHall extends Actor {
     case ActivateHall(newHall, senderRef) => activeHall = Some(newHall); senderRef ! activeHall
     case MoveMatchToHall(hallId, row, column, pingpongMatch) => activateHall(hallId, row, column, pingpongMatch)
     case DeleteMatchInHall(hallId, row, column) => deleteMatchInHall(hallId, row, column)
-    case DeleteMatchById(matchId) => deleteMatchInHall(matchId)
+    case UpdateMatchInHall(pingpongMatch) => updateMatchInHall(pingpongMatch)
+    case DeleteMatchById(matchId, completed) => deleteMatchInHall(matchId, completed)
     case MoveRefereeToTable(hallId, row, column, player) => updateRef(hallId, row, column, Some(player))
     case DeleteRefereeFromTable(hallId, row, column, player) => updateRef(hallId, row, column, None)
     case _ => sender() ! "method not supported!"
   }
 
-  private def deleteMatchInHall(matchId: String) = {
-    withHall(deleteById(matchId))
+  private def deleteMatchInHall(matchId: String, completed: Boolean) = {
+    withHall(deleteById(matchId, completed))
   }
 
   private def deleteMatchInHall(hallId: String, row: Int, column: Int) =
@@ -69,11 +72,21 @@ class ActiveHall extends Actor {
     realHall.copy(tables = performTableMutationAt(row, column, table => table.copy(referee = refOpt))(realHall.tables))
   }
 
+  private def updateMatchInHall(pingpongMatch: PingpongMatch): Unit ={
+    withHall( hall => hall.tables.find( hallTable => hallTable.pingpongMatch.exists(_.id == pingpongMatch.id)).map{
+      table => updateTableMatchInhall(Some(pingpongMatch), table.row, table.column)(hall)
+    }.getOrElse(hall))
+  }
+
   private def updateTableMatchInhall(pingpongMatch: Option[PingpongMatch], row: Int, column: Int): Hall => Hall = realHall => {
     realHall.copy(tables = performTableMutationAt(row, column, table => table.copy(pingpongMatch = pingpongMatch))(realHall.tables))
   }
 
-  private def deleteById(matchId: String): Hall => Hall = hall => hall.copy(tables = hall.tables.map(table => if (table.pingpongMatch.exists(_.id == matchId)) table.copy(pingpongMatch = None) else table))
+  private def deleteById(matchId: String, completed: Boolean): Hall => Hall = hall => {hall.copy(tables = hall.tables.map(table => if (table.pingpongMatch.exists(_.id == matchId)) {
+    if(completed) table.referee.foreach{ realRef => sender() ! TournamentEventActor.HallRefereeDelete(hall.id, table.row, table.column, realRef, completed = true)}
+    table.copy(pingpongMatch = None)
+  } else table))
+  }
 
   private def withExistingHall(hallId: String)(hallMutation: Hall => Hall) = {
     activeHall.foreach { realHall =>
