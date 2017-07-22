@@ -63,13 +63,19 @@ PATCH         /hallRef/:hallId/:row/:column                  controllers.HallCon
 GET           /activehall                                    controllers.HallController.getActiveHall
 POST          /activehall/:hallId                            controllers.HallController.setActiveHall(hallId: String)
 
-GET           /eventstream                                   controllers.StreamController.eventStream
+GET           /eventstream                                   controllers.StreamController.tournamentEventStream
+GET           /scorestream                                   controllers.StreamController.scoreEventStream
+
+GET           /startScore/:tournamentId                      controllers.ScoreController.startStreamingScores(tournamentId:String)
+GET           /stopScore                                     controllers.ScoreController.stopStreamingScores
+
 
 GET           /ranks                                         controllers.PlayerController.getRanks
 
 #POST          /uploadimage                                   controllers.PlayerController.uploadPlayerImage
 
 GET           /                                              controllers.ManagerController.showManager
+GET           /scorer                                        controllers.ManagerController.showScorer
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                  controllers.Assets.versioned(path="/public", file: Asset)

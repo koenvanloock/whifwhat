@@ -19,7 +19,7 @@ class SeriesServiceTest extends PlaySpec {
   val koen = Player("1", "Koen", "Van Loock", Ranks.D0)
   val hans = Player("2", "Hans", "Van Bael", Ranks.E4)
   val nicky  =Player("12", "Nicky", "Hoste", Ranks.E4)
-  val aram = Player("6", "Aram", "Paduwels", Ranks.B4)
+  val aram = Player("6", "Aram", "Pauwels", Ranks.B4)
   val gil = Player("9", "Gil", "Corujeira-Figueira", Ranks.E2)
 
   val players = List(
@@ -123,13 +123,17 @@ class SeriesServiceTest extends PlaySpec {
 
 
     "returnRoundRankingOrNextRoundIfPresent returns the ranking if it's the last round of the tournament (no next round)" in {
-      val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("1", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
-      val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"123",1,List(RobinGroup("1", List(), List(
+      Await.result(seriesPlayerRepository.deleteAll(), DEFAULT_DURATION)
+      Await.result(seriesRoundRepository.deleteAll(), DEFAULT_DURATION)
+      val insertedSeries = Await.result(seriesRepository.create(TournamentSeries("999", "Open met voorgift", "#ffffff", 2, 21, true, 0, true, 0, "1")), DEFAULT_DURATION)
+      val seriesPlayers = List(SeriesPlayer("57687","999",aram, PlayerScores(0,1,0,2,30,42, 666)), SeriesPlayer("sfqdfqs89","999",koen, PlayerScores(1,0,2,0,42,30, 3456)))
+      val insertedSeriesPlayers = seriesPlayers.map(seriesPlayer => Await.result(seriesPlayerRepository.create(seriesPlayer), DEFAULT_DURATION))
+      val seriesRound = Await.result(seriesRoundRepository.create(SiteRobinRound("123",1,"999",1,List(RobinGroup("1", seriesPlayers, List(
         PingpongMatch("1", Some(koen), Some(aram),"5", 2, true, 21, 2, 2, 0, List(
           PingpongGame(21, 15, 1),
           PingpongGame(21, 15, 2))
         )))))), DEFAULT_DURATION)
-      val ranking = players.reverse
+      val ranking = seriesPlayers.reverse
       val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking)(None), DEFAULT_DURATION)
 
       result mustBe Left(ranking)

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="tournamentManager">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <head>
+        <title>Whif-Wut</title>
+        <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
+        <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/font-awesome/css/font-awesome.min.css")">
+    </head>
+    <body>
+
+        <div id="scoreApp">
+            <div v-if="activeTournament.id">
+            <tournament-bar :tournament="activeTournament" ></tournament-bar>
+            <div style="margin-top: 80px;">
+                <button v-on:click="startStream(activeTournament.id)">Start scores volgen</button>
+                <button v-on:click="stopStream">Stop scores volgen</button>
+            </div>
+            </div>
+            <div v-else>
+                <h3>Er is geen actief tornooi.</h3>
+            </div>
+        </div>
+
+
+        <script src="@routes.Assets.versioned("bower_components/vue/dist/vue.js")"></script>
+        <script src="@routes.Assets.versioned("bower_components/vue-resource/dist/vue-resource.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/Scorer.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/TournamentBar.js")"></script>
+    </body>
+</html>

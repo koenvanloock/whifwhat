@@ -158,7 +158,7 @@ form .progress {
 
 .pingpongTable{
     background: grey;
-    width: 500px;
+    width: 400px;
     height: 550px;
     padding: 5px;
     display: inline-block;
@@ -166,7 +166,7 @@ form .progress {
 
 .table{
     height: 500px;
-    width: 300px;
+    width: 340px;
 }
 
 .net{
@@ -177,7 +177,7 @@ form .progress {
 
 .playerBox{
     height: 245px;
-    width: 250px;
+    width: 290px;
     margin-left: 20px;
     margin-right: 20px;
     background: darkgreen;
@@ -187,7 +187,7 @@ form .progress {
 
 .playerBoxBlue{
     height: 245px;
-    width: 250px;
+    width: 290px;
     margin-left: 20px;
     margin-right: 20px;
     background: darkblue;
@@ -231,7 +231,7 @@ form .progress {
 
 .horizontal-table{
     width: 500px;
-    height: 300px;
+    height: 340px;
 }
 
 .horizonal-net{
@@ -244,7 +244,7 @@ form .progress {
 .playerBoxHorizontal{
     float: left;
     width: 240px;
-    height: 250px;
+    height: 290px;
     margin-top: 20px;
     margin-bottom: 20px;
     display: inline-block;
@@ -256,7 +256,7 @@ form .progress {
 .playerBoxHorizontalBlue{
     float: left;
     width: 240px;
-    height: 250px;
+    height: 290px;
     margin-top: 20px;
     margin-bottom: 20px;
     display: inline-block;
@@ -278,4 +278,14 @@ form .progress {
     -ms-transform: rotate(90deg);
     /* Opera */
     -o-transform: rotate(90deg);
+}
+
+.flex-2 {
+    /* This will be twice as big as the small item. */
+    -webkit-flex: 2 0 0;
+    flex: 2 0 0;
+}
+.flex-1 {
+    -webkit-flex: 1 0 0;
+    flex: 1 0 0;
 }

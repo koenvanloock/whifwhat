@@ -28,7 +28,7 @@ class PingpongMatchServiceTest extends PlaySpec{
     "create a match, it recieves an id" in {
 
       val siteMatch =  Await.result(matchService.create(PingpongMatch("10",Some(koen),Some(hans),"1",3,true,21,2,0,0, Nil)),DEFAULT_DURATION)
-      siteMatch.id.length mustBe 24
+      siteMatch.id mustBe "10"
     }
 
     "update a match" in {

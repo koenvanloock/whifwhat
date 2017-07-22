@@ -10,6 +10,20 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class HallService @Inject()(hallRepository: HallRepository) {
+  def deleteMatchAndRefInHall(hallId: String, pingpongMatch: PingpongMatch) = hallRepository.retrieveById(hallId).flatMap {
+    case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = None, referee = None) else table)).map(Some(_))
+    case _ => Future(None)
+}
+
+  def updateMatchInHall(hallId: String, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
+    hallRepository.retrieveById(hallId).flatMap {
+      case Some(hallToUpdate) =>
+        val newHall = hallToUpdate.copy(tables  = hallToUpdate.tables.map{ table => if(table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = Some(pingpongMatch)) else table })
+        hallRepository.update(newHall).map(Some(_))
+      case None => Future(None)
+    }
+  }
+
   def insertRefInHall(hallId: String, row: Int, column: Int, referee: Player): Future[Option[Hall]] = {
     hallRepository.retrieveById(hallId).map { hallOpt =>
       val newHallOpt = addRefereeToHall(row, column, referee)(hallOpt)
@@ -42,6 +56,11 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
 
 }
 
+  def deleteMatchInHall(hallId: String, matchId: String): Future[Option[Hall]] =  hallRepository.retrieveById(hallId).flatMap {
+    case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == matchId)) table.copy(pingpongMatch = None) else table)).map(Some(_))
+    case _ => Future(None)
+  }
+
 
   def setMatchToTable (hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
   hallRepository.retrieveByField ("id", hallId).map {
@@ -57,7 +76,7 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
   protected def updateTable (hall: Hall) (updateFunc: (HallTable) => HallTable): Hall = hall.copy (tables = hall.tables.map (updateFunc) )
 
   protected def originalOrMatchToUpdate (row: Int, column: Int, pingpongMatch: Option[PingpongMatch] ): (HallTable) => HallTable =
-  hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (siteMatch = pingpongMatch) else hallTable
+  hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (pingpongMatch = pingpongMatch) else hallTable
 
   protected def originalOrRefToUpdate (row: Int, column: Int, referee: Option[Player] ): (HallTable) => HallTable =
   hallTable => if (hallTable.row == row && hallTable.column == column) hallTable.copy (referee = referee) else hallTable
