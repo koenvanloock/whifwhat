@@ -37,20 +37,20 @@ class ActiveTournament extends Actor{
       publishTournament()
       senderRef !  tournament
     case UpdateMatchInTournament(pingpongMatch, occupiedPlayers) =>
-      updateMatchInList(pingpongMatch)
+      updateMatchInList(pingpongMatch, occupiedPlayers)
       updatePlayers(occupiedPlayers)
       publishTournament()
     case RemoveTournament => tournament = None
     case NewOccupiedPlayers(occupiedPlayers) => tournament = tournament.map( realTournament => realTournament.copy(
       players = realTournament.players.map(viewPlayer => viewPlayer.copy(occupied = occupiedPlayers.contains(viewPlayer.player))),
-      matchesToPlay = realTournament.matchesToPlay.map( viewableMatch => viewableMatch.copy(isOccupied = !matchPlayersAreAvailable(viewableMatch, occupiedPlayers)))
+      matchesToPlay = realTournament.matchesToPlay.map(updateOccupied(_,occupiedPlayers))
     ))
       publishTournament()
     case _ => sender() ! "invalid command"
   }
 
-  private def updateMatchInList(updatedMatch: PingpongMatch) = tournament =
-    tournament.map( existingTournament => existingTournament.copy(matchesToPlay = existingTournament.matchesToPlay.foldLeft(List[ViewablePingpongMatch]())((acc, pingpongMatch) => if(updatedMatch.id == pingpongMatch.pingpongMatch.id) ViewablePingpongMatch(updatedMatch, MatchChecker.isWon(updatedMatch), false) :: acc else pingpongMatch :: acc)))
+  private def updateMatchInList(updatedMatch: PingpongMatch, occupiedPlayers: List[Player]) =
+    tournament = tournament.map( existingTournament => existingTournament.copy(matchesToPlay = newMatchOrViewableExistingMatch(updatedMatch, existingTournament, occupiedPlayers).reverse))
 
   private def updatePlayers(occupiedPlayers: List[Player]) = {
     tournament = tournament.map(realTournament => realTournament.copy( players = realTournament.players.map( player => ViewablePlayer( player.player, occupiedPlayers.contains(player.player)))))
@@ -67,4 +67,14 @@ class ActiveTournament extends Actor{
       pingpongMatch.pingpongMatch.playerA.exists(a => a.id != player.id) &&
         pingpongMatch.pingpongMatch.playerB.exists(b => b.id != player.id))
   }
+
+  private def newMatchOrViewableExistingMatch(updatedMatch: PingpongMatch, tournament: HallOverViewTournament, occupiedPlayers: List[Player]): List[ViewablePingpongMatch] = {
+    tournament.matchesToPlay.foldLeft(List[ViewablePingpongMatch]())((acc, pingpongMatch) => if(updatedMatch.id == pingpongMatch.pingpongMatch.id){
+      ViewablePingpongMatch(MatchChecker.calculateSets(updatedMatch), MatchChecker.isWon(updatedMatch), false) :: acc
+    }  else {
+      updateOccupied(pingpongMatch, occupiedPlayers) :: acc
+    })
+  }
+
+  private def updateOccupied(pingpongMatch: ViewablePingpongMatch, occupiedPlayers: List[Player]) = pingpongMatch.copy(isOccupied = !matchPlayersAreAvailable(pingpongMatch, occupiedPlayers))
 }

@@ -93,6 +93,8 @@ class GenericMongoRepo[M: Model]
     checked(uncheckedDelete)(id)
   }
 
+  def deleteAll() = collectionFuture.map(_.drop(false))
+
   //
   // extra stuff
   //

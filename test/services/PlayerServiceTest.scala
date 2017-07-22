@@ -27,8 +27,9 @@ class PlayerServiceTest extends PlaySpec {
 
 
     "create a player, he/she recieves an id" in {
-
-        player.id.length mustBe 24
+      val createdPlayer = waitFor(playerRepository.create(Player("10","Aram", "Pauwels", Ranks.B4, None)))
+      val player =  waitFor(playerService.getPlayer("10"))
+      player mustBe Some(createdPlayer)
     }
 
     "update a player" in {
