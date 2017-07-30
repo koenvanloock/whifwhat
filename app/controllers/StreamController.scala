@@ -2,6 +2,7 @@ package controllers
 
 import javax.inject.{Inject, Named}
 
+import actors.ScoreStreamer
 import actors.StreamActor.Start
 import actors.TournamentEventActor.SetChannel
 import akka.actor.ActorRef
@@ -24,7 +25,7 @@ class StreamController @Inject()(@Named("score-streamer") scoreStreamer: ActorRe
   streamActor ! Start(channel)
 
   val (scoreOut, scoreChanel) = Concurrent.broadcast[JsObject]
-  scoreStreamer ! Start(scoreChanel)
+  scoreStreamer ! ScoreStreamer.Start(scoreChanel)
 
   tournamentEventActor ! SetChannel(streamActor)
 

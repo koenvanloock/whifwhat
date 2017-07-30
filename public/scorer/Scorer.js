@@ -13,5 +13,12 @@ var scorer = new Vue({
     this.$http.get(window.location.origin + "/activeTournament").then(function (response) {
       this.activeTournament = response.data;
     }, this.logError);
+
+    var eventSource = new EventSource(window.location.origin + "/scorestream");
+    eventSource.addEventListener('message', function (e) {
+      var data = JSON.parse(e.data);
+     console.log(data);
+    }.bind(this), false);
+    eventSource.addEventListener('error', this.errorListener, false);
   }
 });

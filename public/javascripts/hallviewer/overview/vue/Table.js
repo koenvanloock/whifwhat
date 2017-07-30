@@ -37,7 +37,7 @@ Vue.component("vue-pingpong-table", {
   '<div class="horizonal-net"></div>'+
   '<div class="playerBox-right" v-bind:class="{ playerBoxHorizontal: table.isGreen, playerBoxHorizontalBlue: !table.isGreen}">' +
   '<span v-if="tableData.pingpongMatch">' +
-  '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +
+  '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerB.firstname + " " + tableData.pingpongMatch.playerB.lastname}}</p>' +
   '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
