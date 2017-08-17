@@ -5,26 +5,23 @@
         <title>Whif-Wut</title>
         <link rel="shortcut icon" href="@routes.Assets.versioned("images/favicon.png")">
         <link rel="stylesheet" href="@routes.Assets.versioned("bower_components/font-awesome/css/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/scorer.css")">
     </head>
     <body>
 
-        <div id="scoreApp">
-            <div v-if="activeTournament.id">
-            <tournament-bar :tournament="activeTournament" ></tournament-bar>
-            <div style="margin-top: 80px;">
-                <button v-on:click="startStream(activeTournament.id)">Start scores volgen</button>
-                <button v-on:click="stopStream">Stop scores volgen</button>
-            </div>
-            </div>
-            <div v-else>
-                <h3>Er is geen actief tornooi.</h3>
-            </div>
-        </div>
+        <div id="scoreApp"></div>
 
 
         <script src="@routes.Assets.versioned("bower_components/vue/dist/vue.js")"></script>
         <script src="@routes.Assets.versioned("bower_components/vue-resource/dist/vue-resource.js")"></script>
         <script src="@routes.Assets.versioned("scorer/Scorer.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/RoundView.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/RobinRound.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/BracketRound.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/BracketNode.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/BracketLeaf.js")"></script>
         <script src="@routes.Assets.versioned("scorer/TournamentBar.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/CompletedMatchPanel.js")"></script>
+        <script src="@routes.Assets.versioned("scorer/CompletedMatch.js")"></script>
     </body>
 </html>

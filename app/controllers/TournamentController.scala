@@ -99,7 +99,7 @@ class TournamentController @Inject()(@Named("tournament-event-actor") tournament
   }
 
   def releaseActiveTournament = Action.async{
-    (tournamentEventActor ? ActiveTournamentRemoved).mapTo[Option[Tournament]].map{ response => Ok
+    (tournamentEventActor ? ActiveTournamentRemoved).mapTo[String].map{ response => Ok
     }
   }
 }

@@ -17,7 +17,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import SeriesRoundEvidence._
 import actors.ActiveHall.GetHall
-import actors.TournamentEventActor
+import actors.{ScoreActor, TournamentEventActor}
 import actors.TournamentEventActor.MatchCompleted
 import akka.actor.ActorRef
 import akka.util.Timeout
@@ -28,7 +28,7 @@ import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
 import scala.concurrent.duration._
 
-class SeriesRoundController @Inject()(@Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService) extends Controller{
+class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService) extends Controller{
   type FinalRanking = List[SeriesPlayer]
   implicit val timeout = Timeout(5 seconds)
 
@@ -116,6 +116,7 @@ class SeriesRoundController @Inject()(@Named("tournament-event-actor") tournamen
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
        val matchWithSetResults = calculateSets(siteMatch)
         if(MatchChecker.isWon(siteMatch)) {
+          scoreActor ! ScoreActor.MatchCompleted(matchWithSetResults)
           tournamentStream ! MatchCompleted(matchWithSetResults)
           (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
             case Some(hall) => hallService.deleteMatchAndRefInHall(hall.id, matchWithSetResults)

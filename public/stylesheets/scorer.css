@@ -1,0 +1,20 @@
+body {
+    color: #212121;
+    font-family: "Helvetica Neue", "Calibri Light", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: 0.02em;
+}
+
+.bracket-name-box{
+
+}
+
+.bracket-set-box{
+    background: #ebeb00;
+    width: 40px;
+    height: 50px;
+    color: black;
+    font-weight: bold;
+    text-align: center;
+}

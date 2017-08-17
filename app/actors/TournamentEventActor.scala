@@ -68,7 +68,9 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
       withInvolvedFreePlayers(getMatchPlayers(pingpongMatch))(putMatchInHall(hallId, row, column, pingpongMatch))
     case GetHall => activeHall ! ActiveHall.GetHall(sender)
     case ActiveTournamentChanged(newTournament) => activeTournament ! ActivateTournament(newTournament, occupiedPlayers, sender())
-    case ActiveTournamentRemoved => activeTournament ! RemoveTournament
+    case ActiveTournamentRemoved =>
+      activeTournament ! RemoveTournament
+      sender() ! "ok"
     case HallMatchDelete(hallId, row, column, pingpongMatch) =>
       activeHall ! ActiveHall.DeleteMatchInHall(hallId, row, column)
       freePlayers(getMatchPlayers(pingpongMatch))

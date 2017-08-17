@@ -2,18 +2,22 @@ package actors
 
 import javax.inject.{Inject, Named}
 
+import actors.ScoreStreamer.ShowCompletedMatch
 import akka.actor.{Actor, ActorRef}
 import models.TournamentSeries
+import models.matches.PingpongMatch
 import play.api.libs.json.Json
 import services.SeriesRoundService
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 object ScoreActor {
 
-  case class StartTournamentScores(seriesList: List[TournamentSeries], interval: Int=30)
+  case class StartTournamentScores(seriesList: List[TournamentSeries], interval: Int=10)
   case class ShowNextActiveRound(series: TournamentSeries)
   case object StopTournamentScores
+  case class MatchCompleted(pingpongMatch: PingpongMatch)
 }
 
 
@@ -26,6 +30,7 @@ class ScoreActor @Inject()(@Named("score-streamer") scoreStreamer: ActorRef, ser
     case StopTournamentScores => killSignal = true;
     case StartTournamentScores(seriesList, interval) => streamScores(seriesList, interval)
     case ShowNextActiveRound(series: TournamentSeries) => showActiveRoundOf(series)
+    case MatchCompleted(pingpongMatch) => scoreStreamer ! ShowCompletedMatch(pingpongMatch)
     case _ => sender() !  "method not supported"
   }
 
