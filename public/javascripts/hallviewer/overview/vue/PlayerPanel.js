@@ -13,7 +13,14 @@ Vue.component("playerPanel", {
   ' v-for="player in filterPlayers(playerList, playerQuery)"' +
   ' draggable="true"' +
   ' v-on:dragstart="drag(player, event)">' +
-  '<p style="text-align: center"> {{player.firstname + " " + player.lastname}}</p>' +
+  '<div style="text-align: center">' +
+  '<p> {{player.player.firstname + " " + player.player.lastname}}</p>' +
+  '<div>' +
+  '<span><i class="fa fa-balance-scale" aria-hidden="true"></i> {{player.refereeInfo.numberOfRefs}}</span>' +
+  '<span style="min-width: 20px; height: 10px;">&nbsp;</span>' +
+  '<span><i class="fa fa-bolt" aria-hidden="true"></i> {{player.refereeInfo.matchesToPlay}}</span>' +
+  '</div>' +
+  '</div>' +
   '</li>' +
   '</ul>' +
   '</div>' +
@@ -22,23 +29,24 @@ Vue.component("playerPanel", {
   data: function () {
     return {
       playerQuery: '',
-      playerList: this.players.filter(function(viewablePlayer){ return !viewablePlayer.occupied }).map(function(viewablePlayer){ return viewablePlayer.player})
+      playerList: this.players.filter(function(viewablePlayer){ return !viewablePlayer.occupied })
     }
   },
   watch: {
     players: function (newPlayers) {
-      this.playerList = newPlayers.filter(function(viewablePlayer){ return !viewablePlayer.occupied }).map(function(viewablePlayer){ return viewablePlayer.player});
+      this.playerList = newPlayers.filter(function(viewablePlayer){ return !viewablePlayer.occupied });
     }
   },
 
   methods: {
     drag: function (referee, event) {
-      event.dataTransfer.setData("referee", JSON.stringify(referee));
+      var player = referee.player;
+      event.dataTransfer.setData("referee", JSON.stringify(player));
     },
     filterPlayers: function (playerList, query) {
       return playerList.filter(function (player) {
-        return contains(player.firstname + ' ' + player.lastname, query) ||
-          contains(player.lastname + ' ' + player.firstname,query)
+        return contains(player.player.firstname + ' ' + player.player.lastname, query) ||
+          contains(player.player.lastname + ' ' + player.player.firstname,query)
       });
     }
   }

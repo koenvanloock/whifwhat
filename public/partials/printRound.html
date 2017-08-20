@@ -12,7 +12,7 @@
 <div ng-show="ctrl.roundToPrint.roundType === 'B'">
 
   <div ng-repeat="match in ctrl.matchList">
-    <economic-match-format ng-show="ctrl.economic" match="match" series-name="'eindtabel ' + ctrl.series.seriesName" my-style="ctrl.matchStyle"></economic-match-format>
+    <economic-match-format ng-show="ctrl.economic" match="match" series-name="'eindtabel ' + ctrl.series.seriesName" is-handicap="series.playingWithHandicaps" my-style="ctrl.matchStyle"></economic-match-format>
     <fabulous-match-format ng-hide="ctrl.economic" match="match" series-name="'eindtabel ' + ctrl.series.seriesName" my-style="ctrl.matchStyle"></fabulous-match-format>
   </div>
 </div>
@@ -21,7 +21,7 @@
 
     <div ng-repeat="robinRound in ctrl.roundToPrint.robinRounds" ng-init="myIndex = $index">
       <div ng-repeat="match in robinRound.robinMatches track by $index" ng-class="{pageend: ($index != 0 && $index % 9 == 0)}">
-        <economic-match-format ng-show="ctrl.economic" match="match" series-name="ctrl.series.seriesName + ' poule ' + (myIndex +1)" my-style="ctrl.matchStyle"></economic-match-format>
+        <economic-match-format ng-show="ctrl.economic" match="match" series-name="ctrl.series.seriesName + ' poule ' + (myIndex +1)" my-style="ctrl.matchStyle" is-handicap="series.playingWithHandicaps"></economic-match-format>
         <fabulous-match-format ng-hide="ctrl.economic" match="match" series-name="ctrl.series.seriesName + ' poule '+ (myIndex +1)" my-style="ctrl.matchStyle"></fabulous-match-format>
       </div>
     </div>

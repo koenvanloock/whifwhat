@@ -5,7 +5,7 @@ import javax.inject.Inject
 import models.{SeriesRound, Tournament}
 import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries}
 import models.matches.{MatchChecker, PingpongMatch, ViewablePingpongMatch}
-import models.player.ViewablePlayer
+import models.player.{RefereeInfo, ViewablePlayer}
 import play.api.libs.json.Json
 import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 
@@ -29,7 +29,7 @@ class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRo
         val hallSeriesList = hallSeriesListWithMatchesToPlay.map(_._1)
         val matchList = hallSeriesListWithMatchesToPlay.flatMap(_._2).map(ppMatch => ViewablePingpongMatch(ppMatch, MatchChecker.isWon(ppMatch), isOccupied = false))
         seriesPlayerService.retrievePlayersOf(hallSeriesList.map(_.seriesId)).map{seriesPlayerList =>
-          val players = seriesPlayerList.map(_.player).distinct.map(ViewablePlayer(_, occupied = false))
+          val players = seriesPlayerList.map(_.player).distinct.map(ViewablePlayer(_, RefereeInfo(0,0), occupied = false))
         HallOverViewTournament(tournament.id, tournament.tournamentName, tournament.tournamentDate, hallSeriesList, players, matchList)}
       }
   }

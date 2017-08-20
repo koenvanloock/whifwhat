@@ -8,7 +8,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem}
 import akka.util.Timeout
 import models.halls._
 import models.matches.PingpongMatch
-import models.player.Player
+import models.player.{Player, RefereeInfo}
 
 import scala.concurrent.duration._
 
@@ -56,7 +56,7 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
   private val activeTournament = system.actorOf(ActiveTournament.props)
 
   private var occupiedPlayers: List[Player] = Nil
-  private var referees: Map[Player, Int] = Map()
+  private var referees: Map[Player, RefereeInfo] = Map()
 
   override def receive: Receive = {
     case SetChannel(streamActor) =>
@@ -113,12 +113,9 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
     activeTournament ! NewOccupiedPlayers(occupiedPlayers)
   }
 
-  private def getMatchPlayers(pingpongMatch: PingpongMatch): List[Player] = {
+  private def getMatchPlayers(pingpongMatch: PingpongMatch): List[Player] =
+      pingpongMatch.playerA.toList ++ pingpongMatch.playerB.toList
 
-    val players = pingpongMatch.playerA.toList ++ pingpongMatch.playerB.toList
-    println(players)
-    players
-  }
 
   private def occupyPlayers(playerList: List[Player]) = occupiedPlayers = occupiedPlayers ++ playerList
 
@@ -132,8 +129,8 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
 
   private def upRefereeCount(player: Player) {
     referees.get(player) match {
-      case None => referees += (player -> 1)
-      case Some(number) => referees += (player -> (number + 1))
+      case None => referees += (player -> RefereeInfo(1,0))
+      case Some(refereeInfo) => referees += (player -> refereeInfo.copy( numberOfRefs = refereeInfo.numberOfRefs + 1))
     }
   }
 }

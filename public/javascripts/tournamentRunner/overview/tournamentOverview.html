@@ -13,13 +13,13 @@
   </md-toolbar>
 
   <div layout="row" ng-style="ctrl.roundSpecificPadding()" ng-hide="ctrl.showFinalRanking()">
-
     <editable-bracket-node node="ctrl.selectedRound.bracketRounds"
                           updatematch="ctrl.updateRound(roundId, match)"
                           series-round-id="ctrl.selectedRound.id"
-                          ng-show="ctrl.activeBracketRound()"></editable-bracket-node>
+                          ng-show="ctrl.activeBracketRound()"
+                          is-handicap="ctrl.selectedSeries.playingWithHandicaps"></editable-bracket-node>
 
-    <editable-robin-round flex="90" ng-repeat="robingroup in ctrl.selectedRound.robinRounds" robinround="robingroup"  update-fn="ctrl.updateRound(seriesRoundId,match)" series-round-id="ctrl.selectedRound.id" ng-show="ctrl.activeRobinRound()"></editable-robin-round>
+    <editable-robin-round flex="90" ng-repeat="robingroup in ctrl.selectedRound.robinRounds" robinround="robingroup" is-handicap="ctrl.selectedSeries.playingWithHandicaps" update-fn="ctrl.updateRound(seriesRoundId,match)" series-round-id="ctrl.selectedRound.id" ng-show="ctrl.activeRobinRound()"></editable-robin-round>
   </div>
 
   <final-ranking final-ranking="ctrl.finalRanking" ng-show="ctrl.showFinalRanking()"></final-ranking>

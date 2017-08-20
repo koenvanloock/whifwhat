@@ -16,13 +16,25 @@
     </div>
   </div>
 
-  <div layout="column" >
+  <div layout="column" style="width: 50px;">
+    <div layout="row" layout-align="start center">
+      <h3>KL</h3>
+    </div>
+    <div layout="row" layout-align="start center" style="height:50px;">
+      <p style="text-align: center">{{match.playerA.rank.name}}</p>
+    </div>
+    <div layout="row" layout-align="start center" style="height:50px;">
+      <p style="text-align: center">{{match.playerB.rank.name}}</p>
+    </div>
+  </div>
+
+  <div layout="column" ng-if="isHandicap">
     <div>
       <h3>Vg</h3>
     </div>
     <div style="padding: 5px; border-radius: 25px; border: solid 1px; margin-left: 10px; width: 40px; background: rgba(121, 121, 121, 0.8)">
       <div layout="row" layout-align="start center" style="height:50px;">
-        <p >{{match.isHandicapForB ? '' : '+'+match.handicap}}</p>
+        <p>{{match.isHandicapForB ? ' ' : '+'+ match.handicap}}</p>
       </div>
 
       <div layout="row" layout-align="start center" style="height:50px;">

@@ -9,7 +9,8 @@ tournamentRunner.directive("editableBracketMatch", function () {
     scope: {
       match: '=',
       updatematch: '&',
-      seriesRoundId: "="
+      seriesRoundId: "=",
+      isHandicap: '='
     },
     templateUrl: "assets/javascripts/tournamentRunner/overview/editableBracketMatch.html"
   }
@@ -24,14 +25,15 @@ tournamentRunner.directive("editableBracketNode", ['$compile', function ($compil
     scope: {
       node: '=',
       updatematch: '&',
-      seriesRoundId: '='
+      seriesRoundId: '=',
+      isHandicap: '='
     },
     template: '<div layout="row" layout-align="center center">' +
     '<div layout="column">' +
-    '<div ng-if="node.left"><editable-bracket-node node="node.left" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-node></div>' +
-    '<div ng-if="node.right"><editable-bracket-node node="node.right" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-node></div>' +
+    '<div ng-if="node.left"><editable-bracket-node node="node.left" is-handicap="isHandicap" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-node></div>' +
+    '<div ng-if="node.right"><editable-bracket-node node="node.right" is-handicap="isHandicap" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-node></div>' +
     '</div>' +
-    '<editable-bracket-match match="node.value" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-match>' +
+    '<editable-bracket-match match="node.value"  is-handicap="isHandicap" updatematch="updatematch({roundId: roundId, match: match})" series-round-id="seriesRoundId"></editable-bracket-match>' +
     '</div>',
     compile: function (element, link) {
       // Normalize the link parameter
@@ -95,7 +97,8 @@ tournamentRunner.directive("editableRobinMatches", function () {
       robinMatches: '=',
       updateFn: '&',
       seriesRoundId: '=',
-      listView: '='
+      listView: '=',
+      isHandicap: '='
     },
     templateUrl: "assets/javascripts/tournamentRunner/overview/editableRobinMatches.html"
   }
@@ -108,7 +111,8 @@ tournamentRunner.directive("editableRobinMatch", function () {
       match: '=',
       updateFn: '&',
       seriesRoundId: '=',
-      listView: '='
+      listView: '=',
+      isHandicap: '='
     },
     templateUrl: "assets/javascripts/tournamentRunner/overview/editableRobinMatch.html"
   }
@@ -120,7 +124,8 @@ tournamentRunner.directive("editableRobinRound", function () {
     scope: {
       robinround: '=',
       updateFn: '&',
-      seriesRoundId: '='
+      seriesRoundId: '=',
+      isHandicap: '='
     },
     templateUrl: "assets/javascripts/tournamentRunner/overview/editableRobinRound.html"
   }

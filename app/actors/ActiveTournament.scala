@@ -5,7 +5,7 @@ import actors.StreamActor.PublishActiveTournament
 import akka.actor.{Actor, ActorRef, Props}
 import models.halls.HallOverViewTournament
 import models.matches.{MatchChecker, PingpongMatch, ViewablePingpongMatch}
-import models.player.{Player, ViewablePlayer}
+import models.player.{Player, RefereeInfo, ViewablePlayer}
 
 object ActiveTournament{
 
@@ -53,7 +53,7 @@ class ActiveTournament extends Actor{
     tournament = tournament.map( existingTournament => existingTournament.copy(matchesToPlay = newMatchOrViewableExistingMatch(updatedMatch, existingTournament, occupiedPlayers).reverse))
 
   private def updatePlayers(occupiedPlayers: List[Player]) = {
-    tournament = tournament.map(realTournament => realTournament.copy( players = realTournament.players.map( player => ViewablePlayer( player.player, occupiedPlayers.contains(player.player)))))
+    tournament = tournament.map(realTournament => realTournament.copy( players = realTournament.players.map( player => ViewablePlayer( player.player, RefereeInfo(0,0), occupiedPlayers.contains(player.player)))))
   }
 
   private def publishTournament(): Unit = streamActor.foreach( realActorRef =>  tournament.foreach{

@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeries}
 import models.matches.{PingpongGame, PingpongMatch, ViewablePingpongMatch}
-import models.player.{Player, Rank, ViewablePlayer}
+import models.player.{Player, Rank, RefereeInfo, ViewablePlayer}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{Json, Writes, __}
 import utils.JsonUtils
@@ -18,6 +18,7 @@ object HallTournamentOverviewWrites{
   implicit val matchWrites = Json.writes[PingpongMatch]
   implicit val matchListWrites = JsonUtils.listWrites(matchWrites)
   implicit val hallRoundWrites = Json.writes[HallOverviewRound]
+  implicit val refereeInfoWrites = Json.writes[RefereeInfo]
 
   implicit val hallOverviewTournamentWrites: Writes[HallOverViewTournament] = (
     (__ \ "id").write[String] and

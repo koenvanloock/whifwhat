@@ -32,7 +32,7 @@
 
             <div layout="column">
               <round-players round-players="robin.robinPlayers"></round-players>
-              <robin-matches robin-matches="robin.robinMatches"></robin-matches>
+              <robin-matches robin-matches="robin.robinMatches" is-handicap="round.playingWithHandicaps"></robin-matches>
             </div>
 
             <md-button class="md-fab md-primary" ng-click="drawCtrl.updateSeriesRound(round)"><i class="fa fa-save"></i>

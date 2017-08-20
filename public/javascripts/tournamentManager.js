@@ -60,7 +60,7 @@ tournamentmanager.directive("roundPlayers", function(){
 tournamentmanager.directive("robinMatches", function(){
     return{
         restrict: 'E',
-        scope: {robinMatches: '='},
+        scope: {robinMatches: '=', isHandicap: '='},
         templateUrl: "assets/directives/robinMatches.html"
     }
 });
@@ -68,7 +68,7 @@ tournamentmanager.directive("robinMatches", function(){
 tournamentmanager.directive("robinMatch", function(){
     return{
         restrict: 'E',
-        scope: {match: '='},
+        scope: {match: '=', isHandicap: '='},
         templateUrl: "assets/directives/robinMatch.html"
     }
 });
@@ -79,7 +79,7 @@ tournamentmanager.directive("bracketNode", ['$compile',function ($compile) {
         restrict: 'E',
         replace: true,
         scope: {
-            node: '='
+            node: '=', isHandicap: '='
         },
         template: '<div layout="row">' +
         '<div layout="column">' +
@@ -126,7 +126,7 @@ tournamentmanager.directive("bracketNode", ['$compile',function ($compile) {
 tournamentmanager.directive("bracketMatch", function(){
    return{
        restrict: 'E',
-       scope: { match: '='},
+       scope: { match: '=', isHandicap: '='},
        templateUrl: "assets/directives/bracketMatch.html"
    } 
 });
@@ -134,7 +134,7 @@ tournamentmanager.directive("bracketMatch", function(){
 tournamentmanager.directive('economicMatchFormat', function(){
     return{
         restrict: 'E',
-        scope: { match: '=', myStyle: '=', seriesName: '='},
+        scope: { match: '=', myStyle: '=', seriesName: '=',  isHandicap: '='},
         templateUrl: 'assets/directives/economicMatchFormat.html'
     }
 });
@@ -142,7 +142,7 @@ tournamentmanager.directive('economicMatchFormat', function(){
 tournamentmanager.directive('fabulousMatchFormat', function(){
     return{
         restrict: 'E',
-        scope: { match: '=', myStyle: '=', seriesName: '='},
+        scope: { match: '=', myStyle: '=', seriesName: '=', isHandicap: '='},
         templateUrl: 'assets/directives/fabulousMatchFormat.html'
     }
 });

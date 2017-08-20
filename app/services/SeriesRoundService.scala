@@ -110,15 +110,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   def calculatePlayerScore: (SeriesPlayerWithRoundPlayers) => SeriesPlayer = {
     seriesPlayerWithRoundPlayers =>
       seriesPlayerWithRoundPlayers.seriesPlayer.copy(playerScores = seriesPlayerWithRoundPlayers.seriesRoundPlayers.map(_.playerScores).foldLeft(PlayerScores())(
-        (accPlayerScore: PlayerScores, seriesRoundPlayerScore: PlayerScores) =>
-          PlayerScores(
-            accPlayerScore.wonMatches + seriesRoundPlayerScore.wonMatches,
-            accPlayerScore.lostMatches + seriesRoundPlayerScore.lostMatches,
-            accPlayerScore.wonSets + seriesRoundPlayerScore.wonSets,
-            accPlayerScore.lostSets + seriesRoundPlayerScore.lostSets,
-            accPlayerScore.wonPoints + seriesRoundPlayerScore.wonPoints,
-            accPlayerScore.lostPoints + seriesRoundPlayerScore.lostPoints,
-            accPlayerScore.totalPoints + seriesRoundPlayerScore.totalPoints)
+        (accPlayerScore: PlayerScores, seriesRoundPlayerScore: PlayerScores) => accPlayerScore + seriesRoundPlayerScore
       ))
   }
 

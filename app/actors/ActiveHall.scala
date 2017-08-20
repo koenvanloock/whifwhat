@@ -79,6 +79,9 @@ class ActiveHall extends Actor {
   }
 
   private def updateTableMatchInhall(pingpongMatch: Option[PingpongMatch], row: Int, column: Int): Hall => Hall = realHall => {
+    if(realHall.tables.find(table => table.row == row && table.column == column).exists(table => table.pingpongMatch.nonEmpty)){
+      //todo send freed match to hall or prevent this altogether
+    }
     realHall.copy(tables = performTableMutationAt(row, column, table => table.copy(pingpongMatch = pingpongMatch))(realHall.tables))
   }
 

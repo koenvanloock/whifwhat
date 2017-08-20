@@ -5,11 +5,13 @@ import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
 import models.types.{BracketLeaf, BracketNode}
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
 
-
+@RunWith(classOf[JUnitRunner])
 class SeriesRoundServiceTest extends PlaySpec{
 
   val appBuilder = new GuiceApplicationBuilder().build()

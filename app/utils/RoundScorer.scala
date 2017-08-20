@@ -31,25 +31,14 @@ object RoundScorer {
     bracketRound.copy(bracket = updatedBracket, bracketPlayers = updatedPlayers)
   }
 
-  def dealWithHandicap(isWithHandicap: Boolean, matchToAdd: PingpongMatch, aOrB: String) =
-    if(isWithHandicap) {
-      if (matchToAdd.isHandicapForB && aOrB == "B") {
-        matchToAdd.handicap
-      } else if (!matchToAdd.isHandicapForB && aOrB == "A") {
-        matchToAdd.handicap
-      }else{
-        0
-      }
-    } else { 0}
-
 
   def addPlayerAscores(isWithHandicap: Boolean, matchToAdd: PingpongMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
     wonMatches = acc.wonMatches + (if(matchToAdd.wonSetsA == matchToAdd.numberOfSetsToWin) 1 else 0),
     lostMatches = acc.lostMatches + (if(matchToAdd.wonSetsB == matchToAdd.numberOfSetsToWin) 1 else 0),
     wonSets = acc.wonSets +  matchToAdd.wonSetsA,
     lostSets = acc.lostSets + matchToAdd.wonSetsB,
-    wonPoints = acc.wonPoints + matchToAdd.games.foldRight(0)( (game, pointsOfA) => pointsOfA + game.pointA - dealWithHandicap(isWithHandicap, matchToAdd, "A")),
-    lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfB) => pointsOfB + game.pointB - dealWithHandicap(isWithHandicap, matchToAdd, "B"))
+    wonPoints = acc.wonPoints + matchToAdd.games.foldRight(0)( (game, pointsOfA) => pointsOfA + game.pointA),
+    lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfB) => pointsOfB + game.pointB)
   )
 
   def addPlayerBscores(isWithHandicap: Boolean, matchToAdd: PingpongMatch, acc: PlayerScores = PlayerScores()): PlayerScores = acc.copy(
@@ -57,8 +46,8 @@ object RoundScorer {
     lostMatches = acc.lostMatches + (if(matchToAdd.wonSetsA == matchToAdd.numberOfSetsToWin) 1 else 0),
     wonSets = acc.wonSets +  matchToAdd.wonSetsB,
     lostSets = acc.lostSets + matchToAdd.wonSetsA,
-    wonPoints = acc.wonPoints + matchToAdd.games.foldRight(0)( (game, pointsOfB) => pointsOfB + game.pointB - dealWithHandicap(isWithHandicap, matchToAdd, "B")),
-    lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfA) => pointsOfA + game.pointA - dealWithHandicap(isWithHandicap, matchToAdd, "A"))
+    wonPoints = acc.wonPoints + matchToAdd.games.foldRight(0)( (game, pointsOfB) => pointsOfB + game.pointB),
+    lostPoints = acc.lostPoints + matchToAdd.games.foldRight(0)( (game, pointsOfA) => pointsOfA + game.pointA)
   )
 
   def getScoresOfPlayer(isWithHandicap: Boolean, matchList: List[PingpongMatch], seriesPlayer: SeriesPlayer): PlayerScores = matchList.foldRight[PlayerScores](PlayerScores()){ (matchToAdd, acc) =>
