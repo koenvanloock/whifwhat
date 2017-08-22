@@ -6,10 +6,12 @@ import actors.ActiveHall.{ActivateHall, MoveMatchToHall, RemoveActiveHall, Updat
 import actors.ActiveTournament._
 import akka.actor.{Actor, ActorRef, ActorSystem}
 import akka.util.Timeout
+import akka.pattern.ask
 import models.halls._
-import models.matches.PingpongMatch
+import models.matches.{PingpongMatch, ViewablePingpongMatch}
 import models.player.{Player, RefereeInfo}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 
@@ -56,7 +58,9 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
   private val activeTournament = system.actorOf(ActiveTournament.props)
 
   private var occupiedPlayers: List[Player] = Nil
-  private var referees: Map[Player, RefereeInfo] = Map()
+  private var playerInfo: Map[Player, RefereeInfo] = Map()
+
+
 
   override def receive: Receive = {
     case SetChannel(streamActor) =>
@@ -67,7 +71,9 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
     case MoveMatchInHall(hallId, row, column, pingpongMatch) =>
       withInvolvedFreePlayers(getMatchPlayers(pingpongMatch))(putMatchInHall(hallId, row, column, pingpongMatch))
     case GetHall => activeHall ! ActiveHall.GetHall(sender)
-    case ActiveTournamentChanged(newTournament) => activeTournament ! ActivateTournament(newTournament, occupiedPlayers, sender())
+    case ActiveTournamentChanged(newTournament) =>
+      populatePlayerInfo(newTournament)
+      activeTournament ! ActivateTournament(newTournament, occupiedPlayers, sender())
     case ActiveTournamentRemoved =>
       activeTournament ! RemoveTournament
       sender() ! "ok"
@@ -79,9 +85,7 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
       activeHall ! UpdateMatchInHall(matchWithSetResults)
       activeTournament ! UpdateMatchInTournament(matchWithSetResults, occupiedPlayers)
     case MatchCompleted(pingpongMatch) =>
-      activeHall ! ActiveHall.DeleteMatchById(pingpongMatch.id, completed = true)
-      freePlayers(getMatchPlayers(pingpongMatch))
-      activeTournament ! ActiveTournament.UpdateMatchInTournament(pingpongMatch, occupiedPlayers)
+
     case HallRefereeInsert(hallId, row, column, insertedReferee) =>
       activeHall ! ActiveHall.MoveRefereeToTable(hallId, row, column, insertedReferee)
       occupyPlayers(List(insertedReferee))
@@ -128,9 +132,33 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
   private def withInvolvedFreePlayers(players: List[Player])(f: Unit) = if (occupiedPlayers.forall(occupiedPlayer => !players.contains(occupiedPlayer))) f
 
   private def upRefereeCount(player: Player) {
-    referees.get(player) match {
-      case None => referees += (player -> RefereeInfo(1,0))
-      case Some(refereeInfo) => referees += (player -> refereeInfo.copy( numberOfRefs = refereeInfo.numberOfRefs + 1))
+    playerInfo.get(player) match {
+      case None => playerInfo += (player -> RefereeInfo(1,0))
+      case Some(refereeInfo) => playerInfo += (player -> refereeInfo.copy( numberOfRefs = refereeInfo.numberOfRefs + 1))
+    }
+  }
+
+  private def populatePlayerInfo(newTournament: HallOverViewTournament) = {
+      playerInfo = Map()
+    newTournament.players.foreach{ player => playerInfo += player.player -> player.refereeInfo}
+  }
+
+  private def playerCompletedMatch(completedMatch: PingpongMatch) = {
+    (activeTournament ? GetMatchesToPlay).mapTo[List[ViewablePingpongMatch]]
+      .map{ matches =>
+        val exists = matches.exists( viewMatch => viewMatch.pingpongMatch.id == completedMatch.id)
+        if(exists){
+          activeHall ! ActiveHall.DeleteMatchById(completedMatch.id, completed = true)
+          freePlayers(getMatchPlayers(completedMatch))
+          activeTournament ! ActiveTournament.UpdateMatchInTournament(completedMatch, occupiedPlayers)
+          getMatchPlayers(completedMatch).foreach(decreasePlayerMatchesToPlay)}
+      }
+  }
+
+  private def decreasePlayerMatchesToPlay(player: Player): Unit = {
+    playerInfo.get(player) match {
+      case Some(refereeInfo) => playerInfo += player -> refereeInfo.copy( matchesToPlay = refereeInfo.matchesToPlay - 1)
+      case _ => playerInfo += player -> RefereeInfo(0,0)
     }
   }
 }

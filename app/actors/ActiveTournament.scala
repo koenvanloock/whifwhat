@@ -18,6 +18,7 @@ object ActiveTournament{
   case class ActivateTournament(tournament: HallOverViewTournament, occupiedPlayers: List[Player], senderRef: ActorRef)
   case class UpdateMatchInTournament(pingpongMatch: PingpongMatch, occupiedPlayers: List[Player])
   case class NewOccupiedPlayers(occupiedPlayers: List[Player])
+  case object GetMatchesToPlay
 
 }
 
@@ -46,6 +47,7 @@ class ActiveTournament extends Actor{
       matchesToPlay = realTournament.matchesToPlay.map(updateOccupied(_,occupiedPlayers))
     ))
       publishTournament()
+    case GetMatchesToPlay => sender() ! tournament.map( trueTournament => trueTournament.matchesToPlay).getOrElse(Nil)
     case _ => sender() ! "invalid command"
   }
 
@@ -53,7 +55,7 @@ class ActiveTournament extends Actor{
     tournament = tournament.map( existingTournament => existingTournament.copy(matchesToPlay = newMatchOrViewableExistingMatch(updatedMatch, existingTournament, occupiedPlayers).reverse))
 
   private def updatePlayers(occupiedPlayers: List[Player]) = {
-    tournament = tournament.map(realTournament => realTournament.copy( players = realTournament.players.map( player => ViewablePlayer( player.player, RefereeInfo(0,0), occupiedPlayers.contains(player.player)))))
+    tournament = tournament.map(realTournament => realTournament.copy( players = realTournament.players.map( player => ViewablePlayer( player.player, player.refereeInfo, occupiedPlayers.contains(player.player)))))
   }
 
   private def publishTournament(): Unit = streamActor.foreach( realActorRef =>  tournament.foreach{

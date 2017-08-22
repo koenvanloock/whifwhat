@@ -14,14 +14,14 @@ Vue.component("vue-pingpong-table", {
   '<div class="playerBox-top" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.pingpongMatch">' +
   '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +
-  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 1)" v-model.number="tableData.pingpongMatch.games[index].pointA" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="1000* table.row + 10*table.column + (index * 2 + 1)" v-model.number="tableData.pingpongMatch.games[index].pointA" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '<div class="net"></div>' +
   '<div class="playerBox-bottom" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.pingpongMatch">' +
   '<p style="font-weight: bold; text-align: center; margin-top: 0">{{tableData.pingpongMatch.playerB.firstname + " " + tableData.pingpongMatch.playerB.lastname}}</p>' +
-  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="(index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
+  '<input type="number" v-for="(game,index) in tableData.pingpongMatch.games" v-bind:tabindex="1000* table.row + 10*table.column + (index * 2 + 2)" v-model.number="tableData.pingpongMatch.games[index].pointB" style="margin-left: 10px; width:40px; font-weight:bold"/>' +
   '</span>'+
   '</div>'+
   '</div>'+
