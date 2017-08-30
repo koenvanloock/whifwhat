@@ -1,11 +1,14 @@
 package actors
 
-import actors.ActiveHall._
+import actors.ActiveHall.{GetHall, _}
 import actors.StreamActor.PublishActiveHall
+import actors.TournamentEventActor.FreedHallPlayers
 import akka.actor.{Actor, ActorRef, Props}
 import models.halls.{Hall, HallTable}
 import models.matches.PingpongMatch
 import models.player.Player
+import utils.PingpongMatchUtils._
+
 
 object ActiveHall {
   def props: Props = Props(new ActiveHall())
@@ -17,6 +20,8 @@ object ActiveHall {
   case object RemoveActiveHall
 
   case class GetHall(sender: ActorRef)
+
+  case object GetHallPlayers
 
   case class MoveMatchToHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch)
 
@@ -30,6 +35,7 @@ object ActiveHall {
 
   case class DeleteMatchById(id: String, completed: Boolean)
 
+  case class GetReferee(matchId: String)
 }
 
 
@@ -38,19 +44,28 @@ class ActiveHall extends Actor {
   var activeHall: Option[Hall] = None
   var channelOpt: Option[ActorRef] = None
 
+  def getRefereeOfMatch(matchId: String): Option[Player] =
+    activeHall
+    .map(realHall => realHall.tables.find( table => table.pingpongMatch.exists(_.id == matchId)).flatMap(_.referee))
+    .getOrElse(None)
+
   override def receive: Receive = {
     case SetChannel(channel) => channelOpt = Some(channel)
     case GetHall(originalSender) => originalSender ! activeHall
     case RemoveActiveHall => activeHall = None
     case ActivateHall(newHall, senderRef) => activeHall = Some(newHall); senderRef ! activeHall
-    case MoveMatchToHall(hallId, row, column, pingpongMatch) => activateHall(hallId, row, column, pingpongMatch)
+    case MoveMatchToHall(hallId, row, column, pingpongMatch) => moveMatchInHall(hallId, row, column, pingpongMatch)
     case DeleteMatchInHall(hallId, row, column) => deleteMatchInHall(hallId, row, column)
     case UpdateMatchInHall(pingpongMatch) => updateMatchInHall(pingpongMatch)
     case DeleteMatchById(matchId, completed) => deleteMatchInHall(matchId, completed)
     case MoveRefereeToTable(hallId, row, column, player) => updateRef(hallId, row, column, Some(player))
     case DeleteRefereeFromTable(hallId, row, column, player) => updateRef(hallId, row, column, None)
+    case GetHallPlayers => sender() ! getHallPlayers
+    case GetReferee(matchId) => sender() ! getRefereeOfMatch(matchId)
     case _ => sender() ! "method not supported!"
   }
+
+  private def getHallPlayers = this.activeHall.toList.flatMap(trueHall => trueHall.tables.flatMap(table => table.pingpongMatch.toList.flatMap(getMatchPlayers)))
 
   private def deleteMatchInHall(matchId: String, completed: Boolean) = {
     withHall(deleteById(matchId, completed))
@@ -60,7 +75,7 @@ class ActiveHall extends Actor {
     withExistingHall(hallId)(updateTableMatchInhall(None, row, column))
 
 
-  private def activateHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch) =
+  private def moveMatchInHall(hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch) =
     withExistingHall(hallId)(updateTableMatchInhall(Some(pingpongMatch), row, column))
 
 
@@ -80,7 +95,10 @@ class ActiveHall extends Actor {
 
   private def updateTableMatchInhall(pingpongMatch: Option[PingpongMatch], row: Int, column: Int): Hall => Hall = realHall => {
     if(realHall.tables.find(table => table.row == row && table.column == column).exists(table => table.pingpongMatch.nonEmpty)){
-      //todo send freed match to hall or prevent this altogether
+      realHall.tables.find(table => table.row == row && table.column == column)
+        .foreach(table => table.pingpongMatch
+          .foreach(realMatch => sender !  FreedHallPlayers(getMatchPlayers(realMatch)))
+        )
     }
     realHall.copy(tables = performTableMutationAt(row, column, table => table.copy(pingpongMatch = pingpongMatch))(realHall.tables))
   }
