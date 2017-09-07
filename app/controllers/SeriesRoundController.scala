@@ -8,8 +8,8 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import play.api.mvc.{Action, Controller, Result}
-import services.{HallOverviewService, HallService, SeriesRoundService, SeriesService}
-import utils.{ControllerUtils, JsonUtils, RoundRanker}
+import services._
+import utils.{ControllerUtils, JsonUtils, RoundRanker, RoundResultCalculator}
 import utils.JsonUtils.ListWrites._
 import akka.pattern.ask
 
@@ -25,10 +25,9 @@ import models.halls.Hall
 import models.matches.MatchEvidence.matchIsModel._
 import models.matches.{MatchChecker, MatchEvidence, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
-
 import scala.concurrent.duration._
 
-class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService) extends Controller{
+class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService, roundResultService: RoundResultService) extends Controller{
   type FinalRanking = List[SeriesPlayer]
   implicit val timeout = Timeout(5 seconds)
 
@@ -114,7 +113,7 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
 
   def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
     ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
-       val matchWithSetResults = calculateSets(siteMatch)
+       val matchWithSetResults = MatchChecker.calculateSets(siteMatch)
         if(MatchChecker.isWon(siteMatch)) {
           scoreActor ! ScoreActor.MatchCompleted(matchWithSetResults)
           tournamentStream ! MatchCompleted(matchWithSetResults)
@@ -134,10 +133,6 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
     }.getOrElse(Future(BadRequest))
   }
 
-  def calculateSets(siteMatch: PingpongMatch): PingpongMatch = {
-    val setTuple = siteMatch.games.foldRight((0,0))( (game, tuple) => if(game.isCorrect(siteMatch.targetScore) && game.pointA > game.pointB) (tuple._1 +1, tuple._2) else if(game.isCorrect(siteMatch.targetScore) && game.pointA < game.pointB) (tuple._1, tuple._2 +1) else tuple )
-    siteMatch.copy(wonSetsA = setTuple._1, wonSetsB = setTuple._2)
-  }
 
   def getRound(roundId: String) = Action.async{
     seriesRoundService
@@ -171,7 +166,14 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   def proceedToNextRound(seriesId: String, roundNr: Int) = Action.async {
     seriesService.retrieveById(seriesId).flatMap {
       case Some(series) => seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> seriesId))
-        .flatMap(showNextRoundOrFinalRanking(series, roundNr))
+        .flatMap{ seriesRoundOpt =>
+          seriesRoundOpt.foreach { seriesRound =>
+            val roundResult = RoundResultCalculator.calculateResult(seriesRound, series.playingWithHandicaps)
+            println("Result: " + roundResult)
+            roundResultService.createOrUpdate(roundResult)
+          }
+          showNextRoundOrFinalRanking(series, roundNr)(seriesRoundOpt)
+        }
       case None => Future(BadRequest("Reeks niet gevonden"))
     }
   }
@@ -233,5 +235,23 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   private def showRetrieveRoundResult: Option[SeriesRound] => Result = {
     case Some(round) => Ok(Json.toJson(round))
     case _ => BadRequest("De gevraagde ronde kon niet gevonden worden.")
+  }
+
+  def retrieveResultsOfRound(roundId: String) = Action.async{
+    roundResultService.retrieveResultOfSeriesRound(roundId).flatMap{
+      case Some(roundResult) => Future(Ok(Json.toJson(roundResult)(RoundResultEvidence.roundResultEvidence.roundResultWrites)))
+      case _ => seriesRoundService.retrieveByFields(Json.obj("id" -> roundId)).flatMap{
+        case Some(round) =>
+          seriesService.retrieveById(round.seriesId).map{
+            case Some(series) =>
+              val roundResult = RoundResultCalculator.calculateResult(round, series.playingWithHandicaps)
+              roundResultService.createOrUpdate(roundResult)
+              Ok(Json.toJson(roundResult)(RoundResultEvidence.roundResultEvidence.roundResultWrites))
+            case _ => BadRequest("the requested series of the round couldn't be found")
+
+          }
+        case _ => Future(BadRequest("the requested result couldn't be found"))
+      }
+    }
   }
 }

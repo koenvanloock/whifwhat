@@ -26,6 +26,6 @@
 
 
   <md-button class="md-raised md-accent" id="previousRound" ng-show="ctrl.hasPreviousRound()" ng-click="ctrl.gotoPreviousRound()">Vorige ronde</md-button>
-  <md-button class="md-raised md-accent" id="nextRound" ng-hide="ctrl.lastRound" ng-click="ctrl.gotoNextRound()">Volgende ronde</md-button>
-  <md-button class="md-raised md-accent" id="finalRound" ng-show="ctrl.lastRound && ctrl.finalRanking.length < 1" ng-click="ctrl.gotoNextRound()">Laatste Ronde</md-button>
+  <md-button class="md-raised md-accent" id="nextRound" ng-hide="ctrl.lastRound" ng-click="ctrl.showRoundResult()">Volgende ronde</md-button>
+  <md-button class="md-raised md-accent" id="finalRound" ng-show="ctrl.lastRound && ctrl.finalRanking.length < 1" ng-click="ctrl.showRoundResult()">Laatste Ronde</md-button>
 </div>

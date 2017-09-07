@@ -41,6 +41,7 @@ GET           /matchList/:seriesRoundId                      controllers.SeriesR
 GET           /nextRound/:seriesId/:roundNr                  controllers.SeriesRoundController.proceedToNextRound(seriesId: String, roundNr: Int)
 GET           /previousRound/:seriesId/:roundNr              controllers.SeriesRoundController.showPreviousRound(seriesId: String, roundNr: Int)
 GET           /isLastRound/:seriesId                         controllers.SeriesRoundController.isLastRoundOfSeries(seriesId: String)
+GET           /roundresult/:roundId                           controllers.SeriesRoundController.retrieveResultsOfRound(roundId: String)
 
 
 GET           /drawseries/:tournamentId                      controllers.DrawController.drawSeriesOfTournament(tournamentId: String)

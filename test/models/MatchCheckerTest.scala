@@ -37,5 +37,46 @@ class MatchCheckerTest extends PlaySpec{
       MatchChecker.calculateSets(pingpongMatch) mustBe pingpongMatch.copy(wonSetsA = 1, wonSetsB = 2)
       MatchChecker.isWon(pingpongMatch) mustBe true
     }
+
+    "allowedGamescore returns true on 0-0" in {
+      MatchChecker.allowedGameScore(PingpongGame(0, 0,1), 11) mustBe true
+      MatchChecker.allowedGameScore(PingpongGame(0, 0,1), 11) mustBe true
+    }
+
+    "allowedGamescore returns true on 21-15" in {
+      MatchChecker.allowedGameScore(PingpongGame(21, 15,1), 21) mustBe true
+      MatchChecker.allowedGameScore(PingpongGame(15, 21,1), 21) mustBe true
+    }
+
+    "allowedGamescore returns true on 21-19" in {
+      MatchChecker.allowedGameScore(PingpongGame(21, 19,1), 21) mustBe true
+      MatchChecker.allowedGameScore(PingpongGame(19, 21,1), 21) mustBe true
+    }
+
+
+    "allowedGamescore returns false on 10-11" in {
+      MatchChecker.allowedGameScore(PingpongGame(11, 10,1), 11) mustBe false
+      MatchChecker.allowedGameScore(PingpongGame(10, 11,1), 11) mustBe false
+    }
+
+    "allowedGamescore returns true on 10-12" in {
+      MatchChecker.allowedGameScore(PingpongGame(12, 10,1), 11) mustBe true
+      MatchChecker.allowedGameScore(PingpongGame(10, 12,1), 11) mustBe true
+    }
+
+    "allowedGamescore returns true on 11-13" in {
+      MatchChecker.allowedGameScore(PingpongGame(13, 11,1), 11) mustBe true
+      MatchChecker.allowedGameScore(PingpongGame(11, 13,1), 11) mustBe true
+    }
+
+    "allowedGamescore returns false on 10-13" in {
+      MatchChecker.allowedGameScore(PingpongGame(13, 10,1), 11) mustBe false
+      MatchChecker.allowedGameScore(PingpongGame(10, 13,1), 11) mustBe false
+    }
+
+    "allowedGamescore returns false on 17-0" in {
+      MatchChecker.allowedGameScore(PingpongGame(17, 0,1), 21) mustBe false
+      MatchChecker.allowedGameScore(PingpongGame(0, 17,1), 21) mustBe false
+    }
   }
 }

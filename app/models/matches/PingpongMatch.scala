@@ -17,7 +17,8 @@ case class PingpongMatch(
                       numberOfSetsToWin: Int,
                       wonSetsA: Int,
                       wonSetsB: Int,
-                      games: List[PingpongGame])
+                      games: List[PingpongGame],
+                      errorMessage:  Option[String] = None)
 
 object MatchEvidence{
 
@@ -38,7 +39,7 @@ object MatchEvidence{
 
 object MatchChecker{
   def calculateSets(pingpongMatch: PingpongMatch): PingpongMatch = {
-    val result = pingpongMatch.games.foldLeft[(Int, Int)]((0,0)){ (acc, game) => {
+    val (wonSetsA, wonSetsB) = pingpongMatch.games.foldLeft[(Int, Int)]((0,0)){ (acc, game) => {
       if( (game.pointA == pingpongMatch.targetScore && game.pointB <= pingpongMatch.targetScore - 2 ) ||
         (game.pointA - 2 == game.pointB && game.pointA >= pingpongMatch.targetScore)){
        (acc._1 + 1, acc._2)
@@ -50,12 +51,35 @@ object MatchChecker{
       }
     }}
 
-    pingpongMatch.copy(wonSetsA = result._1, wonSetsB = result._2)
+    val gameError = pingpongMatch.games.foldLeft[Option[String]](None)( (acc, game) =>  if(acc.isEmpty && allowedGameScore(game, pingpongMatch.targetScore)) None else if(acc.isEmpty) Some(s"Error in set ${game.gameNr}") else acc)
+    val finalError = gameError match {
+      case Some(error)  => Some(error)
+      case _            => if(
+        !pingpongMatch.games.forall(gameEmpty) &&
+          wonSetsA != pingpongMatch.numberOfSetsToWin &&
+          wonSetsB != pingpongMatch.numberOfSetsToWin
+      ) Some("Deze wedstrijd is onvolledig of foutief ingevuld!") else None
+    }
+    pingpongMatch.copy(wonSetsA = wonSetsA, wonSetsB = wonSetsB, errorMessage = finalError)
   }
 
   def isWon(pingpongMatch: PingpongMatch): Boolean = {
     val checkecMatch = calculateSets(pingpongMatch)
     (checkecMatch.wonSetsA > checkecMatch.wonSetsB) && checkecMatch.wonSetsA == checkecMatch.numberOfSetsToWin ||
       checkecMatch.wonSetsA < checkecMatch.wonSetsB && checkecMatch.wonSetsB == checkecMatch.numberOfSetsToWin
+  }
+
+  def gameEmpty(pingpongGame: PingpongGame) = pingpongGame.pointA == 0 && pingpongGame.pointB == 0
+
+  def allowedGameScore(pingpongGame: PingpongGame, targetScore: Int): Boolean = {
+    if(pingpongGame.pointA != 0 || pingpongGame.pointB != 0){
+      if(pingpongGame.pointA != targetScore && pingpongGame.pointB != targetScore){
+        Math.abs(pingpongGame.pointA - pingpongGame.pointB) == 2
+      } else {
+        Math.abs(pingpongGame.pointA - pingpongGame.pointB) > 1
+      }
+    } else {
+      true
+    }
   }
 }

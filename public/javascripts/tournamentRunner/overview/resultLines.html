@@ -1,0 +1,33 @@
+<table class="result-table">
+  <thead>
+  <tr class="result-head">
+    <td></td>
+    <td>Naam</td>
+    <td>Klassement</td>
+    <td>GW</td>
+    <td>VW</td>
+    <td>GS</td>
+    <td>VS</td>
+    <td>GP</td>
+    <td>VP</td>
+  </tr>
+  </thead>
+  <tbody>
+  <tr class="result-line"
+      ng-repeat="resultLine in resultLines track by $index">
+    <td>{{$index + 1 + '.'}}</td>
+    <td>{{resultLine.player.player.firstname +' ' + resultLine.player.player.lastname}}</td>
+    <td>{{resultLine.player.player.rank.name}}</td>
+    <td>{{resultLine.player.playerScores.wonMatches}}</td>
+    <td>{{resultLine.player.playerScores.lostMatches}}</td>
+    <td>{{resultLine.player.playerScores.wonSets}}</td>
+    <td>{{resultLine.player.playerScores.lostSets}}</td>
+    <td>{{resultLine.player.playerScores.wonPoints}}</td>
+    <td>{{resultLine.player.playerScores.lostPoints}}</td>
+    <td ng-if="resultLine.tieScore" style="color: greenyellow">{{'+' + resultLine.tieScore.wonSets}}</td>
+    <td ng-if="resultLine.tieScore" style="color: red">{{'-' + resultLine.tieScore.lostSets}}</td>
+    <td ng-if="resultLine.tieScore" style="color: greenyellow">{{'+' + resultLine.tieScore.wonPoints}}</td>
+    <td ng-if="resultLine.tieScore" style="color: red">{{'-' + resultLine.tieScore.lostPoints}}</td>
+  </tr>
+  </tbody>
+</table>

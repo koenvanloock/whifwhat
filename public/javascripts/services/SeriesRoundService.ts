@@ -57,6 +57,10 @@ module TournamentManagement {
             return this.roundsMap[seriesId] ? this.roundsMap[seriesId].length : 0;
         }
 
+        showRoundResult(roundId: string){
+            return this.$http.get(this.base.url + "/roundresult/"+ roundId);
+        }
+
         /*
         moveSeriesUp(roundToMove) {
             if (roundToMove.roundNr > 1) {

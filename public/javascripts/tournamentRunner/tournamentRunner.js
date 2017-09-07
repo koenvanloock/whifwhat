@@ -141,6 +141,18 @@ tournamentRunner.directive("finalRanking", function () {
   }
 });
 
+tournamentRunner.directive("resultLines", function(){
+  return {
+
+    restrict: 'E',
+    scope: {
+      resultLines: '='
+    },
+    templateUrl: 'assets/javascripts/tournamentRunner/overview/resultLines.html'
+  }
+
+});
+
 
 
 

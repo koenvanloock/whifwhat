@@ -1,0 +1,30 @@
+<md-dialog aria-label="ronderesultaat" ng-cloak flex="40" >
+  <form>
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Ronderesultaat</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="roundResultController.cancel()">
+          <md-icon md-font-icon="fa fa-times" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content layout="column" class="md-padding">
+      <div layout="column">
+        <result-lines result-lines="roundResultController.roundResult.resultLines"></result-lines>
+      </div>
+
+      <div layout="column">
+        <div ng-repeat="robinResult in roundResultController.roundResult.robinResult track by $index">
+          <h4 style="color:white; font-weight: bold;">Poule {{$index + 1}}</h4>
+        <result-lines result-lines="robinResult"></result-lines>
+        </div>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions layout="row">
+      <span flex></span>
+      <md-button class="md-raised" ng-click="roundResultController.cancel()">Terug</md-button>
+      <md-button class="md-raised md-primary" ng-click="roundResultController.showNextRound()" style="margin-right:20px;">Volgende ronde</md-button>
+    </md-dialog-actions>
+  </form>
+</md-dialog>

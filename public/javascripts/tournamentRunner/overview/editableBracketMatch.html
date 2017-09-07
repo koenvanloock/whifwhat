@@ -1,5 +1,5 @@
-<md-card layout="row" class="matchTag">
-
+<md-card class="matchTag">
+<div layout="row">
   <div layout="column" style="width: 300px;">
     <div>
       <h3>Naam</h3>
@@ -79,5 +79,9 @@
         <p class="pointLabel">{{match.wonSetsB}}</p>
       </div>
     </div>
-
+  </div>
+  </div>
+    <div ng-show="match.errorMessage" style="height: 40px; background: red; color: white; font-weight: bold;">
+      <h3>{{match.errorMessage}}</h3>
+    </div>
 </md-card>

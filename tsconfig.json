@@ -64,6 +64,7 @@
 
     "public/javascripts/tournamentRunner/loadingTournament/loadingController.ts",
     "public/javascripts/tournamentRunner/overview/OverviewController.ts",
+    "public/javascripts/tournamentRunner/overview/RoundResultController.ts",
     "public/javascripts/tournamentRunner/services/loadingService.ts",
 
     "public/javascripts/hallviewer/hallSetup/HallSetupController.ts",

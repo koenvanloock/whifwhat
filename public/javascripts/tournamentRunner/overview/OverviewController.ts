@@ -51,6 +51,7 @@ module TournamentRunner {
 
             this.$rootScope.$watch(() =>this.selectedSeries, (newVal, oldVal) => {
                 if (newVal != oldVal) {
+                    this.finalRanking = [];
                     this.loadRoundsOfSeries(newVal.id)
                 }
             })
@@ -129,6 +130,26 @@ module TournamentRunner {
 
         hasPreviousRound() {
             return this.selectedRound && this.selectedRound.roundNr > 1;
+        }
+
+        showRoundResult(){
+            this.seriesRoundService.showRoundResult(this.selectedRound.id).then(
+                (response) => {
+                    var roundResult = response.data;
+                    this.$mdDialog
+                    .show({
+                        locals:{roundResult: roundResult},
+                        clickOutsideToClose: true,
+                        controllerAs: 'roundResultController',
+                        templateUrl: 'assets/dialogs/roundResultDialog.html',
+                        controller: 'RoundResultController',
+                    }).then(
+                        () => {this.gotoNextRound();},
+                        () => {}
+                        )
+                },
+                (errorResponse) => this.alertService.addAlert({type: "error", msg: errorResponse.data, timeout: 3000})
+                )
         }
 
         gotoNextRound() {
