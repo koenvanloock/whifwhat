@@ -1,15 +1,17 @@
 .printMatch{
-    background: white;
     font-size: 10px;
     font-weight: bold;
-    color: black;
     border-collapse: collapse;
     height: 2.65cm;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
 }
 
 .printMatch td, .printMatch tr, .printMatch table{
     border-collapse: collapse;
     border: 2px solid  #a3a3a3;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
 }
 
 .printMatch td {

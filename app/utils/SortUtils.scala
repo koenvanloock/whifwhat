@@ -2,6 +2,7 @@ package utils
 
 
 import models.ResultLine
+import models.player.SeriesPlayer
 
 object SortUtils {
 
@@ -33,6 +34,14 @@ object SortUtils {
     }
 
     resultLines.sorted(ordering)
+  }
+
+  def sortSeriesPlayers(players: List[SeriesPlayer]) = {
+    val ordering = Ordering.by { seriesPlayer: SeriesPlayer =>
+      (-seriesPlayer.playerScores.wonMatches, -seriesPlayer.playerScores.wonSets, seriesPlayer.playerScores.lostSets, -seriesPlayer.playerScores.wonPoints, seriesPlayer.playerScores.lostPoints)
+    }
+
+    players.sorted(ordering)
   }
 
 

@@ -80,22 +80,22 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   }
 
 
-  def advanceIfPossibleOrShowFinalRanking(series: TournamentSeries, roundRanking: List[SeriesPlayer]): Future[Either[FinalRanking, SeriesRound]] = {
+  def advanceIfPossibleOrShowFinalRanking(series: TournamentSeries, roundRanking: List[SeriesPlayer], roundResult: RoundResult): Future[Either[FinalRanking, SeriesRound]] = {
     seriesRoundService
       .retrieveByFields(Json.obj("roundNr" -> (series.currentRoundNr + 1), "seriesId" -> series.id))
-      .flatMap(returnRoundRankingOrNextRoundIfPresent(series, roundRanking))
+      .flatMap(returnRoundRankingOrNextRoundIfPresent(series, roundRanking, roundResult))
   }
 
-  def returnRoundRankingOrNextRoundIfPresent(series: TournamentSeries, roundRanking: FinalRanking): Option[SeriesRound] => Future[Either[FinalRanking, SeriesRound]] = {
-    case Some(nextRound) => updateAndReturnNextRound(series, nextRound, roundRanking)
+  def returnRoundRankingOrNextRoundIfPresent(series: TournamentSeries, roundRanking: FinalRanking, roundResult: RoundResult): Option[SeriesRound] => Future[Either[FinalRanking, SeriesRound]] = {
+    case Some(nextRound) => updateAndReturnNextRound(series, nextRound, roundRanking, roundResult)
     case _ => seriesPlayerRepository.retrieveAllSeriesPlayers(series.id)
       .flatMap( playerList => Future.sequence{playerList.map(retrieveRoundPlayersAndAggregateScore)})
       .map(playerList => Left(playerList.sortBy(-_.playerScores.totalPoints)))
   }
 
-  private def updateAndReturnNextRound(series: TournamentSeries, nextRound: SeriesRound, roundRanking: FinalRanking) = {
+  private def updateAndReturnNextRound(series: TournamentSeries, nextRound: SeriesRound, roundRanking: FinalRanking, roundResult: RoundResult) = {
     update(series.copy(currentRoundNr = series.currentRoundNr + 1)).flatMap { _ =>
-      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series).getOrElse(nextRound)
+      val updatedRound = drawService.drawSubsequentRound(nextRound, roundRanking, series, roundResult).getOrElse(nextRound)
       seriesRoundService.updateSeriesRound(updatedRound).map(_ => Right(updatedRound))
     }
   }

@@ -29,7 +29,7 @@ class ActiveTournamentTest extends TestKit(ActorSystem("MySpec")) with ImplicitS
 
     val occupiedPlayers = List(HANS, ARAM)
     val matchList = List(HANS_ARAM, ARAM_KOEN, HANS_KOEN).map(ViewablePingpongMatch(_,false,false))
-    val players = List(HANS, ARAM, KOEN).map(ViewablePlayer(_,RefereeInfo(0,0), false))
+    val players = List(HANS, ARAM, KOEN).map(ViewablePlayer(_,RefereeInfo(0,2), false))
     val tournament = HallOverViewTournament("1234", "blabla",LocalDate.now(), Nil, players, matchList)
 
     "return false initially when no tournament has been set" in {
@@ -83,7 +83,7 @@ class ActiveTournamentTest extends TestKit(ActorSystem("MySpec")) with ImplicitS
       expectMsg(Some(tournament))
       activeTournament ! UpdateMatchInTournament(pingpongMatch, occupiedPlayers)
       val updatedMatchList = List(ViewablePingpongMatch(pingpongMatch,true,false), ViewablePingpongMatch(ARAM_KOEN,false,true), ViewablePingpongMatch(HANS_KOEN,false,true))
-      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,0), false), ViewablePlayer(ARAM, RefereeInfo(0,0), false), ViewablePlayer(KOEN, RefereeInfo(0,0), false))
+      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,1), false), ViewablePlayer(ARAM, RefereeInfo(0,1), false), ViewablePlayer(KOEN, RefereeInfo(0,2), false))
       val newTournament = HallOverViewTournament("1234", "blabla",LocalDate.now(), Nil, updatedPlayers, updatedMatchList)
 
       activeTournament ! GetActiveTournament(this.testActor)
@@ -97,7 +97,7 @@ class ActiveTournamentTest extends TestKit(ActorSystem("MySpec")) with ImplicitS
       expectMsg(Some(tournament))
       activeTournament ! UpdateMatchInTournament(pingpongMatch, occupiedPlayers)
       val updatedMatchList = List(ViewablePingpongMatch(HANS_ARAM,false,true), ViewablePingpongMatch(pingpongMatch,true,false), ViewablePingpongMatch(HANS_KOEN,false,true))
-      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,0), true), ViewablePlayer(ARAM, RefereeInfo(0,0), false), ViewablePlayer(KOEN, RefereeInfo(0,0), false))
+      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,2), true), ViewablePlayer(ARAM, RefereeInfo(0,1), false), ViewablePlayer(KOEN, RefereeInfo(0,1), false))
       val newTournament = HallOverViewTournament("1234", "blabla",LocalDate.now(), Nil, updatedPlayers, updatedMatchList)
 
       activeTournament ! GetActiveTournament(this.testActor)
@@ -111,7 +111,7 @@ class ActiveTournamentTest extends TestKit(ActorSystem("MySpec")) with ImplicitS
       expectMsg(Some(tournament))
       activeTournament ! NewOccupiedPlayers(newOccupiedPlayers)
       val updatedMatchList = List(ViewablePingpongMatch(HANS_ARAM,false,false), ViewablePingpongMatch(ARAM_KOEN,false,true), ViewablePingpongMatch(HANS_KOEN,false,true))
-      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,0), false), ViewablePlayer(ARAM, RefereeInfo(0,0), false), ViewablePlayer(KOEN, RefereeInfo(0,0), true))
+      val updatedPlayers = List(ViewablePlayer(HANS, RefereeInfo(0,2), false), ViewablePlayer(ARAM, RefereeInfo(0,2), false), ViewablePlayer(KOEN, RefereeInfo(0,2), true))
       val updatedTournament = tournament.copy(players = updatedPlayers, matchesToPlay = updatedMatchList)
 
       activeTournament ! GetActiveTournament(this.testActor)

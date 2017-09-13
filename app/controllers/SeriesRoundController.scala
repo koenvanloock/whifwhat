@@ -181,8 +181,12 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   //todo move logic to service layer ???
   def checkCompleteAndAdvanceIfPossible(series: TournamentSeries, seriesRound: SeriesRound): Future[Either[String, Either[FinalRanking, SeriesRound]]] = {
     if (seriesRound.isComplete) {
-      val roundRanking = RoundRanker.calculateRoundResults(seriesRound, series.playingWithHandicaps, ScoreTypes.DIRECT_CONFRONTATION)
-      seriesService.advanceIfPossibleOrShowFinalRanking(series, roundRanking).map(Right(_))
+      val roundResult = RoundResultCalculator.calculateResult(seriesRound, series.playingWithHandicaps)
+      val roundRanking = RoundResultCalculator.calculateResult(seriesRound, series.playingWithHandicaps) match {
+        case result: RoundResult if result.robinResult.nonEmpty => RoundResultCalculator.aggregateRobins(result.robinResult.get).map(_.player)
+        case result: RoundResult if result.robinResult.isEmpty => result.results.map(_.player)
+      }
+      seriesService.advanceIfPossibleOrShowFinalRanking(series, roundRanking, roundResult).map(Right(_))
     } else {
       Future(Left("The current round isn't complete"))
     }

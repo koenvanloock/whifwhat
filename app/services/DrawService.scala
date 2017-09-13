@@ -6,6 +6,7 @@ import javax.inject.Inject
 import models._
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
+import utils.{BracketPlacement, RoundResultCalculator}
 
 import scala.util.{Random, Try}
 
@@ -99,8 +100,12 @@ class DrawService @Inject()() {
     case roundNr if (roundNr > 0) => drawEmptyMatches(roundNr + 1, bracketId, bracket.numberOfBracketRounds, numberOfSetsToWin, setTargetScore)
   }
 
-  def drawSubsequentRound(seriesRound: SeriesRound, sortedPlayerList: List[SeriesPlayer], series: TournamentSeries): Option[SeriesRound] =  seriesRound match {
-    case bracket: SiteBracketRound  => drawBracket(sortedPlayerList, bracket, series.numberOfSetsToWin, series.setTargetScore)
+  def drawSubsequentRound(seriesRound: SeriesRound, sortedPlayerList: List[SeriesPlayer], series: TournamentSeries, roundResult: RoundResult): Option[SeriesRound] =  seriesRound match {
+    case bracket: SiteBracketRound  =>
+      roundResult.robinResult.map{ robinResult =>
+       val sortedPlayersForBracket =  BracketPlacement.sortRobinPlayersForPlacedBracket(robinResult, bracket.numberOfBracketRounds)
+        drawBracket(sortedPlayersForBracket, bracket, series.numberOfSetsToWin, series.setTargetScore)
+      }.getOrElse(drawBracket(sortedPlayerList, bracket, series.numberOfSetsToWin, series.setTargetScore))
     case robinRound: SiteRobinRound => drawRobins(sortedPlayerList, robinRound, series.setTargetScore, series.numberOfSetsToWin, DrawTypes.EnteredOrder)
   }
 
