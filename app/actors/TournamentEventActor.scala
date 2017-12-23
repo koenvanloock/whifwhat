@@ -86,13 +86,11 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
       activeHall ! UpdateMatchInHall(matchWithSetResults)
       activeTournament ! UpdateMatchInTournament(matchWithSetResults, Nil)
     case MatchCompleted(pingpongMatch) =>
-     /* (activeHall ? IsMatchComplete(pingpongMatch.id)).mapTo[Boolean].map( isComplete =>
+      (activeHall ? IsMatchComplete(pingpongMatch.id)).mapTo[Boolean].map( isComplete =>
         if(!isComplete) {
           (activeHall ? ActiveHall.GetReferee(pingpongMatch.id)).mapTo[Option[Player]].map(playerOpt => playerOpt.foreach(referee => activeTournament ! UpRefCount(referee)))
-        })*/
-      activeTournament ! UpdateMatchInTournament(pingpongMatch, Nil, getMatchPlayers(pingpongMatch))
-
-
+        })
+      activeTournament ! CompleteMatchInTournament(pingpongMatch)
     case HallRefereeInsert(hallId, row, column, insertedReferee) =>
       activeHall ! ActiveHall.MoveRefereeToTable(hallId, row, column, insertedReferee)
       val occupiedPlayers = List(insertedReferee)
@@ -100,7 +98,7 @@ class TournamentEventActor @Inject()(implicit val system: ActorSystem) extends A
     case HallRefereeDelete(hallId, row, column, deletedReferee: Player, completed) =>
         activeHall ! ActiveHall.DeleteRefereeFromTable(hallId, row, column, deletedReferee)
         val freePlayers = List(deletedReferee)
-        activeTournament ! NewOccupiedPlayers(freePlayers = freePlayers)
+        activeTournament ! NewOccupiedPlayers(Nil, freePlayers = freePlayers)
 
     case RoundAdvance(matches) => ???
     case GetActiveTournament =>

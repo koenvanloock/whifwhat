@@ -7,9 +7,9 @@ import models._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import play.api.mvc.{Action, Controller, Result}
+import play.api.mvc.{Action, Controller, InjectedController, Result}
 import services._
-import utils.{ControllerUtils, JsonUtils, RoundRanker, RoundResultCalculator}
+import utils.{JsonUtils, RoundRanker, RoundResultCalculator}
 import utils.JsonUtils.ListWrites._
 import akka.pattern.ask
 
@@ -25,9 +25,10 @@ import models.halls.Hall
 import models.matches.MatchEvidence.matchIsModel._
 import models.matches.{MatchChecker, MatchEvidence, PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
+
 import scala.concurrent.duration._
 
-class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService, roundResultService: RoundResultService) extends Controller{
+class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService, roundResultService: RoundResultService) extends InjectedController{
   type FinalRanking = List[SeriesPlayer]
   implicit val timeout = Timeout(5 seconds)
 
@@ -86,16 +87,16 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
 
   }
 
-  def updateConfigSeriesRound() = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, roundReadsConfig).map{ seriesRound =>
+  def updateConfigSeriesRound() = Action.async(parse.tolerantJson){ request =>
+    JsonUtils.parseRequestBody(request)(roundReadsConfig).map{ seriesRound =>
       seriesRoundService.updateSeriesRound(seriesRound).map {
         updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
       }
     }.getOrElse(Future(BadRequest))
   }
 
-  def fullUpdateSeriesRound = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, SeriesRoundEvidence.seriesRoundIsModel.roundReads).map{ seriesRound =>
+  def fullUpdateSeriesRound = Action.async(parse.tolerantJson){ request =>
+    JsonUtils.parseRequestBody(request)(SeriesRoundEvidence.seriesRoundIsModel.roundReads).map{ seriesRound =>
       seriesRoundService.updateSeriesRound(seriesRound).map {
         updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
       }
@@ -111,8 +112,8 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
 
   def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map{_ => NoContent})
 
-  def updateRoundMatch(seriesRoundId: String) = Action.async{ request =>
-    ControllerUtils.parseEntityFromRequestBody(request, Json.reads[PingpongMatch]).map{ siteMatch =>
+  def updateRoundMatch(seriesRoundId: String) = Action.async(parse.tolerantJson){ request =>
+    JsonUtils.parseRequestBody(request)(Json.reads[PingpongMatch]).map{ siteMatch =>
        val matchWithSetResults = MatchChecker.calculateSets(siteMatch)
         if(MatchChecker.isWon(siteMatch)) {
           scoreActor ! ScoreActor.MatchCompleted(matchWithSetResults)

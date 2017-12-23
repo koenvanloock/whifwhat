@@ -18,14 +18,14 @@ import play.api.libs.json.Json
 import play.api.mvc.WebSocket.MessageFlowTransformer
 import play.api.mvc._
 import services.{HallService, SeriesRoundService}
-import utils.{ControllerUtils, JsonUtils}
+import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class HallController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, hallService: HallService, seriesRoundService: SeriesRoundService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends Controller {
+class HallController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, hallService: HallService, seriesRoundService: SeriesRoundService, implicit val system: ActorSystem, implicit val materializer: Materializer) extends InjectedController {
   implicit val timeout = Timeout(5 seconds)
   implicit val messageFlowTransformer = MessageFlowTransformer.jsonMessageFlowTransformer[Hall, Hall]
   implicit val rankFormat = Json.format[Rank]
@@ -71,17 +71,14 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     }
   }
 
-  def update() = Action.async { request =>
-    request.body.asJson.flatMap { json =>
-      json.validate[Hall].asOpt.map {
+  def update() = Action.async(parse.tolerantJson) { request =>
+    request.body.validate[Hall].asOpt.map {
         hall =>
           hallService.update(hall).map { result =>
             tournamentEventActor ! Hallchanged(hall)
             Ok(Json.toJson(result))
           }
-      }
     }.getOrElse(Future(BadRequest("Het request kon niet geparset worden.")))
-
   }
 
   def setActiveHall(hallId: String) = Action.async {
@@ -109,9 +106,9 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     }
   }
 
-  def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async { request =>
+  def updateHallWithMatch(hallId: String, row: Int, column: Int) = Action.async(parse.tolerantJson) { request =>
 
-    ControllerUtils.parseEntityFromRequestBody(request, JsonUtils.pingpongMatchReads).map { pingpongMatch =>
+    JsonUtils.parseRequestBody(request)(JsonUtils.pingpongMatchReads).map { pingpongMatch =>
       hallService.setMatchToTable(hallId, row, column, pingpongMatch).map {
         case Some(hall) =>
           tournamentEventActor ! MoveMatchInHall(hallId, row, column, pingpongMatch)
@@ -122,9 +119,8 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
 
   }
 
-  def deleteHallMatch(hallId: String, row: Int, column: Int) = Action.async { request =>
-    println(request.body)
-    ControllerUtils.parseEntityFromRequestBody(request, pingpongMatchReads).map { pingpongMatch =>
+  def deleteHallMatch(hallId: String, row: Int, column: Int) = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(pingpongMatchReads).map { pingpongMatch =>
       seriesRoundService.retrieveByFields(Json.obj("id" -> pingpongMatch.roundId)).flatMap {
         case Some(round) =>
           val updatedRound = seriesRoundService.updateMatchInRound(pingpongMatch, round)
@@ -145,8 +141,8 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     }
   }
 
-  def deleteHallReferee(hallId: String, row: Int, column: Int) = Action.async { request =>
-    ControllerUtils.parseEntityFromRequestBody(request, playerFormat).map { referee =>
+  def deleteHallReferee(hallId: String, row: Int, column: Int) = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(playerFormat).map { referee =>
       hallService.deleteHallRef(hallId, row, column, referee).map {
         case Some(updatedHall) =>
           tournamentEventActor ! HallRefereeDelete(hallId, row, column, referee, completed = false)
@@ -156,8 +152,8 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
     }.getOrElse(Future(BadRequest))
   }
 
-  def updateHallWithReferee(hallId: String, row: Int, column: Int) = Action.async { request =>
-    ControllerUtils.parseEntityFromRequestBody(request, playerFormat).map { referee =>
+  def updateHallWithReferee(hallId: String, row: Int, column: Int) = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(playerFormat).map { referee =>
       hallService.insertRefInHall(hallId, row, column, referee).map {
         case Some(updatedHall) =>
           tournamentEventActor ! HallRefereeInsert(hallId, row, column, referee)

@@ -5,14 +5,15 @@ import javax.inject.Inject
 import models.player._
 import models._
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, Controller}
+import play.api.mvc.{Action, BaseController, Controller, InjectedController}
 import services.SeriesService
 import utils.JsonUtils
 import models.SeriesRoundEvidence._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class DrawController @Inject()(seriesService: SeriesService) extends Controller{
+class DrawController @Inject()(seriesService: SeriesService) extends InjectedController{
 
   implicit val rankFormat = Json.format[Rank]
   implicit val playerFormat = Json.format[Player]
@@ -32,7 +33,7 @@ class DrawController @Inject()(seriesService: SeriesService) extends Controller{
     }
   }
 
-  def redraw = Action.async { request =>
+  def redraw = Action.async(parse.tolerantJson) { request =>
 
     JsonUtils.parseRequestBody(request)(seriesRoundIsModel.roundReads).map { round =>
       val resultFut: Future[JsValue] = seriesService.drawRound(round).map {

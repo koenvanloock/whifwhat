@@ -57,11 +57,8 @@ object JsonUtils {
 
   }
 
-  def parseRequestBody[T](request: Request[AnyContent])(implicit reads: Reads[T]): Option[T] = {
-    request.body.asJson.flatMap(json => {
-      println(json.toString())
-      json.validate[T](reads).asOpt
-    })
+  def parseRequestBody[T](request: Request[JsValue])(implicit reads: Reads[T]): Option[T] = {
+    request.body.validate[T](reads).asOpt
   }
 
   implicit val localDateReads = new Reads[LocalDate] {

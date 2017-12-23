@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, SeriesRoundRepository}
+import utils.RoundResultCalculator
 
 import scala.concurrent.Await
 
@@ -134,7 +135,7 @@ class SeriesServiceTest extends PlaySpec {
           PingpongGame(21, 15, 2))
         )))))), DEFAULT_DURATION)
       val ranking = seriesPlayers.reverse
-      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking)(None), DEFAULT_DURATION)
+      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking, RoundResultCalculator.calculateResult(seriesRound, isHandicap = true))(None), DEFAULT_DURATION)
 
       result mustBe Left(ranking)
     }
@@ -147,8 +148,8 @@ class SeriesServiceTest extends PlaySpec {
           PingpongGame(21, 15, 2))
         )))))), DEFAULT_DURATION)
       val ranking = players.reverse.take(5)
-      val drawnNextRound = drawService.drawSubsequentRound(seriesRound, ranking ,insertedSeries)
-      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking)(Some(seriesRound)), DEFAULT_DURATION)
+      val drawnNextRound = drawService.drawSubsequentRound(seriesRound, ranking ,insertedSeries, RoundResultCalculator.calculateResult(seriesRound, isHandicap = true))
+      val result = Await.result(seriesService.returnRoundRankingOrNextRoundIfPresent(insertedSeries, ranking, RoundResultCalculator.calculateResult(seriesRound, isHandicap = true))(Some(seriesRound)), DEFAULT_DURATION)
 
       result match {
         case Right(drawnRound) => drawnRound match{

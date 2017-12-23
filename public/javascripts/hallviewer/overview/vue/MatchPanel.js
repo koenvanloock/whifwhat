@@ -18,7 +18,7 @@ Vue.component("matchPanel", {
   ' v-if="match.playerA && match.playerB" ' +
   ' v-for="match in filterMatches(seriesFilters, matchList, matchQuery)"' +
   ' draggable="true"' +
-  ' v-on:dragstart="drag(match, event)">' +
+  ' v-on:dragstart="drag" v-on:mousedown="selectMatch(match)">' +
   '<match-list-elem :color="getColorOf(match.roundId)" :match="match" style="margin: 10px 10px 0 0;"></match-list-elem>' +
   '</li>' +
   '</ul>' +
@@ -61,8 +61,9 @@ Vue.component("matchPanel", {
   },
 
   methods: {
-    drag: function (match, event) {
-      event.dataTransfer.setData("match", JSON.stringify(match));
+    selectMatch: function(match) { selectedMatch = match;},
+    drag: function (event) {
+      event.dataTransfer.setData("match", JSON.stringify(selectedMatch));
     },
     filterMatches: function (seriesFilters, matchList, query) {
       return matchList.filter(function (match) {
@@ -75,11 +76,6 @@ Vue.component("matchPanel", {
     },
 
     getColorOf: function (roundId) {
-      console.log("" + this.seriesMap.filter(function (series) {
-            return series.rounds.filter(function (seriesRound) {
-                  return seriesRound.roundId === roundId
-                }).length > 0
-          })[0].seriesColor);
       return (this.seriesMap.length > 0)
           ? this.seriesMap
               .filter(function (series) {
@@ -99,7 +95,10 @@ function contains(stringToSearch, stringToMatch) {
 }
 
 function seriesRoundIsVisible(seriesFilters, roundId){
-  return seriesFilters
+  var existingRounds = seriesFilters
       .filter(function(series){  return series.rounds
-          .filter( function(seriesRound){ return seriesRound.roundId === roundId}).length > 0 })[0].checked;
+          .filter( function(seriesRound){ return seriesRound.roundId === roundId}).length > 0 });
+      return existingRounds.length > 0 && existingRounds[0].checked;
 }
+
+var selectedMatch = {};

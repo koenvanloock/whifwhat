@@ -18,7 +18,7 @@ class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRo
   def convertRoundToHallOverView: (SeriesRound) => (HallOverviewRound, List[PingpongMatch]) = seriesRound => {
     val allMatches = seriesRound.matches
     val uncompletedMatches = allMatches.filterNot(MatchChecker.isWon)
-    val completePercentage =  uncompletedMatches.length * 100 / allMatches.length
+    val completePercentage =  (allMatches.length - uncompletedMatches.length) * 100 / (allMatches.length + 1)
 
     (HallOverviewRound(seriesRound.id, seriesRound.seriesId, s"ronde ${seriesRound.roundNr}", completePercentage), uncompletedMatches)
   }

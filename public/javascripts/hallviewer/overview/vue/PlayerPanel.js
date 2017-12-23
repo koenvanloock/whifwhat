@@ -12,7 +12,7 @@ Vue.component("playerPanel", {
   ' style="border-radius: 20px; border: 1px solid white; background: gray; margin-bottom: 10px; margin-right: 10px; color: white; font-weight: bold"' +
   ' v-for="player in filterPlayers(playerList, playerQuery)"' +
   ' draggable="true"' +
-  ' v-on:dragstart="drag(player, event)">' +
+  ' v-on:dragstart="drag" v-on:mousedown="selectPlayerForDrag(player)">' +
   '<div style="text-align: center">' +
   '<p> {{player.player.firstname + " " + player.player.lastname}}</p>' +
   '<div>' +
@@ -39,9 +39,10 @@ Vue.component("playerPanel", {
   },
 
   methods: {
-    drag: function (referee, event) {
-      var player = referee.player;
-      event.dataTransfer.setData("referee", JSON.stringify(player));
+    selectPlayerForDrag: function(player) {
+      selectedPlayer = player.player},
+    drag: function (event) {
+      event.dataTransfer.setData("referee", JSON.stringify(selectedPlayer));
     },
     filterPlayers: function (playerList, query) {
       return playerList.filter(function (player) {
@@ -56,3 +57,5 @@ Vue.component("playerPanel", {
 function contains(stringToSearch, stringToMatch) {
   return stringToSearch.toLowerCase().indexOf(stringToMatch.toLowerCase()) > -1;
 }
+
+var selectedPlayer = {};

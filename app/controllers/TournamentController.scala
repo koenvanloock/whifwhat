@@ -6,15 +6,15 @@ import actors.TournamentEventActor._
 import akka.actor.{ActorRef, ActorSystem}
 import com.typesafe.scalalogging.StrictLogging
 import models.{SeriesWithPlayers, Tournament, TournamentWithSeries}
-import play.api.libs.json.Json
-import play.api.mvc.{Action, AnyContent, Controller, Request}
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc._
 import repositories.mongo.{SeriesPlayerRepository, SeriesRepository, TournamentRepository}
 import utils.JsonUtils
 import utils.JsonUtils.ListWrites._
 import models.TournamentEvidence._
 import akka.util.Timeout
-import scala.concurrent.duration._
 
+import scala.concurrent.duration._
 import akka.pattern.ask
 import models.halls.HallOverViewTournament
 import jsonconverters.HallTournamentOverviewWrites
@@ -23,7 +23,7 @@ import services.HallOverviewService
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class TournamentController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository, hallOverviewService: HallOverviewService) extends Controller with StrictLogging{
+class TournamentController @Inject()(@Named("tournament-event-actor") tournamentEventActor: ActorRef, system: ActorSystem, tournamentRepository: TournamentRepository, seriesRepository: SeriesRepository, seriesPlayerRepository: SeriesPlayerRepository, hallOverviewService: HallOverviewService) extends InjectedController with StrictLogging{
   implicit val timeout = Timeout(5 seconds)
   val tournamentWrites = Json.format[Tournament]
 
@@ -31,7 +31,7 @@ class TournamentController @Inject()(@Named("tournament-event-actor") tournament
 
   implicit val halloverviewWrites = HallTournamentOverviewWrites.hallOverviewTournamentWrites
 
-  def createTournament() = Action.async{ request =>
+  def createTournament() = Action.async(parse.tolerantJson){ request =>
     JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads).map{ tournament =>
         tournamentRepository.create(tournament).flatMap { createdTournament =>
           if (!createdTournament.hasMultipleSeries) {
@@ -44,7 +44,7 @@ class TournamentController @Inject()(@Named("tournament-event-actor") tournament
 
   }
 
-  def createDefaulSeries(tournament: Tournament, request: Request[AnyContent]) = {
+  def createDefaulSeries(tournament: Tournament, request: Request[JsValue]) = {
     JsonUtils.parseRequestBody(request)(JsonUtils.singleSeriesReads).map { tournamentSeries =>
       println("testCreate")
       seriesRepository.create(tournamentSeries.copy(tournamentId = tournament.id, seriesName = tournament.tournamentName)).map { _ =>

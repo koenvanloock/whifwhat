@@ -4,41 +4,40 @@ import javax.inject.Inject
 
 import com.typesafe.scalalogging.StrictLogging
 import models.SeriesEvidence._
-import models.player.SeriesPlayer
-import models.{ScoreTypes, SeriesRound, TournamentSeries}
-import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller, Result}
+import models.TournamentSeries
+import play.api.libs.json.{JsValue, Json}
+import play.api.mvc._
 import services.{SeriesRoundService, SeriesService}
 import utils.JsonUtils.ListWrites._
-import utils.{JsonUtils, RoundRanker}
+import utils.JsonUtils
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SeriesController @Inject()(seriesService: SeriesService, seriesRoundService: SeriesRoundService) extends Controller with StrictLogging {
+class SeriesController @Inject()(seriesService: SeriesService, seriesRoundService: SeriesRoundService) extends InjectedController with StrictLogging {
 
-  def createSeries = Action.async { request =>
+  def createSeries: Action[JsValue] = Action.async(parse.tolerantJson) { request =>
     logger.info("received request: " + request.body.toString)
     JsonUtils.parseRequestBody[TournamentSeries](request)(JsonUtils.seriesReads).map { series =>
       logger.info(series.toString)
-      seriesService.create(series).map(x => Created(Json.toJson(series)))
+      seriesService.create(series).map(_ => Created(Json.toJson(series)))
     }.getOrElse(Future(BadRequest))
 
   }
 
-  def updateSeries(seriesId: String) = Action.async { request =>
+  def updateSeries(seriesId: String): Action[JsValue] = Action.async(parse.tolerantJson) { request =>
     JsonUtils.parseRequestBody[TournamentSeries](request)(JsonUtils.fullSeriesReads).map { series =>
-      seriesService.update(series).map(x => Ok(Json.toJson(series)))
+      seriesService.update(series).map(_ => Ok(Json.toJson(series)))
     }.getOrElse(Future(BadRequest))
   }
 
-  def getSeriesOfTournament(tournamentId: String) = Action.async {
+  def getSeriesOfTournament(tournamentId: String): Action[AnyContent] = Action.async {
     seriesService.retrieveAllByField("tournamentId", tournamentId).map(seriesList => Ok(Json.listToJson(seriesList)))
   }
 
-  def deleteSeries(seriesId: String) = Action.async {
-    deleteRoundsOfSeries(seriesId).flatMap { x =>
-      seriesService.delete(seriesId).map { result => NoContent }
+  def deleteSeries(seriesId: String): Action[AnyContent] = Action.async {
+    deleteRoundsOfSeries(seriesId).flatMap { _ =>
+      seriesService.delete(seriesId).map { _ => NoContent }
     }
   }
 
@@ -50,7 +49,7 @@ class SeriesController @Inject()(seriesService: SeriesService, seriesRoundServic
     }
   }
 
-  def getSeries(seriesId: String) = Action.async {
+  def getSeries(seriesId: String): Action[AnyContent] = Action.async {
     seriesService.retrieveById(seriesId).map {
       case Some(series) => Ok(Json.toJson(series))
       case _ => BadRequest("series not found")

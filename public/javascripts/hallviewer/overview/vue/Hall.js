@@ -28,6 +28,7 @@ Vue.component("hall-overview", {
   mounted: function () {
     this.$http.get(window.location.origin + "/activeTournament").then(function (response) {
       this.tournament = response.data;
+      this.tournament.series.map(function(series){ series.checked = false;});
       this.matchList = this.tournament.remainingMatches;
       this.freePlayers = this.tournament.freePlayers;
     }.bind(this), this.logError);

@@ -80,7 +80,7 @@ class RoundResultCalculatorTest extends PlaySpec{
         ResultLine(SeriesPlayer("2", "1",HANS, PlayerScores(0,2,0,4,66,84,0)), None)
       )
 
-      RoundResultCalculator.calculateResult(robinRound, true) must equal(results)
+      RoundResultCalculator.calculateResult(robinRound, true).results must equal(results)
     }
 
   }

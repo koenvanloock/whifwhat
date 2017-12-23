@@ -31,7 +31,7 @@ class SeriesRoundControllerTest extends PlaySpec with OneAppPerTest{
       val roundCreate = route(app, FakeRequest(POST,s"/seriesrounds/${series.id}"), json).get
       status(roundCreate) mustBe CREATED
       (contentAsJson(roundCreate) \ "seriesId").as[String] mustBe series.id
-      (contentAsJson(roundCreate) \ "id").as[String].length mustBe 24
+      (contentAsJson(roundCreate) \ "id").as[String].length mustBe 36
     }
 
     "update config values of a robin round" in {
