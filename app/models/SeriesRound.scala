@@ -53,6 +53,18 @@ case class SiteRobinRound(id: String, numberOfRobinGroups: Int, seriesId: String
   def matches = robinList.flatMap(robinGroup => robinGroup.robinMatches)
 }
 
+case class SwissRound(id: String, seriesId: String, roundNr: Int, swissLegs: List[SwissLeg], players: List[SeriesPlayer], scoreKey: Option[List[Int]] = None, roundType: String = "S") extends SeriesRound {
+  def getId(m: SwissRound): Option[String] = Some(id)
+
+  def setId(id: String)(m: SwissRound): SwissRound = m.copy(id = id)
+
+  def isComplete = this.swissLegs.forall( swissLeg => swissLeg.matches.forall(MatchChecker.isWon))
+
+  def roundPlayers = players
+
+  def matches = swissLegs.flatMap(_.matches)
+}
+
 
 object SeriesRoundEvidence {
 
@@ -63,9 +75,8 @@ object SeriesRoundEvidence {
     implicit val playerFormat = Json.format[Player]
     implicit val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
     implicit val gameWrites = Json.format[PingpongGame]
-    implicit val matchWrites = Json.format[PingpongMatch]
+    implicit val matchFormat = Json.format[PingpongMatch]
     implicit val listSeriesPlayerWrites = JsonUtils.listWrites(Json.writes[SeriesPlayer])
-    implicit val listMatchReads = JsonUtils.listReads(Json.reads[PingpongMatch])
     implicit val listSeriesPlayerReads = JsonUtils.listReads(Json.reads[SeriesPlayer])
 
 
@@ -149,31 +160,62 @@ object SeriesRoundEvidence {
         (__ \ "scoreKey").readNullable[List[Int]]
       ) (SiteRobinRound.apply(_, _, _, _, _, _))
 
+    implicit val swissLegReads: Reads[SwissLeg] = (
+      (__ \ "id").read[String] and
+      (__ \ "matches").lazyRead[List[PingpongMatch]](Reads.list[PingpongMatch](matchFormat))
+    ) (SwissLeg.apply(_, _))
+
+    implicit val swissLegWrites: Writes[SwissLeg] = (
+      (__ \ "id").write[String] and
+        (__ \ "matches").lazyWrite[List[PingpongMatch]](Writes.list[PingpongMatch](matchFormat))
+      ) (unlift(SwissLeg.unapply))
+
+    implicit val swissRoundWrites: Writes[SwissRound] = (
+      (__ \ "id").write[String] and
+        (__ \ "seriesId").write[String] and
+        (__ \ "roundNr").write[Int] and
+        (__ \ "swisslegs").lazyWrite[List[SwissLeg]](Writes.list[SwissLeg](swissLegWrites)) and
+        (__ \ "players").lazyWrite[List[SeriesPlayer]](Writes.list[SeriesPlayer](Json.writes[SeriesPlayer])) and
+        (__ \ "scoreKey").writeNullable[List[Int]] and
+        (__ \ "roundType").write[String]
+      ) (unlift(SwissRound.unapply))
+
+
+    implicit val swissRoundReads: Reads[SwissRound] = (
+      (__ \ "id").read[String] and
+        (__ \ "seriesId").read[String] and
+        (__ \ "roundNr").read[Int] and
+        (__ \ "swisslegs").lazyRead[List[SwissLeg]](Reads.list[SwissLeg](swissLegReads)) and
+        (__ \ "players").lazyRead[List[SeriesPlayer]](Reads.list[SeriesPlayer](Json.reads[SeriesPlayer])) and
+        (__ \ "scoreKey").readNullable[List[Int]]
+      ) (SwissRound.apply(_, _, _, _, _, _))
+
     override def getId(m: SeriesRound): Option[String] = m match {
       case r: SiteRobinRound => r.getId(r)
       case b: SiteBracketRound => b.getId(b)
+      case s: SwissRound => s.getId(s)
     }
 
     override def setId(id: String)(m: SeriesRound): SeriesRound = m match {
       case r: SiteRobinRound => r.setId(id)(r)
       case b: SiteBracketRound => b.setId(id)(b)
+      case s: SwissRound => s.setId(id)(s)
     }
 
     override def writes(o: SeriesRound): JsObject = o match {
       case r: SiteRobinRound => Json.toJson(r)(siteRobinRoundWrites).asInstanceOf[JsObject]
       case b: SiteBracketRound => Json.toJson(b)(siteBracketRoundWrites).asInstanceOf[JsObject]
+      case s: SwissRound => Json.toJson(s)(swissRoundWrites).asInstanceOf[JsObject]
     }
 
-    override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
-      case "R" => Json.fromJson[SiteRobinRound](json)(siteRobinRoundReads)
-      case "B" => Json.fromJson[SiteBracketRound](json)(siteBracketRoundReads)
-    }
+    override def reads(json: JsValue): JsResult[SeriesRound] = Json.fromJson[SeriesRound](json)(roundReads)
 
 
     implicit val roundReads = new Reads[SeriesRound] {
       override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
         case "R" => Json.fromJson(json)(siteRobinRoundReads)
         case "B" => Json.fromJson(json)(siteBracketRoundReads)
+        case "S" => Json.fromJson(json)(swissRoundReads)
       }
     }
   }

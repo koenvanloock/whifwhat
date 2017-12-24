@@ -28,7 +28,7 @@ import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 
 import scala.concurrent.duration._
 
-class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService, roundResultService: RoundResultService) extends InjectedController{
+class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef, @Named("tournament-event-actor") tournamentStream: ActorRef, seriesRoundService: SeriesRoundService, seriesService: SeriesService, hallService: HallService, roundResultService: RoundResultService) extends InjectedController {
   type FinalRanking = List[SeriesPlayer]
   implicit val timeout = Timeout(5 seconds)
 
@@ -37,41 +37,56 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
     (JsPath \ "numberOfRobinGroups").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteRobinRound.apply(UUID.randomUUID().toString,_, _, _, Nil))
+    ) (SiteRobinRound.apply(UUID.randomUUID().toString, _, _, _, Nil))
+
+  implicit val swissInitReads: Reads[SwissRound] = (
+    (JsPath \ "seriesId").read[String] and
+      (JsPath \ "roundNr").read[Int]
+    ) (SwissRound.apply(UUID.randomUUID().toString, _, _, Nil, Nil))
 
   implicit val bracketInitReads: Reads[SiteBracketRound] = (
     (JsPath \ "numberOfBracketRounds").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteBracketRound.apply(UUID.randomUUID().toString,_, _, _, Nil, SiteBracket.buildBracket(1,21,2)))
+    ) (SiteBracketRound.apply(UUID.randomUUID().toString, _, _, _, Nil, SiteBracket.buildBracket(1, 21, 2)))
 
   val robinconfigReads: Reads[SiteRobinRound] = (
     (JsPath \ "id").read[String] and
-    (JsPath \ "numberOfRobinGroups").read[Int] and
+      (JsPath \ "numberOfRobinGroups").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteRobinRound.apply(_,_, _, _, Nil))
+    ) (SiteRobinRound.apply(_, _, _, _, Nil))
 
   val bracketConfigReads: Reads[SiteBracketRound] = (
     (JsPath \ "id").read[String] and
       (JsPath \ "numberOfBracketRounds").read[Int] and
       (JsPath \ "seriesId").read[String] and
       (JsPath \ "roundNr").read[Int]
-    ) (SiteBracketRound.apply(_,_, _, _, Nil, SiteBracket.buildBracket(1,21,2)))
+    ) (SiteBracketRound.apply(_, _, _, _, Nil, SiteBracket.buildBracket(1, 21, 2)))
 
-  val roundReadsInsert = new Reads[SeriesRound]{
+  implicit val swissConfigReads: Reads[SwissRound] = (
+    (JsPath \ "seriesId").read[String] and
+      (JsPath \ "roundNr").read[Int]
+    ) (SwissRound.apply(UUID.randomUUID().toString, _, _, Nil, Nil))
+
+
+  val roundReadsInsert = new Reads[SeriesRound] {
 
 
     override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
       case "R" => Json.fromJson[SiteRobinRound](json)(robinInitReads)
       case "B" => Json.fromJson[SiteBracketRound](json)(bracketInitReads)
+      case "S" => Json.fromJson[SwissRound](json)(swissInitReads)
+      case _ => JsError()
     }
   }
 
-  val roundReadsConfig = new Reads[SeriesRound]{
+  val roundReadsConfig = new Reads[SeriesRound] {
     override def reads(json: JsValue): JsResult[SeriesRound] = (json \ "roundType").as[String] match {
       case "R" => Json.fromJson[SiteRobinRound](json)(robinconfigReads)
       case "B" => Json.fromJson[SiteBracketRound](json)(bracketConfigReads)
+      case "S" => Json.fromJson[SwissRound](json)(swissConfigReads)
+      case _ => JsError()
     }
   }
 
@@ -81,79 +96,79 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   implicit val playerWrites = Json.writes[Player]
   implicit val seriesPlayerWrites = Json.writes[SeriesPlayer]
 
-  def getRoundsOfSeries(seriesId: String) = Action.async{
+  def getRoundsOfSeries(seriesId: String) = Action.async {
 
     seriesRoundService.getRoundsOfSeries(seriesId).map(roundList => Ok(Json.listToJson(roundList.sortBy(_.roundNr))))
 
   }
 
-  def updateConfigSeriesRound() = Action.async(parse.tolerantJson){ request =>
-    JsonUtils.parseRequestBody(request)(roundReadsConfig).map{ seriesRound =>
+  def updateConfigSeriesRound() = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(roundReadsConfig).map { seriesRound =>
       seriesRoundService.updateSeriesRound(seriesRound).map {
         updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
       }
     }.getOrElse(Future(BadRequest))
   }
 
-  def fullUpdateSeriesRound = Action.async(parse.tolerantJson){ request =>
-    JsonUtils.parseRequestBody(request)(SeriesRoundEvidence.seriesRoundIsModel.roundReads).map{ seriesRound =>
+  def fullUpdateSeriesRound = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(SeriesRoundEvidence.seriesRoundIsModel.roundReads).map { seriesRound =>
       seriesRoundService.updateSeriesRound(seriesRound).map {
         updatedSeriesRound => Ok(Json.toJson(updatedSeriesRound))
       }
     }.getOrElse(Future(BadRequest))
   }
 
-  def createSeriesRound(seriesId: String) = Action.async{
-      val seriesRound =  SiteBracketRound(UUID.randomUUID().toString,0, seriesId,0,Nil, SiteBracket.buildBracket(1,21,2))
-      seriesRoundService.createSeriesRound(seriesRound).map{
-        round => Created(Json.toJson(round))
-      }
+  def createSeriesRound(seriesId: String) = Action.async {
+    val seriesRound = SiteBracketRound(UUID.randomUUID().toString, 0, seriesId, 0, Nil, SiteBracket.buildBracket(1, 21, 2))
+    seriesRoundService.createSeriesRound(seriesRound).map {
+      round => Created(Json.toJson(round))
+    }
   }
 
-  def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map{_ => NoContent})
+  def deleteSeriesRound(seriesRoundId: String) = Action.async(seriesRoundService.delete(seriesRoundId).map { _ => NoContent })
 
-  def updateRoundMatch(seriesRoundId: String) = Action.async(parse.tolerantJson){ request =>
-    JsonUtils.parseRequestBody(request)(Json.reads[PingpongMatch]).map{ siteMatch =>
-       val matchWithSetResults = MatchChecker.calculateSets(siteMatch)
-        if(MatchChecker.isWon(siteMatch)) {
-          scoreActor ! ScoreActor.MatchCompleted(matchWithSetResults)
-          tournamentStream ! MatchCompleted(matchWithSetResults)
-          (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
-            case Some(hall) => hallService.deleteMatchAndRefInHall(hall.id, matchWithSetResults)
-            case _ => None
-          }
-        } else {
-          tournamentStream ! TournamentEventActor.MatchUpdated(matchWithSetResults)
-          (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map{
-            case Some(hall) => hallService.updateMatchInHall(hall.id, matchWithSetResults)
-            case _ => None
-          }
+  def updateRoundMatch(seriesRoundId: String) = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody(request)(Json.reads[PingpongMatch]).map { siteMatch =>
+      val matchWithSetResults = MatchChecker.calculateSets(siteMatch)
+      if (MatchChecker.isWon(siteMatch)) {
+        scoreActor ! ScoreActor.MatchCompleted(matchWithSetResults)
+        tournamentStream ! MatchCompleted(matchWithSetResults)
+        (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map {
+          case Some(hall) => hallService.deleteMatchAndRefInHall(hall.id, matchWithSetResults)
+          case _ => None
         }
+      } else {
+        tournamentStream ! TournamentEventActor.MatchUpdated(matchWithSetResults)
+        (tournamentStream ? TournamentEventActor.GetHall).mapTo[Option[Hall]].map {
+          case Some(hall) => hallService.updateMatchInHall(hall.id, matchWithSetResults)
+          case _ => None
+        }
+      }
 
-        seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
+      seriesRoundService.updateRoundWithMatch(matchWithSetResults, seriesRoundId).map(showRetrieveRoundResult)
     }.getOrElse(Future(BadRequest))
   }
 
 
-  def getRound(roundId: String) = Action.async{
+  def getRound(roundId: String) = Action.async {
     seriesRoundService
       .getRound(roundId)
       .map(showRetrieveRoundResult)
   }
 
-  def getMatchListOfRound(seriesRoundId: String) = Action.async{
+  def getMatchListOfRound(seriesRoundId: String) = Action.async {
     implicit val rankWrites = Json.writes[Rank]
     implicit val playerWrites = Json.writes[Player]
     implicit val gameWrites = Json.writes[PingpongGame]
     implicit val matchWrites = Json.writes[PingpongMatch]
-    seriesRoundService.getMatchesOfRound(seriesRoundId).map( matchList => Ok(Json.listToJson(matchList)))
+    seriesRoundService.getMatchesOfRound(seriesRoundId).map(matchList => Ok(Json.listToJson(matchList)))
   }
 
-  def getNextRoundOrWinnerView(seriesRoundId: String, scoreType: String) = Action.async  {
-    val isWithHandicap = true //todo fech series
+  def getNextRoundOrWinnerView(seriesRoundId: String, scoreType: String) = Action.async {
+    val isWithHandicap = true //todo fetch series
     val parsedScoreType = ScoreTypes.parseScoreType(scoreType)
-    seriesRoundService.getRound(seriesRoundId).flatMap{
-      case Some(seriesRound) => if(seriesRound.isComplete) {
+    seriesRoundService.getRound(seriesRoundId).flatMap {
+      case Some(seriesRound) => if (seriesRound.isComplete) {
         val rankedPlayers = RoundRanker.calculateRoundResults(seriesRound, isWithHandicap, parsedScoreType)
         // todo add these results to seriesPlayer if needed and draw and return the next series
         Future(Ok)
@@ -167,7 +182,7 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   def proceedToNextRound(seriesId: String, roundNr: Int) = Action.async {
     seriesService.retrieveById(seriesId).flatMap {
       case Some(series) => seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> seriesId))
-        .flatMap{ seriesRoundOpt =>
+        .flatMap { seriesRoundOpt =>
           seriesRoundOpt.foreach { seriesRound =>
             val roundResult = RoundResultCalculator.calculateResult(seriesRound, series.playingWithHandicaps)
             println("Result: " + roundResult)
@@ -194,14 +209,14 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
   }
 
   def showNextRoundOrFinalRanking(series: TournamentSeries, roundNr: Int): Option[SeriesRound] => Future[Result] = {
-    case Some(seriesRound) => if(roundNr > series.currentRoundNr){
-                                checkCompleteAndAdvanceIfPossible(series, seriesRound).map(showProceedResult)
-                              } else {
-                                seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> series.id)).map {
-                                  case Some(retrievedRound) => Ok(Json.toJson(retrievedRound))
-                                  case _ => BadRequest("Round not found")
-                                }
-                              }
+    case Some(seriesRound) => if (roundNr > series.currentRoundNr) {
+      checkCompleteAndAdvanceIfPossible(series, seriesRound).map(showProceedResult)
+    } else {
+      seriesRoundService.retrieveByFields(Json.obj("roundNr" -> series.currentRoundNr, "seriesId" -> series.id)).map {
+        case Some(retrievedRound) => Ok(Json.toJson(retrievedRound))
+        case _ => BadRequest("Round not found")
+      }
+    }
     case _ => Future(BadRequest("Geen ronde gevonden"))
   }
 
@@ -213,26 +228,26 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
     case Left(error) => BadRequest(error)
   }
 
-  def showPreviousRound(seriesId: String, roundNr: Int) = Action.async{
+  def showPreviousRound(seriesId: String, roundNr: Int) = Action.async {
     seriesRoundService.retrieveByFields(Json.obj("roundNr" -> roundNr, "seriesId" -> seriesId)).map(showRetrieveRoundResult)
   }
 
-  def isLastRoundOfSeries(seriesId: String) = Action.async{
-    seriesService.retrieveById(seriesId).flatMap{
+  def isLastRoundOfSeries(seriesId: String) = Action.async {
+    seriesService.retrieveById(seriesId).flatMap {
       case Some(series) =>
-          seriesRoundService.retrieveAllByField("seriesId", seriesId).map { list =>
-            val isLast = list.length == series.currentRoundNr
-            Ok(Json.obj("lastRound" -> isLast))
-          }
+        seriesRoundService.retrieveAllByField("seriesId", seriesId).map { list =>
+          val isLast = list.length == series.currentRoundNr
+          Ok(Json.obj("lastRound" -> isLast))
+        }
       case None => Future(Ok(Json.obj("lastRound" -> false)))
     }
   }
 
-  def getActiveRoundOfSeries(seriesId: String) = Action.async{
-    seriesService.retrieveById(seriesId).flatMap{
+  def getActiveRoundOfSeries(seriesId: String) = Action.async {
+    seriesService.retrieveById(seriesId).flatMap {
       case Some(series) => seriesRoundService
-                              .retrieveByFields(Json.obj("seriesId" -> seriesId, "roundNr" -> series.currentRoundNr))
-                              .map(showRetrieveRoundResult)
+        .retrieveByFields(Json.obj("seriesId" -> seriesId, "roundNr" -> series.currentRoundNr))
+        .map(showRetrieveRoundResult)
       case _ => Future(BadRequest("De gevraagde reeks kon niet gevonden worden."))
     }
   }
@@ -242,12 +257,12 @@ class SeriesRoundController @Inject()(@Named("score-actor") scoreActor: ActorRef
     case _ => BadRequest("De gevraagde ronde kon niet gevonden worden.")
   }
 
-  def retrieveResultsOfRound(roundId: String) = Action.async{
-    roundResultService.retrieveResultOfSeriesRound(roundId).flatMap{
+  def retrieveResultsOfRound(roundId: String) = Action.async {
+    roundResultService.retrieveResultOfSeriesRound(roundId).flatMap {
       case Some(roundResult) => Future(Ok(Json.toJson(roundResult)(RoundResultEvidence.roundResultEvidence.roundResultWrites)))
-      case _ => seriesRoundService.retrieveByFields(Json.obj("id" -> roundId)).flatMap{
+      case _ => seriesRoundService.retrieveByFields(Json.obj("id" -> roundId)).flatMap {
         case Some(round) =>
-          seriesService.retrieveById(round.seriesId).map{
+          seriesService.retrieveById(round.seriesId).map {
             case Some(series) =>
               val roundResult = RoundResultCalculator.calculateResult(round, series.playingWithHandicaps)
               roundResultService.createOrUpdate(roundResult)

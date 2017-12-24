@@ -18,7 +18,8 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
   def getMatchesOfRound(seriesRoundId: String): Future[List[PingpongMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
     case Some(bracketRound: SiteBracketRound) => bracketRound.bracket.toList
-    case Some(robinRound: SiteRobinRound) => robinRound.robinList.flatMap( robinGroup => robinGroup.robinMatches)
+    case Some(robinRound: SiteRobinRound) => robinRound.matches
+    case Some(swissRound: SwissRound) => swissRound.matches
     case None => List()
   }
 
@@ -67,6 +68,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       seriesRoundRepository.retrieveAllByField("seriesId",seriesId).map( list => seriesRound match{
         case r: SiteRobinRound => r.copy(roundNr = list.length + 1 )
         case b: SiteBracketRound => b.copy(roundNr = list.length + 1)
+        case s: SwissRound => s.copy(roundNr = list.length + 1)
       })
     }
     val seriesToCreate = getNextRoundNrOfSeries(seriesRound.seriesId)
@@ -84,6 +86,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
     def decreaseRoundNr(round: SeriesRound) = round match {
       case r:SiteRobinRound => r.copy(roundNr = r.roundNr - 1)
       case b:SiteBracketRound => b.copy(roundNr = b.roundNr - 1)
+      case s:SwissRound => s.copy(roundNr = s.roundNr - 1)
     }
 
     round => if(round.roundNr > roundNrToDelete) updateSeriesRound(decreaseRoundNr(round)) else Future(round)
@@ -174,5 +177,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
       robinRound.robinList.forall(robinGroup => robinGroup.robinMatches.forall(matchService.isMatchComplete))
     case bracketRound: SiteBracketRound =>
       SiteBracket.isComplete(bracketRound.bracket)
+    case swissRound: SwissRound =>
+      swissRound.matches.forall(matchService.isMatchComplete)
   }
 }
