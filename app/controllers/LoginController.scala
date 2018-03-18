@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import models.{Credentials, User}
 import play.api.libs.json.Json
-import play.api.mvc.{Action, Controller, InjectedController}
+import play.api.mvc.InjectedController
 import services.LoginService
 import utils.JsonUtils
 
