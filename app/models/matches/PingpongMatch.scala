@@ -1,7 +1,7 @@
 package models.matches
 
 import models.player.{Player, Rank}
-import models.Model
+import models.{Evidence, Model}
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 import utils.JsonUtils
 
@@ -20,9 +20,7 @@ case class PingpongMatch(
                       games: List[PingpongGame],
                       errorMessage:  Option[String] = None)
 
-object MatchEvidence{
-
-  implicit object matchIsModel extends Model[PingpongMatch]{
+object MatchEvidence extends Evidence[PingpongMatch] {
     override def getId(m: PingpongMatch): Option[String] = Some(m.id)
 
     override def setId(id: String)(m: PingpongMatch): PingpongMatch = m.copy(id = id)
@@ -34,7 +32,6 @@ object MatchEvidence{
     override def writes(o: PingpongMatch): JsObject = Json.format[PingpongMatch].writes(o)
 
     override def reads(json: JsValue): JsResult[PingpongMatch] = Json.format[PingpongMatch].reads(json)
-  }
 }
 
 object MatchChecker{

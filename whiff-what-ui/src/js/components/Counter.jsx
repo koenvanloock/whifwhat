@@ -4,7 +4,7 @@ import RaisedButton from "material-ui/RaisedButton"
 class Counter extends React.Component {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {likesCount: 0};
     this.onLike = this.onLike.bind(this)
   }

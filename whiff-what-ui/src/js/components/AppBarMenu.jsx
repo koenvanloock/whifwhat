@@ -5,7 +5,7 @@ import IconMenu from "material-ui/IconMenu"
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import {BrowserRouter, Link, Route} from "react-router-dom";
 
-class MainMenu extends Component {
+class AppBarMenu extends Component {
 
   constructor(props) {
     super(props)
@@ -22,6 +22,7 @@ class MainMenu extends Component {
         >
           <MenuItem><Link to={'/count'}>Count</Link></MenuItem>
           <MenuItem><Link to={'/players'}>Players</Link></MenuItem>
+          <MenuItem><Link to={'/form'}>Form</Link></MenuItem>
           <MenuItem primaryText="Sign out"/>
         </IconMenu>
     )
@@ -31,4 +32,4 @@ class MainMenu extends Component {
 
 }
 
-export default MainMenu;
+export default AppBarMenu;

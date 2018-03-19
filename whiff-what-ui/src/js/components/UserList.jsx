@@ -4,7 +4,7 @@ import axios from "axios";
 class UserList extends Component {
 
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       players: []
     }
@@ -17,7 +17,7 @@ class UserList extends Component {
       }
     })
         .then(res => {
-          const players = res.data.data.map(obj => obj.data);
+          const players = res.data.map(obj => obj);
           this.setState({players});
         });
   }
@@ -25,7 +25,7 @@ class UserList extends Component {
   render() {
     return (<div>
       <ul>
-        {this.state.players.map(user => <li>{user.firstname + " " + user.lastname}</li>)}
+        {this.state.players.map(user => <li key={user.id.toString()}>{user.firstname + " " + user.lastname}</li>)}
       </ul>
     </div>)
   }

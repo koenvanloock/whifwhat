@@ -6,3 +6,7 @@ body {
 #content {
     padding: 20px;
 }
+
+.default-padding {
+    padding: 8px;
+}

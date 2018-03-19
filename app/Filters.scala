@@ -3,13 +3,13 @@ import play.api._
 import play.api.http.HttpFilters
 import play.api.mvc._
 
-import filters.NoCacheFilter
+import filters.HeadersFilter
 
 
 @Singleton
 class Filters @Inject() (
   env: Environment,
-  nocache: NoCacheFilter) extends HttpFilters {
+  nocache: HeadersFilter) extends HttpFilters {
 
   override val filters = {
     if (env.mode == Mode.Dev) Seq(nocache) else Seq.empty

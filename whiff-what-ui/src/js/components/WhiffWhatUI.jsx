@@ -1,17 +1,19 @@
 import React from "react";
-import AwesomeComponent from "./AwesomeComponent";
-import Navbar from "./Navbar"
+import RouterViewComponent from "./RouterViewComponent";
+import NavBar from "./Navbar";
+
 class WhiffWhatUI extends React.Component {
   constructor(props) {
     super(props);
+    this.currentTournament = {tournamentName: store.tournament.tournamentName};
   }
 
 
   render() {
     return (
         <div>
-          <Navbar/>
-          <AwesomeComponent/>
+          <NavBar tournamentName={this.currentTournament.tournamentName}/>
+          <RouterViewComponent/>
         </div>
     );
   }

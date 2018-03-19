@@ -4,7 +4,7 @@ const initialState = {
     currentTournament: {}
 };
 
-function whiffWhat(state, action) {
+export function whiffWhat(state, action) {
     if (typeof state === 'undefined') {
         return initialState
     }

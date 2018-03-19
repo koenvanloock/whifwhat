@@ -1,9 +1,11 @@
 import React from "react";
 import Counter from "./Counter"
 import UserList from "./UserList"
+import CreateTournamentForm from "./CreateTournamentForm"
+import CreateTournamentFlow from "./CreateTournamentFlow"
 import {BrowserRouter, Link, Route} from "react-router-dom";
 
-class AwesomeComponent extends React.Component {
+class RouterViewComponent extends React.Component {
 
   constructor(props) {
     super(props);
@@ -14,10 +16,11 @@ class AwesomeComponent extends React.Component {
           <div id="content">
             <Route exact path="/count" component={Counter} />
             <Route exact path="/players" component={UserList} />
+            <Route exact path="/form" component={CreateTournamentFlow}/>
           </div>
     );
   }
 
 }
 
-export default AwesomeComponent;
+export default RouterViewComponent;

@@ -10,7 +10,7 @@ case class RoundResult(id: String, seriesRoundId: String, results: List[ResultLi
 
 case class ResultLine(player: SeriesPlayer, tieScore: Option[PlayerScores])
 
-object RoundResultEvidence{
+object RoundResultEvidence extends Evidence[RoundResult] {
   import utils.JsonUtils.ListWrites._
   implicit val playerScoreFormat = Json.format[PlayerScores]
   implicit val rankFormat = Json.format[Rank]
@@ -22,7 +22,6 @@ object RoundResultEvidence{
     override def reads(json: JsValue): JsResult[List[ResultLine]] = Json.fromJson[List[ResultLine]](json)
   }
 
-  implicit object roundResultEvidence extends Model[RoundResult]{
     override def getId(m: RoundResult): Option[String] = Some(m.id)
 
     override def setId(id: String)(m: RoundResult): RoundResult = m.copy(id=id)
@@ -56,5 +55,4 @@ object RoundResultEvidence{
       ) (RoundResult.apply(_,_,_,_))
 
 
-  }
 }

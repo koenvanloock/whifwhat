@@ -14,9 +14,8 @@ case class TournamentSeries(
                              showReferees: Boolean,
                              currentRoundNr: Int=1,
                              tournamentId: String)
-  object SeriesEvidence {
 
-    implicit object seriesIsModel extends Model[TournamentSeries] {
+  object SeriesEvidence extends Evidence[TournamentSeries] {
       override def getId(m: TournamentSeries): Option[String] = Some(m.id)
 
       override def setId(id: String)(m: TournamentSeries): TournamentSeries = m.copy(id = id)
@@ -24,8 +23,6 @@ case class TournamentSeries(
       override def writes(o: TournamentSeries): JsObject = Json.format[TournamentSeries].writes(o)
 
       override def reads(json: JsValue): JsResult[TournamentSeries] = Json.format[TournamentSeries].reads(json)
-    }
-
   }
 
 case class SeriesWithPlayers(seriesId: String,

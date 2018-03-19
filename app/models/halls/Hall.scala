@@ -1,6 +1,6 @@
 package models.halls
 
-import models.Model
+import models.{Evidence, Model}
 import models.matches.MatchEvidence._
 import models.matches.PingpongMatch
 import models.player.{Player, Rank}
@@ -14,9 +14,7 @@ import scala.language.postfixOps
 case class Hall(id: String, hallName: String, rows: Int, tablesPerRow: Int, tables: List[HallTable])
 
 
-object HallEvidence {
-
-  implicit object HallIsModel extends Model[Hall] {
+object HallEvidence extends Evidence[Hall] {
     implicit val rankFormat = Json.format[Rank]
     implicit val playerFormat = Json.format[Player]
     val optionPlayerWrites = JsonUtils.optionWrites(playerFormat)
@@ -56,7 +54,5 @@ object HallEvidence {
     override def writes(o: Hall): JsObject = Json.format[Hall].writes(o)
 
     override def reads(json: JsValue): JsResult[Hall] = Json.format[Hall].reads(json)
-  }
-
 
 }

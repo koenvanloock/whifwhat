@@ -66,9 +66,7 @@ case class SwissRound(id: String, seriesId: String, roundNr: Int, swissLegs: Lis
 }
 
 
-object SeriesRoundEvidence {
-
-  implicit object seriesRoundIsModel extends Model[SeriesRound] {
+object SeriesRoundEvidence extends Evidence[SeriesRound] {
 
     implicit val rankFormat = Json.format[Rank]
     implicit val playerScoresFormat = Json.format[PlayerScores]
@@ -218,5 +216,4 @@ object SeriesRoundEvidence {
         case "S" => Json.fromJson(json)(swissRoundReads)
       }
     }
-  }
 }

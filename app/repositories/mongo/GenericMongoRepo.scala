@@ -1,30 +1,25 @@
 package repositories.mongo
 
-import com.typesafe.config.Config
-import models.Model
+import models.{Evidence, Model}
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json.Json.{JsValueWrapper, toJsFieldJsValueWrapper}
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoApi
-import reactivemongo.api.MongoDriver
-import reactivemongo.play.json._
-import reactivemongo.api.collections.bson.BSONCollection
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json._
 import reactivemongo.play.json.collection.JSONCollection
 import utils.JsonUtils._
 import utils.PaginationUtils._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
+import scala.util.Failure
 
-class GenericMongoRepo[M: Model]
-(name: String, defaultOrder: String, defaultPageSize: Int)
+class GenericMongoRepo[M]
+(name: String, defaultOrder: String, defaultPageSize: Int, evidence: Evidence[M])
 (implicit reactiveMongoApi: ReactiveMongoApi) {
 
   private final val logger: Logger = LoggerFactory.getLogger(classOf[GenericMongoRepo[M]])
-
-  val model = implicitly[Model[M]]
 
   def collectionFuture = reactiveMongoApi.database.map(_.collection[JSONCollection](name))
 
@@ -78,7 +73,7 @@ class GenericMongoRepo[M: Model]
 
   def update(u_m: M): Future[M] = {
     val msg = s"update($u_m)"
-    model.getId(u_m).map(checked(uncheckedUpdate(u_m))).getOrElse {
+    evidence.getId(u_m).map(checked(uncheckedUpdate(u_m))).getOrElse {
       val msg = s"update with object $u_m ko (no id)"
       logger.debug(msg)
       Future.fromTry(Failure(new Exception(msg)))
@@ -141,7 +136,7 @@ class GenericMongoRepo[M: Model]
     }
 
   protected def beforeInsert(m: M): M =
-    model.setId(generateId())(m)
+    evidence.setId(generateId())(m)
 
   protected def insert(i_m: M): Future[M] = {
     collectionFuture.flatMap(collection => collection

@@ -1,14 +1,14 @@
 import React from 'react'
 import AppBar from 'material-ui/AppBar'
-import IconButton from "material-ui/IconButton"
-import MainMenu from "./MainMenu"
+import FlatButton from 'material-ui/FlatButton'
+import AppBarMenu from "./AppBarMenu"
 
 class Navbar extends React.Component {
 
-  constructor(props) {
-    super(props)
-
-  }
+    constructor(props) {
+        super(props);
+        this.tournamentName = props.tournamentName;
+    }
 
 
   render() {
@@ -16,7 +16,8 @@ class Navbar extends React.Component {
         <div>
           <AppBar
               title="Whiff What"
-              iconElementLeft={<MainMenu />}
+              iconElementLeft={<AppBarMenu />}
+              iconElementRight={<FlatButton label={this.tournamentName} />}
           />
         </div>
     )
@@ -25,4 +26,4 @@ class Navbar extends React.Component {
 
 }
 
-export default Navbar;
+export default Navbar

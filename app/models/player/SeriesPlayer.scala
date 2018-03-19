@@ -1,13 +1,11 @@
 package models.player
 
-import models.Model
+import models.{Evidence, Model}
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 
 case class SeriesPlayer(id: String, seriesId: String, player: Player, playerScores: PlayerScores)
 
-  object SeriesPlayerEvidence {
-
-    implicit object isSeriesPlayerModel extends Model[SeriesPlayer] {
+  object SeriesPlayerEvidence extends Evidence[SeriesPlayer] {
       implicit val rankFormat = Json.format[Rank]
       implicit val playerFormat = Json.format[Player]
       implicit val playerScoresFormat = Json.format[PlayerScores]
@@ -19,6 +17,5 @@ case class SeriesPlayer(id: String, seriesId: String, player: Player, playerScor
       override def writes(o: SeriesPlayer): JsObject = Json.format[SeriesPlayer].writes(o)
 
       override def reads(json: JsValue): JsResult[SeriesPlayer] = Json.format[SeriesPlayer].reads(json)
-    }
 
   }
