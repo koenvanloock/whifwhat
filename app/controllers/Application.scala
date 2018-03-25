@@ -11,7 +11,7 @@ class Application extends InjectedController{
     "Access-Control-Allow-Credentials" -> "true"
   )
 
-  def options = Action { request =>
+  def options(url: String) = Action { request =>
     NoContent.withHeaders(headers : _*)
   }
 }

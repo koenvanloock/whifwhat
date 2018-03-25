@@ -26,6 +26,8 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
   name: 'PlayerLine',
   props: ['player', 'ranks'],
@@ -46,8 +48,11 @@ export default {
       this.edit = false
     },
     finishEdit () {
-      // send call
-      this.edit = false
+      axios.put('http://localhost:9000/players', this.editPlayer, {
+        crossDomain: true
+      }).then(response => {
+        this.edit = false
+      })
     },
     deletePlayer () {
       this.$emit('delete', this.player.id)

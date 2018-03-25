@@ -14,11 +14,12 @@ class NoCacheFilter @Inject()(
   override def apply(nextFilter: RequestHeader => Future[Result])
                     (requestHeader: RequestHeader): Future[Result] = {
     nextFilter(requestHeader).map { result =>
-      if(requestHeader.method.equals("GET")) result.withHeaders(
+      if(List("GET", "POST", "PUT", "OPTIONS").contains(requestHeader.method)) {
+        result.withHeaders(
         PRAGMA -> "no-cache",
         CACHE_CONTROL -> "no-cache,no-store, must-revalidate",
-        ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:8080"
-      ) else result
+        ACCESS_CONTROL_ALLOW_ORIGIN -> "http://localhost:8080")
+      } else result
     }
   }
 

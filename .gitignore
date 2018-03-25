@@ -10,6 +10,7 @@ target
 
 .DS_Store
 node_modules/
+public/bower_components/
 /dist/
 npm-debug.log*
 yarn-debug.log*
