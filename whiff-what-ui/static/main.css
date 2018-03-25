@@ -1,0 +1,38 @@
+.card{
+  border:             1px solid grey;
+  border-radius:      3px;
+  margin:             10px;
+  flex:               auto;
+  -webkit-box-shadow: 2px 4px 5px grey;
+  -moz-box-shadow:    2px 4px 5px grey;
+  box-shadow:         2px 4px 5px grey;
+}
+
+.card p {
+  padding-left: 5px;
+}
+
+.standard-table{
+  display:         inline-block;
+}
+.standard-table table{
+  border-collapse: collapse;
+  border:          1px solid #a5a5a5;
+}
+
+.standard-table th {
+  background: #31b531;
+  color: white;
+  text-align: center;
+}
+
+.standard-table td{
+  padding: 5px;
+  border: 1px solid #a5a5a5;
+}
+
+.table-filter{
+  background:     #63B175;
+  color:          white;
+  padding:        10px;
+}
