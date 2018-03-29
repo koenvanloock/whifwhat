@@ -28,10 +28,11 @@ export default {
 
 <style>
   .selected {
-    border-left: 2px yellow solid;
+    border-left: 2px #F79F66 solid;
     padding: 5px;
     background: #278527;
     cursor: pointer;
+    color: #F79F66;
   }
   #nav-list li:hover {
     background: #278527;

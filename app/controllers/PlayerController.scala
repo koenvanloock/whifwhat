@@ -41,7 +41,6 @@ class PlayerController @Inject()(playerService: PlayerService, seriesPlayerServi
     playerService.getPlayers.map(players => Ok(Json.toJson(players)))
   }
 
-
   def getPlayer(playerId: String): Action[AnyContent] = Action.async{
     playerService.getPlayer(playerId).map{
       case Some(player) => Ok(Json.toJson(player))

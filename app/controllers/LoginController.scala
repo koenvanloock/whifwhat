@@ -32,4 +32,6 @@ class LoginController @Inject()(loginService: LoginService) extends InjectedCont
         loginService.createUser(user).map( user => Ok(Json.toJson(user)))
     }.getOrElse(Future(BadRequest("Geef een geldige user op")))
   }
+
+
 }
