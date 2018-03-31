@@ -1,9 +1,11 @@
 <template>
   <div id="app" class="container">
+    <v-app>
     <left-nav id="sidebar" :active-tab="activeTab"/>
     <div class="main-content">
       <router-view/>
     </div>
+    </v-app>
   </div>
 </template>
 

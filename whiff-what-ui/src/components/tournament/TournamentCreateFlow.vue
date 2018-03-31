@@ -29,7 +29,7 @@
             <th class="table-header">toon scheidsrechters</th>
             <th class="table-header"></th>
           </tr>
-          <tr v-for="series in seriesRounds">
+          <tr v-for="series in seriesRounds" :key="series.seriesId">
             <td>{{series.seriesname}}</td>
             <td>{{series.seriesColor}}</td>
             <td>{{series.setTargetScore}}</td>
@@ -43,45 +43,45 @@
       </div>
     </div>
     <div>
-      <button v-on:click="previousStep"><i class="fa fa-chevron-left"></i></button>
-      <button v-on:click="nextStep"><i class="fa fa-chevron-right"></i></button>
+      <v-btn v-on:click="previousStep"><i class="fa fa-chevron-left"></i></v-btn>
+      <v-btn v-on:click="nextStep"><i class="fa fa-chevron-right"></i></v-btn>
     </div>
   </div>
 </template>
 
 <script>
-  import axios from 'axios'
+import axios from 'axios'
 
 export default {
-  name: "tournament-create-flow",
+  name: 'tournament-create-flow',
   data () {
     return {
       currentStep: 1,
-      tournament: { seriesRounds: []}
+      tournament: {seriesRounds: []}
     }
   },
   methods: {
     createTournament () {
-      axios.post("http://localhost:900/tournament")
-        .then(this.tournament = tournament)
+      axios.post('http://localhost:900/tournament')
+        .then(response => { this.tournament = response.data })
     },
     updateTournament () {
-      axios.post("http://localhost:900/tournament")
-        .then(this.tournament = tournament)
+      axios.post('http://localhost:900/tournament')
+        .then(response => { this.tournament = response.data })
     },
     previousStep () {
-      if(this.currentStep > 1) {
+      if (this.currentStep > 1) {
         this.currentStep -= 1
       }
     },
     nextStep () {
-      if(this.currentStep < 4) {
+      if (this.currentStep < 4) {
         this.currentStep += 1
       }
     }
   },
   watch: {
-    "currentStep": (from, to) => {
+    'currentStep': (from, to) => {
 
     }
   }
