@@ -14,7 +14,7 @@ class NoCacheFilter @Inject()(
   override def apply(nextFilter: RequestHeader => Future[Result])
                     (requestHeader: RequestHeader): Future[Result] = {
     nextFilter(requestHeader).map { result =>
-      if(List("GET", "POST", "PUT", "OPTIONS").contains(requestHeader.method)) {
+      if(List("GET", "POST", "PUT", "DELETE", "OPTIONS").contains(requestHeader.method)) {
         result.withHeaders(
         PRAGMA -> "no-cache",
         CACHE_CONTROL -> "no-cache,no-store, must-revalidate",

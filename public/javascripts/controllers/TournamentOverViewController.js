@@ -4,8 +4,8 @@ var TournamentManagement;
         function TournamentOverViewController($scope) {
             this.$scope = $scope;
         }
-        TournamentOverViewController.$inject = ["$scope"];
         return TournamentOverViewController;
     }());
+    TournamentOverViewController.$inject = ["$scope"];
     angular.module("managerControllers").controller("TournamentOverviewController", TournamentOverViewController);
 })(TournamentManagement || (TournamentManagement = {}));

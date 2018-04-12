@@ -16,8 +16,8 @@ var TournamentManagement;
                 return this.$location.path("/tournament/" + tournamentId + "/playerSubscription");
             }
         };
-        TournamentListController.$inject = ["TournamentService", "$location", "alertService"];
         return TournamentListController;
     }());
+    TournamentListController.$inject = ["TournamentService", "$location", "alertService"];
     angular.module("managerControllers").controller("TournamentListController", TournamentListController);
 })(TournamentManagement || (TournamentManagement = {}));

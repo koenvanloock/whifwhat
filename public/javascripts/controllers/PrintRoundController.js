@@ -22,9 +22,9 @@ var TournamentManagement;
                 }
             });
         }
-        PrintRoundController.$inject = ["SeriesRoundService", "SeriesService", "$routeParams", "$location", "alertService"];
         return PrintRoundController;
     }());
+    PrintRoundController.$inject = ["SeriesRoundService", "SeriesService", "$routeParams", "$location", "alertService"];
     TournamentManagement.PrintRoundController = PrintRoundController;
     angular.module("managerControllers").controller("PrintRoundController", PrintRoundController);
 })(TournamentManagement || (TournamentManagement = {}));

@@ -93,8 +93,8 @@ var TournamentManagement;
             }, function () {
             });
         };
-        SeriesSetupController.$inject = ["$scope", "$mdDialog", "$location", "$routeParams", "TournamentService", "SeriesService", "alertService"];
         return SeriesSetupController;
     }());
+    SeriesSetupController.$inject = ["$scope", "$mdDialog", "$location", "$routeParams", "TournamentService", "SeriesService", "alertService"];
     angular.module("managerControllers").controller("SeriesSetupController", SeriesSetupController);
 })(TournamentManagement || (TournamentManagement = {}));

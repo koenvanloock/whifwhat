@@ -48,8 +48,8 @@ var TournamentManagement;
         DrawController.prototype.printRound = function (roundId) {
             this.$location.path("/printRound/" + roundId);
         };
-        DrawController.$inject = ["TournamentService", "DrawService", "SeriesRoundService", "$routeParams", "$location"];
         return DrawController;
     }());
+    DrawController.$inject = ["TournamentService", "DrawService", "SeriesRoundService", "$routeParams", "$location"];
     angular.module("managerControllers").controller("DrawController", DrawController);
 })(TournamentManagement || (TournamentManagement = {}));

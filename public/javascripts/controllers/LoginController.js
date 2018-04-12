@@ -27,9 +27,9 @@ var TournamentManagement;
                 _this.loginFailed = true;
             });
         };
-        LoginController.$inject = ["LoginRegisterService", "alertService", "authService", "$location"];
         return LoginController;
     }());
+    LoginController.$inject = ["LoginRegisterService", "alertService", "authService", "$location"];
     var LoginCredentials = (function () {
         function LoginCredentials(username, password) {
             this.username = username;

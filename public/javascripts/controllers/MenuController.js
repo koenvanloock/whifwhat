@@ -29,8 +29,8 @@ var TournamentManagement;
         MenuController.prototype.logout = function () {
             this.authservice.logout();
         };
-        MenuController.$inject = ["$scope", "$location", "authService", "TournamentService"];
         return MenuController;
     }());
+    MenuController.$inject = ["$scope", "$location", "authService", "TournamentService"];
     angular.module("managerControllers").controller("menuController", MenuController);
 })(TournamentManagement || (TournamentManagement = {}));
