@@ -16,6 +16,7 @@ POST          /seriesplayers                                 controllers.PlayerC
 GET           /tournaments/:tournamentId                     controllers.TournamentController.getTournamentById(tournamentId: String)
 GET           /tournaments                                   controllers.TournamentController.getAllTournaments
 POST          /tournaments                                   controllers.TournamentController.createTournament()
+PUT           /tournaments                                   controllers.TournamentController.updateTournament()
 
 GET           /activeTournament                              controllers.TournamentController.getActiveTournament
 GET           /activeTournament/release                      controllers.TournamentController.releaseActiveTournament()

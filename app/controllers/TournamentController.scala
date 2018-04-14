@@ -41,7 +41,13 @@ class TournamentController @Inject()(@Named("tournament-event-actor") tournament
           }
         }
     }.getOrElse(Future(BadRequest("Tornooi kon niet aangemaakt worden.")))
+  }
 
+  def updateTournament() = Action.async(parse.tolerantJson) { request =>
+    JsonUtils.parseRequestBody[Tournament](request)(JsonUtils.tournamentReads)
+      .map(tournament => tournamentRepository.update(tournament)
+        .map{ updatedTournament =>Ok(Json.toJson(updatedTournament))
+    }).getOrElse(Future.successful(BadRequest))
   }
 
   def createDefaulSeries(tournament: Tournament, request: Request[JsValue]) = {

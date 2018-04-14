@@ -44,9 +44,11 @@
             <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
 
             <v-toolbar-title v-text="title"></v-toolbar-title>
+            <v-spacer></v-spacer>
+            <h3 v-if="currentTournament && currentTournament.id">Huidig tornooi: {{currentTournament.tournamentName}}</h3>
         </v-toolbar>
         <v-content>
-            <router-view/>
+            <router-view @currentChanged="changeCurrentTournament"/>
         </v-content>
     </v-app>
 </template>
@@ -60,15 +62,11 @@
         clipped: false,
         drawer: true,
         fixed: false,
-        items: [{
-          icon: 'note_add',
-          title: 'Create tournament',
-          path: 'createTournament'
-        },
-        {
-            icon: 'mode_edit',
-            title: 'Edit tournament',
-            path: 'updateTournament'
+        items: [
+          {
+          icon: 'view_module',
+          title: 'Tournaments',
+          path: 'tournaments'
         },
         {
             icon: 'person',
@@ -78,14 +76,15 @@
         miniVariant: false,
         right: true,
         rightDrawer: false,
-        title: 'Whiff-what'
+        title: 'Whiff-what',
+        currentTournament: {}
       }
     },
     methods: {
-      toggelNav: () => {
-        console.log('on')
-      },
-      goto (route) { this.$router.push('/' + route) }
+      goto (route) { this.$router.push('/' + route) },
+      changeCurrentTournament (newTournament) {
+        this.currentTournament = newTournament;
+      }
     },
     mounted () {
       this.activeTab = this.$route.path

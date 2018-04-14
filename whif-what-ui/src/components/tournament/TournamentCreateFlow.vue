@@ -36,7 +36,7 @@
             >
             </v-select>
           </v-flex>
-          <v-btn color="primary" @click.native="createTournament">Continue</v-btn>
+          <v-btn color="primary" @click.native="createOrUpdateTournament">Continue</v-btn>
         </v-stepper-content>
         <v-stepper-content step="2">
           <create-series :tournament="tournament" @seriesAdded="addSeries"></create-series>
@@ -67,6 +67,7 @@ export default {
     SubscribePlayers,
     CreateSeries},
   name: 'tournament-create-flow',
+  props: ['createFlow'],
   data () {
     return {
       el: 1,
@@ -82,16 +83,14 @@ export default {
     }
   },
   methods: {
-    createTournament () {
-      axios.post('http://localhost:9000/tournaments', this.tournament)
+    createOrUpdateTournament () {
+      (this.createFlow
+       ? axios.post('http://localhost:9000/tournaments', this.tournament)
+       : axios.put('http://localhost:9000/tournaments', this.tournament))
         .then(response => {
           this.tournament = response.data
           this.el = 2
         })
-    },
-    updateTournament () {
-      axios.post('http://localhost:9000/tournaments')
-        .then(response => { this.tournament = response.data })
     },
     addSeries (series) {
       this.seriesList.push(series)
@@ -99,20 +98,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  #header-block {
-    padding: 10px;
-  }
-  .step {
-    padding: 4px 8px;
-    border-radius: 50%;
-    background: #31b531;
-    color: white;
-    font-weight: bold;
-  }
-
-  .active {
-    background: #F79F66;
-  }
-</style>
