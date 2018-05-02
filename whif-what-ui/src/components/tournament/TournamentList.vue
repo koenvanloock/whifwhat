@@ -42,8 +42,10 @@
           this.$router.push('/createTournament')
         },
         startTournament (tournament) {
-          this.$emit('currentChanged', tournament)
-          this.$router.push('/playTournament/' + tournament.id)
+          axios.put('http://localhost:9000/activeTournament/' + tournament.id).then( () => {
+            this.$emit('currentChanged', tournament);
+            this.$router.push('/playTournament/' + tournament.id);
+          });
         },
 
       },

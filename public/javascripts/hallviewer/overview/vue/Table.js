@@ -10,7 +10,7 @@ Vue.component("vue-pingpong-table", {
   '<div class="pingpongTable" v-on:dragover="allowDrop" v-on:drop="dropMatch">'+
 
   '<!-- vertical-->'+
-  '<div class="table" v-if="!(table.hidden || table.horizontal)">'+
+  '<div class="tableContainer" v-if="!(table.hidden || table.horizontal)">'+
   '<div class="playerBox-top" v-bind:class="{ playerBox: table.isGreen, playerBoxBlue: !table.isGreen}">' +
   '<span v-if="tableData.pingpongMatch">' +
   '<p style="font-weight: bold; text-align: center">{{tableData.pingpongMatch.playerA.firstname + " " + tableData.pingpongMatch.playerA.lastname}}</p>' +

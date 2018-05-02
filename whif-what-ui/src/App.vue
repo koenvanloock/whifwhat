@@ -69,6 +69,11 @@
           path: 'tournaments'
         },
         {
+            icon: 'settings_overscan',
+            title: 'Halls',
+            path: 'hall'
+        },
+        {
             icon: 'person',
             title: 'Players',
             path: 'managePlayers'

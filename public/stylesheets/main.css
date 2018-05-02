@@ -164,7 +164,7 @@ form .progress {
     display: inline-block;
 }
 
-.table{
+.tableContainer{
     height: 500px;
     width: 340px;
 }
