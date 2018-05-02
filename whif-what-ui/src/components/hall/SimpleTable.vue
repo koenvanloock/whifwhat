@@ -25,6 +25,10 @@
             <v-btn @click="rotate()">
                 <v-icon>rotate_90_degrees_ccw</v-icon>
             </v-btn>
+            <v-btn @click="hide()">
+                <v-icon v-if="this.tableData.hidden">visibility</v-icon>
+                <v-icon v-else>visibility_off</v-icon>
+            </v-btn>
             <v-switch v-model="tableData.isGreen" color="teal"></v-switch>
         </div>
 
@@ -47,6 +51,9 @@
       methods: {
         rotate () {
           this.tableData.horizontal = !this.tableData.horizontal;
+        },
+        hide () {
+          this.tableData.hidden = !this.tableData.hidden;
         }
       }
 
@@ -71,8 +78,6 @@
     .playerBox{
         height: 245px;
         width: 290px;
-        margin-left: 20px;
-        margin-right: 20px;
         background: #0D7E83;
         border-left: solid white 5px;
         border-right: solid white 5px;
@@ -81,8 +86,6 @@
     .playerBoxBlue{
         height: 245px;
         width: 290px;
-        margin-left: 20px;
-        margin-right: 20px;
         background: #2b28bb;
         border-left: solid white 5px;
         border-right: solid white 5px;
