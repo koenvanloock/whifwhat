@@ -5,6 +5,7 @@ import java.util.UUID
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player.Player
 import models.types.{Bracket, BracketLeaf, BracketNode, SiteMatchNode}
+import utils.HandicapCalculator
 
 object SiteBracket {
 
@@ -25,7 +26,11 @@ object SiteBracket {
   }
 
   def updateMatchWithChildrenWinner(bracket: Bracket[PingpongMatch]):Bracket[PingpongMatch] = bracket match{
-    case BracketNode(value, left, right) => BracketNode(value.copy(playerA = getMatchWinner(left.getValue), playerB = getMatchWinner(right.getValue)),updateMatchWithChildrenWinner(left), updateMatchWithChildrenWinner(right))
+    case BracketNode(value, left, right) => BracketNode(value.copy(
+      playerA = getMatchWinner(left.getValue),
+      playerB = getMatchWinner(right.getValue),
+      handicap = HandicapCalculator.calculateHandicapWithOpts(getMatchWinner(left.getValue), getMatchWinner(right.getValue), value.targetScore)),
+      updateMatchWithChildrenWinner(left), updateMatchWithChildrenWinner(right))
     case BracketLeaf(value) => BracketLeaf(value)
   }
 

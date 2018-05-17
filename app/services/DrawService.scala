@@ -6,7 +6,7 @@ import javax.inject.Inject
 import models._
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
-import utils.{BracketPlacement, RoundResultCalculator}
+import utils.{BracketPlacement, HandicapCalculator, RoundResultCalculator}
 
 import scala.util.{Random, Try}
 
@@ -37,7 +37,7 @@ class DrawService @Inject()() {
     playersList.init.zipWithIndex.flatMap { playerWithIndex =>
       val playerA = playerWithIndex._1
       playersList.drop(playerWithIndex._2 + 1).map { playerB => {
-        val relHandicap = playerA.player.rank.value - playerB.player.rank.value
+        val relHandicap = HandicapCalculator.calculateHandicap(playerA.player.rank, playerB.player.rank, setTargetScore)
         val isForB = relHandicap > 0
         val sets = createSiteGameForMatch(numberOfSetsToWin)
         PingpongMatch(UUID.randomUUID().toString, Some(playerA.player), Some(playerB.player), robinId, Math.abs(relHandicap), isForB, setTargetScore, numberOfSetsToWin, 0, 0, sets)
@@ -73,7 +73,10 @@ class DrawService @Inject()() {
   }
 
   def createBracketMatch(roundNr: Int, bracketId: String, matchNr: Int, numberOfSetsToWin: Int, setTargetScore: Int, playerA: Option[SeriesPlayer], playerB: Option[SeriesPlayer]): PingpongMatch = {
-    val relHandicap = Try(playerA.get.player.rank.value - playerB.get.player.rank.value).toOption.getOrElse(0)
+    val relHandicap = (for{
+      realPlayerA <- playerA
+      realPlayerB <- playerB
+    } yield HandicapCalculator.calculateHandicap(realPlayerA.player.rank, realPlayerB.player.rank, setTargetScore)).getOrElse(0)
     val isForB = relHandicap > 0
     val matchId = UUID.randomUUID().toString
     val sets = createSiteGameForMatch(numberOfSetsToWin)
