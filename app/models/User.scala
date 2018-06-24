@@ -2,7 +2,7 @@ package models
 
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 
-case class Role(id: String, roleName: String)
+case class Role(id: String, roleName: String) extends repositories.numongo.Model[String]
 
   object RoleEvidence {
 
@@ -18,7 +18,7 @@ case class Role(id: String, roleName: String)
 
   }
 
-case class User(id: String, username: String, passwordHash: String, roleId: String)
+case class User(id: String, username: String, passwordHash: String, roleId: String) extends repositories.numongo.Model[String]
 
   object UserEvidence {
 

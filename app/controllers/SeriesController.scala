@@ -4,7 +4,7 @@ import javax.inject.Inject
 
 import com.typesafe.scalalogging.StrictLogging
 import models.SeriesEvidence._
-import models.TournamentSeries
+import models.{SeriesRound, TournamentSeries}
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import services.{SeriesRoundService, SeriesService}
@@ -41,11 +41,11 @@ class SeriesController @Inject()(seriesService: SeriesService, seriesRoundServic
     }
   }
 
-  def deleteRoundsOfSeries(seriesId: String): Future[List[Unit]] = {
+  def deleteRoundsOfSeries(seriesId: String): Future[List[SeriesRound]] = {
     seriesRoundService.retrieveAllByField("seriesId", seriesId).flatMap { seriesRoundList =>
       Future.sequence {
         seriesRoundList.map(round => seriesRoundService.delete(round.id))
-      }
+      }.map(_.flatten)
     }
   }
 

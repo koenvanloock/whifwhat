@@ -5,7 +5,7 @@ import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, Ranks}
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.mongo.MatchRepository
+import repositories.numongo.repos.MatchRepository
 
 import scala.concurrent.Await
 

@@ -19,12 +19,12 @@ import play.api.libs.functional.syntax._ // Combinator syntax
 class PlayerController @Inject()(playerService: PlayerService, seriesPlayerService: SeriesPlayerService) extends InjectedController{
 
   implicit val rankWrites = Json.format[Rank]
-  implicit val playerWrites = Json.format[Player]
+  implicit val playerWrites = PlayerFormat.responseWrites
   implicit val playerScoreWrites = Json.writes[PlayerScores]
   implicit val seriesPlayerWrites = Json.writes[SeriesPlayer]
 
 
-  val playerReads: Reads[Player] = (
+  implicit val playerReads: Reads[Player] = (
     (JsPath \ "firstname").read[String] and
       (JsPath \ "lastname").read[String] and
       (JsPath \ "rank").read[Rank]

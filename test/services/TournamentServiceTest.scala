@@ -2,15 +2,15 @@ package services
 
 import java.time.LocalDate
 
-import models.Tournament
-import org.scalatestplus.play.PlaySpec
-
-import scala.concurrent.Await
 import helpers.TestHelpers.DEFAULT_DURATION
+import models.Tournament
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
+import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.mongo.{MatchRepository, TournamentRepository}
+import repositories.numongo.repos.TournamentRepository
+
+import scala.concurrent.Await
 
 @RunWith(classOf[JUnitRunner])
 class TournamentServiceTest extends PlaySpec{

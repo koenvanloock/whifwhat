@@ -5,7 +5,7 @@ import javax.inject.Inject
 import com.typesafe.scalalogging.LazyLogging
 import models.player.{Player, SeriesPlayer}
 import play.api.libs.json.Json
-import repositories.mongo.{PlayerRepository, SeriesPlayerRepository, SeriesRepository}
+import repositories.numongo.repos.{PlayerRepository, SeriesPlayerRepository, SeriesRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -13,7 +13,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, seriesRepository: SeriesRepository, playerRepository: PlayerRepository) extends LazyLogging{
 
   def getSeriesOfPlayer(playerId: String, tournamentId: String) =
-    seriesRepository.retrieveAllByField("tournamentId", tournamentId).flatMap{ seriesList =>
+    seriesRepository.findAllByField("tournamentId", tournamentId).flatMap{ seriesList =>
       Future.sequence(seriesList.map { series =>
         seriesPlayerRepository.getSubscriptionsOfPlayerInTournament(playerId, series.id).map( subscriptions => if(subscriptions.isEmpty) None else Some(series))
       })
@@ -28,7 +28,7 @@ class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, se
       Json.obj("lastname" -> Json.obj("$regex" ->  ("^" + search + ".*"), "$options" -> "-i")),
       Json.obj("rank.name" -> Json.obj("$regex" ->  ("^" + search + ".*"), "$options" -> "-i"))
     ).map{
-      jsObj => playerRepository.retrieveAllByFields(jsObj)
+      jsObj => playerRepository.findFirstByJsQuery(jsObj)
     }
   }.map(_.flatten.distinct)
 
@@ -41,9 +41,9 @@ class PlayerService @Inject()(seriesPlayerRepository: SeriesPlayerRepository, se
 
   def getSeriesPlayers(seriesId: String) = seriesPlayerRepository.getAllSeriesPlayers(seriesId)
 
-  def getPlayers = playerRepository.retrieveAll()
+  def getPlayers = playerRepository.findAll()
 
-  def getPlayer(playerId: String):Future[Option[Player]] = playerRepository.retrieveById(playerId)
+  def getPlayer(playerId: String):Future[Option[Player]] = playerRepository.findById(playerId)
 
   def createPlayer(player: Player): Future[Player] = playerRepository.create(player)
 

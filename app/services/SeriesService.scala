@@ -5,7 +5,7 @@ import javax.inject.Inject
 import models._
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import play.api.libs.json.Json
-import repositories.mongo.{SeriesPlayerRepository, SeriesRepository}
+import repositories.numongo.repos.{SeriesPlayerRepository, SeriesRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -17,9 +17,9 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   def update(tournamentSeries: TournamentSeries) = seriesRepository.update(tournamentSeries)
   def delete(seriesId: String) = seriesRepository.delete(seriesId)
 
-  def retrieveById(seriesId: String) = seriesRepository.retrieveById(seriesId)
-  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRepository.retrieveAllByField(fieldKey, fieldValue)
-  def getTournamentSeriesOfTournament(tournamentId: String): Future[List[TournamentSeries]] = seriesRepository.retrieveAllByField("tournamentId", tournamentId)
+  def retrieveById(seriesId: String) = seriesRepository.findById(seriesId)
+  def retrieveAllByField(fieldKey: String, fieldValue: String) = seriesRepository.findAllByField(fieldKey, fieldValue)
+  def getTournamentSeriesOfTournament(tournamentId: String): Future[List[TournamentSeries]] = seriesRepository.findAllByField("tournamentId", tournamentId)
 
 
   def drawTournamentFirstRounds(tournamentId: String): Future[List[Either[DrawError, (String, SeriesRound)]]] = {
@@ -31,7 +31,7 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   }
 
 
-  def getStartingRoundsOfTournament(tournamentId: String): Future[List[SeriesRound]] = seriesRepository.retrieveAllByField("tournamentId", tournamentId).flatMap { seriesList =>
+  def getStartingRoundsOfTournament(tournamentId: String): Future[List[SeriesRound]] = seriesRepository.findAllByField("tournamentId", tournamentId).flatMap { seriesList =>
     Future.sequence {
       seriesList.map {
         series => seriesRoundService.getRoundsOfSeries(series.id).map(_.sortBy(_.roundNr).headOption)
@@ -47,7 +47,7 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   def drawRobinRound(roundId: String, seriesId: String, robinRound: SiteRobinRound, drawType: DrawType = DrawTypes.RankedRandomOrder): Future[Either[DrawError, (String, SiteRobinRound)]] = {
     seriesPlayerRepository.retrieveAllSeriesPlayers(seriesId).flatMap { seriesPlayers =>
       if (seriesPlayers.length > 1) {
-        seriesRepository.retrieveById(seriesId).map {
+        seriesRepository.findById(seriesId).map {
           case Some(foundSeries) =>
                     val drawResult = drawService.drawRobins(seriesPlayers, robinRound, foundSeries.setTargetScore, foundSeries.numberOfSetsToWin, drawType)
                     drawnRoundOrError(seriesId)(drawResult)
@@ -62,7 +62,7 @@ class SeriesService @Inject()(seriesRoundService: SeriesRoundService, seriesPlay
   def drawBracketRound(roundId: String, seriesId: String, bracket: SiteBracketRound): Future[Either[DrawError, (String, SiteBracketRound)]] = {
     seriesPlayerRepository.retrieveAllSeriesPlayers(seriesId).flatMap { seriesPlayers =>
       if (seriesPlayers.length > 1) {
-        seriesRepository.retrieveById(seriesId).map {
+        seriesRepository.findById(seriesId).map {
           case Some(foundSeries) => drawService.drawBracket(seriesPlayers, bracket, foundSeries.numberOfSetsToWin, foundSeries.setTargetScore) match {
             case Some(round) => Right(seriesId, round)
             case _ => Left(DrawError(seriesId, "de reeks kon niet getrokken worden"))

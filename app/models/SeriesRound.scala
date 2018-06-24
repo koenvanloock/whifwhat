@@ -10,7 +10,7 @@ import utils.JsonUtils
 
 import scala.language.postfixOps
 
-sealed trait SeriesRound {
+sealed trait SeriesRound extends repositories.numongo.Model[String] {
   def matches: List[PingpongMatch]
 
   def isComplete: Boolean

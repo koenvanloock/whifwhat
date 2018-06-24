@@ -3,7 +3,7 @@ package services
 import javax.inject.Inject
 
 import models.player.{PlayerScores, SeriesPlayer}
-import repositories.mongo.{SeriesPlayerRepository, SeriesRoundRepository}
+import repositories.numongo.repos.{SeriesPlayerRepository, SeriesRoundRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

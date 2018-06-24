@@ -7,7 +7,7 @@ import models.halls.{HallOverViewTournament, HallOverviewRound, HallOverviewSeri
 import models.matches.{MatchChecker, PingpongMatch, ViewablePingpongMatch}
 import models.player.{Player, RefereeInfo, ViewablePlayer}
 import play.api.libs.json.Json
-import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
+import repositories.numongo.repos.{SeriesRepository, SeriesRoundRepository}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,10 +37,10 @@ class HallOverviewService @Inject()(seriesRepository: SeriesRepository, seriesRo
   }
 
   private def retrieveHalloverviewSeriesList(tournament: Tournament): Future[List[(HallOverviewSeries, List[PingpongMatch])]] = {
-    seriesRepository.retrieveAllByField("tournamentId", tournament.id).flatMap { seriesList =>
+    seriesRepository.findAllByField("tournamentId", tournament.id).flatMap { seriesList =>
       Future.sequence {
         seriesList.map { series =>
-          seriesRoundRepository.retrieveAllByFields(Json.obj("seriesId" -> series.id, "roundNr" -> series.currentRoundNr)).map { roundList =>
+          seriesRoundRepository.findAllByJsQuery(Json.obj("seriesId" -> series.id, "roundNr" -> series.currentRoundNr)).map { roundList =>
             val convertedRounds = roundList.map(convertRoundToHallOverView)
             (HallOverviewSeries(series.id, series.seriesName, series.seriesColor, convertedRounds.map(_._1)), convertedRounds.flatMap(_._2))
           }

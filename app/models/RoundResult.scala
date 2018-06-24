@@ -2,16 +2,14 @@ package models
 
 import models.player.{Player, PlayerScores, Rank, SeriesPlayer}
 import play.api.libs.functional.syntax._
-import play.api.libs.json
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 
-case class RoundResult(id: String, seriesRoundId: String, results: List[ResultLine], robinResult: Option[List[List[ResultLine]]])
+case class RoundResult(id: String, seriesRoundId: String, results: List[ResultLine], robinResult: Option[List[List[ResultLine]]]) extends repositories.numongo.Model[String]
 
 case class ResultLine(player: SeriesPlayer, tieScore: Option[PlayerScores])
 
 object RoundResultEvidence{
-  import utils.JsonUtils.ListWrites._
   implicit val playerScoreFormat = Json.format[PlayerScores]
   implicit val rankFormat = Json.format[Rank]
   implicit val playerFormat = Json.format[Player]

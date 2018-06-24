@@ -4,15 +4,13 @@ package services
 import javax.inject.Inject
 
 import models.matches.PingpongMatch
-import repositories.mongo.MatchRepository
+import repositories.numongo.repos.MatchRepository
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 
 class SiteMatchService @Inject()(matchRepository: MatchRepository){
 
-  def getMatch(matchId: String) = matchRepository.retrieveById(matchId)
+  def getMatch(matchId: String) = matchRepository.findById(matchId)
 
   def create(siteMatch: PingpongMatch) = matchRepository.create(siteMatch)
 

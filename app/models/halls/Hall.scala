@@ -11,7 +11,7 @@ import utils.JsonUtils
 import scala.language.postfixOps
 
 
-case class Hall(id: String, hallName: String, rows: Int, tablesPerRow: Int, tables: List[HallTable])
+case class Hall(id: String, hallName: String, rows: Int, tablesPerRow: Int, tables: List[HallTable]) extends repositories.numongo.Model[String]
 
 
 object HallEvidence {

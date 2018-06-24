@@ -8,7 +8,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
-import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
+import repositories.numongo.repos.{SeriesRepository, SeriesRoundRepository}
 import helpers.TestHelpers._
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player.{Player, PlayerScores, Ranks, SeriesPlayer}

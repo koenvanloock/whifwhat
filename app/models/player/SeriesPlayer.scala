@@ -3,7 +3,7 @@ package models.player
 import models.Model
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 
-case class SeriesPlayer(id: String, seriesId: String, player: Player, playerScores: PlayerScores)
+case class SeriesPlayer(id: String, seriesId: String, player: Player, playerScores: PlayerScores) extends repositories.numongo.Model[String]
 
   object SeriesPlayerEvidence {
 

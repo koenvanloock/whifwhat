@@ -4,7 +4,7 @@ import models.player.{Player, Ranks}
 import org.scalatestplus.play.PlaySpec
 import helpers.TestHelpers._
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.mongo.{PlayerRepository, SeriesPlayerRepository, SeriesRepository}
+import repositories.numongo.repos.{PlayerRepository, SeriesPlayerRepository, SeriesRepository}
 
 import scala.concurrent.Await
 

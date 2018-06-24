@@ -1,15 +1,14 @@
 package services
 
-import helpers.TestHelpers._
-import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
 import models.matches.{PingpongGame, PingpongMatch}
 import models.player._
 import models.types.{BracketLeaf, BracketNode}
+import models.{RobinGroup, SiteBracketRound, SiteRobinRound}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatestplus.play.PlaySpec
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
+import repositories.numongo.repos.{SeriesRepository, SeriesRoundRepository}
 
 @RunWith(classOf[JUnitRunner])
 class SeriesRoundServiceTest extends PlaySpec{
@@ -32,11 +31,7 @@ class SeriesRoundServiceTest extends PlaySpec{
 
   "SeriesRoundService" should {
 
-
-
     "isRoundComplete of a complete robinRound returns true" in {
-
-
       val matchesWithGames: List[PingpongMatch] = List(
         PingpongMatch("1",None,None,"1",6,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
         PingpongMatch("2",None,None,"1",3,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
@@ -45,7 +40,6 @@ class SeriesRoundServiceTest extends PlaySpec{
         PingpongMatch("5",None,None,"1",1,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2))),
         PingpongMatch("6",None,None,"1",4,true,21,2,2,0,List(PingpongGame(21,16,1),PingpongGame(21,15,2)))
       )
-
       seriesRoundService.isRoundComplete(SiteRobinRound("abc123",1,"123",1,List(RobinGroup("1",players,matchesWithGames)))) mustBe true
     }
   }
@@ -76,8 +70,6 @@ class SeriesRoundServiceTest extends PlaySpec{
         BracketLeaf[PingpongMatch](PingpongMatch("1", None, None, "1",7,true,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(22,20,2)))),
         BracketLeaf(PingpongMatch("1", None, None, "1",3,false,21,2, 2, 0, List(PingpongGame(21,16,1),PingpongGame(21,10,2))))
       )
-
-
     seriesRoundService.isRoundComplete(SiteBracketRound("1",2,"123",1, players, matches)) mustBe true
   }
 

@@ -3,7 +3,7 @@ package models.player
 import models.Model
 import play.api.libs.json.{JsObject, JsResult, JsValue, Json}
 
-case class Player(id: String, firstname: String, lastname: String, rank: Rank, imagepath: Option[String]=None)
+case class Player(id: String, firstname: String, lastname: String, rank: Rank, imagepath: Option[String]=None) extends repositories.numongo.Model[String]
 
 object PlayerEvidence{
   implicit object PlayerIsModel extends Model[Player]{

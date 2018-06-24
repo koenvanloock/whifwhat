@@ -1,15 +1,13 @@
 package controllers
 
-import java.time.LocalDateTime
 import java.util.UUID
 import javax.inject.{Inject, Named}
 
-import actors.TournamentEventActor._
-import actors.TournamentEventActor.Hallchanged
+import actors.TournamentEventActor.{Hallchanged, _}
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.stream.Materializer
-import akka.util.{ByteString, Timeout}
+import akka.util.Timeout
 import models.halls.Hall
 import models.halls.HallEvidence._
 import models.matches.{PingpongGame, PingpongMatch}
@@ -65,7 +63,7 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
   }
 
   def getById(hallId: String): Action[AnyContent] = Action.async {
-    hallService.getHallById(hallId).map {
+    hallService.retrieveById(hallId).map {
       case Some(hall) => Ok(Json.toJson(hall))
       case _ => NotFound("Zaal niet gevonden")
     }
@@ -102,7 +100,8 @@ class HallController @Inject()(@Named("tournament-event-actor") tournamentEventA
 
   def deleteHall(hallId: String) = Action.async {
     hallService.delete(hallId).map {
-      case () => NoContent
+      case Some(tournament: Hall) => NoContent
+      case _ => BadRequest
     }
   }
 

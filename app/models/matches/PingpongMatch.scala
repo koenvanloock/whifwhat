@@ -18,7 +18,7 @@ case class PingpongMatch(
                       wonSetsA: Int,
                       wonSetsB: Int,
                       games: List[PingpongGame],
-                      errorMessage:  Option[String] = None)
+                      errorMessage:  Option[String] = None) extends repositories.numongo.Model[String]
 
 object MatchEvidence{
 

@@ -4,7 +4,7 @@ import java.time.LocalDate
 import play.api.libs.json._
 
 
-case class Tournament(id: String, tournamentName: String, tournamentDate: LocalDate, maximumNumberOfSeriesEntries: Int, hasMultipleSeries: Boolean, showClub: Boolean)
+case class Tournament(id: String, tournamentName: String, tournamentDate: LocalDate, maximumNumberOfSeriesEntries: Int, hasMultipleSeries: Boolean, showClub: Boolean) extends repositories.numongo.Model[String]
 
   object TournamentEvidence {
 

@@ -6,24 +6,24 @@ import models._
 import models.matches.{MatchChecker, PingpongMatch}
 import models.player.{PlayerScores, SeriesPlayer, SeriesPlayerWithRoundPlayers}
 import play.api.libs.json.{JsObject, Json}
-import repositories.mongo.{SeriesRepository, SeriesRoundRepository}
+import repositories.numongo.repos.{SeriesRepository, SeriesRoundRepository}
 import utils.RoundScorer
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundRepository: SeriesRoundRepository, seriesRepository: SeriesRepository) {
-  def retrieveAllByField(fieldKey: String, fieldValue: String): Future[List[SeriesRound]] = seriesRoundRepository.retrieveAllByField(fieldKey, fieldValue)
-  def retrieveByFields(jsObject: JsObject): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveByFields(jsObject)
+  def retrieveAllByField(fieldKey: String, fieldValue: String): Future[List[SeriesRound]] = seriesRoundRepository.findAllByField(fieldKey, fieldValue)
+  def retrieveByFields(jsObject: JsObject): Future[Option[SeriesRound]] = seriesRoundRepository.findFirstByJsQuery(jsObject)
 
-  def getMatchesOfRound(seriesRoundId: String): Future[List[PingpongMatch]] = seriesRoundRepository.retrieveById(seriesRoundId).map{
+  def getMatchesOfRound(seriesRoundId: String): Future[List[PingpongMatch]] = seriesRoundRepository.findById(seriesRoundId).map{
     case Some(bracketRound: SiteBracketRound) => bracketRound.bracket.toList
     case Some(robinRound: SiteRobinRound) => robinRound.matches
     case Some(swissRound: SwissRound) => swissRound.matches
     case None => List()
   }
 
-  def getRound(roundId: String): Future[Option[SeriesRound]] = seriesRoundRepository.retrieveById(roundId)
+  def getRound(roundId: String): Future[Option[SeriesRound]] = seriesRoundRepository.findById(roundId)
 
 
   def calculateRoundResults(playingWithHandicaps: Boolean, seriesRound: SeriesRound): SeriesRound = seriesRound match{
@@ -49,9 +49,9 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   }
 
   def updateRoundWithMatch(siteMatch: PingpongMatch, roundId: String): Future[Option[SeriesRound]] = {
-    seriesRoundRepository.retrieveById(roundId).flatMap{
+    seriesRoundRepository.findById(roundId).flatMap{
       case Some(round) =>
-        seriesRepository.retrieveById(round.seriesId).flatMap{
+        seriesRepository.findById(round.seriesId).flatMap{
           case Some(series) =>
             val updatedRound = calculateRoundResults(series.playingWithHandicaps, updateMatchInRound(siteMatch, round))
             updateSeriesRound(updatedRound).map{ _ => Some(updatedRound)
@@ -65,7 +65,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
   def createSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = {
     def getNextRoundNrOfSeries(seriesId: String) = {
-      seriesRoundRepository.retrieveAllByField("seriesId",seriesId).map( list => seriesRound match{
+      seriesRoundRepository.findAllByField("seriesId",seriesId).map( list => seriesRound match{
         case r: SiteRobinRound => r.copy(roundNr = list.length + 1 )
         case b: SiteBracketRound => b.copy(roundNr = list.length + 1)
         case s: SwissRound => s.copy(roundNr = list.length + 1)
@@ -79,7 +79,7 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
   def updateSeriesRound(seriesRound: SeriesRound): Future[SeriesRound] = seriesRoundRepository.update(seriesRound)
 
 
-  def getRoundsOfSeries(seriesId: String): Future[List[SeriesRound]] = seriesRoundRepository.retrieveAllByField("seriesId", seriesId)
+  def getRoundsOfSeries(seriesId: String): Future[List[SeriesRound]] = seriesRoundRepository.findAllByField("seriesId", seriesId)
 
 
   def updateRoundNrForDeletedNr(roundNrToDelete: Int): (SeriesRound) => Future[SeriesRound] = {
@@ -101,8 +101,8 @@ class SeriesRoundService @Inject()(matchService: MatchService, seriesRoundReposi
 
   }
 
-  def delete(seriesRoundId: String): Future[Unit] = {
-    seriesRoundRepository.retrieveById(seriesRoundId).flatMap {
+  def delete(seriesRoundId: String): Future[Option[SeriesRound]] = {
+    seriesRoundRepository.findById(seriesRoundId).flatMap {
       case Some(round) => updateRoundNrs(round).flatMap(updated =>
         seriesRoundRepository.delete(seriesRoundId)).map(_ => Some(()))
       case None => Future(None)

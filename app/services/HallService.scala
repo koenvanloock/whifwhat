@@ -5,18 +5,18 @@ import javax.inject.Inject
 import models.halls.{Hall, HallTable}
 import models.matches.PingpongMatch
 import models.player.Player
-import repositories.mongo.HallRepository
+import repositories.numongo.repos.HallRepository
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class HallService @Inject()(hallRepository: HallRepository) {
-  def deleteMatchAndRefInHall(hallId: String, pingpongMatch: PingpongMatch) = hallRepository.retrieveById(hallId).flatMap {
+  def deleteMatchAndRefInHall(hallId: String, pingpongMatch: PingpongMatch) = hallRepository.findById(hallId).flatMap {
     case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = None, referee = None) else table)).map(Some(_))
     case _ => Future(None)
 }
 
   def updateMatchInHall(hallId: String, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
-    hallRepository.retrieveById(hallId).flatMap {
+    hallRepository.findById(hallId).flatMap {
       case Some(hallToUpdate) =>
         val newHall = hallToUpdate.copy(tables  = hallToUpdate.tables.map{ table => if(table.pingpongMatch.exists(_.id == pingpongMatch.id)) table.copy(pingpongMatch = Some(pingpongMatch)) else table })
         hallRepository.update(newHall).map(Some(_))
@@ -25,7 +25,7 @@ class HallService @Inject()(hallRepository: HallRepository) {
   }
 
   def insertRefInHall(hallId: String, row: Int, column: Int, referee: Player): Future[Option[Hall]] = {
-    hallRepository.retrieveById(hallId).map { hallOpt =>
+    hallRepository.findById(hallId).map { hallOpt =>
       val newHallOpt = addRefereeToHall(row, column, referee)(hallOpt)
       newHallOpt.map(newHall => hallRepository.update(newHall))
       newHallOpt
@@ -36,7 +36,7 @@ class HallService @Inject()(hallRepository: HallRepository) {
   def addRefereeToHall(row: Int, column: Int, referee: Player): (Option[Hall]) => Option[Hall] = hallOpt => hallOpt.map(hall => updateTable(hall)(originalOrRefToUpdate(row, column, Some(referee))))
 
   def deleteHallRef(hallId: String, row: Int, column: Int, referee: Player): Future[Option[Hall]] = {
-    hallRepository.retrieveById(hallId).map { hallOpt =>
+    hallRepository.findById(hallId).map { hallOpt =>
       val newHallOpt = deleteRefereeOn(row, column, referee)(hallOpt)
       newHallOpt.map(newHall => hallRepository.update(newHall))
       newHallOpt
@@ -47,7 +47,7 @@ class HallService @Inject()(hallRepository: HallRepository) {
 def deleteHallMatch (hall: Hall, row: Int, column: Int): Hall = updateTable (hall) (originalOrMatchToUpdate (row, column, None) )
 
 def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hall]] = {
-  hallRepository.retrieveById (hallId).flatMap {
+  hallRepository.findById (hallId).flatMap {
   case Some (hall) =>
   val updatedHall = deleteHallMatch (hall, row, column)
   hallRepository.update (updatedHall).map (Some (_) )
@@ -56,14 +56,14 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
 
 }
 
-  def deleteMatchInHall(hallId: String, matchId: String): Future[Option[Hall]] =  hallRepository.retrieveById(hallId).flatMap {
+  def deleteMatchInHall(hallId: String, matchId: String): Future[Option[Hall]] =  hallRepository.findById(hallId).flatMap {
     case Some(realHall) => update(updateTable(realHall)(table => if (table.pingpongMatch.exists(_.id == matchId)) table.copy(pingpongMatch = None) else table)).map(Some(_))
     case _ => Future(None)
   }
 
 
   def setMatchToTable (hallId: String, row: Int, column: Int, pingpongMatch: PingpongMatch): Future[Option[Hall]] = {
-  hallRepository.retrieveByField ("id", hallId).map {
+  hallRepository.findFirstByField("id", hallId).map {
   case Some (hall) => Some (updateTable (hall) (originalOrMatchToUpdate (row, column, Some (pingpongMatch) ) ) )
   case _ => None
 }.flatMap {
@@ -84,13 +84,11 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
 
   def delete (hallId: String) = hallRepository.delete (hallId)
 
-  def retrieveById (hallId: String) = hallRepository.retrieveById (hallId)
+  def retrieveById (hallId: String) = hallRepository.findById(hallId)
 
   def update (hall: Hall): Future[Hall] = hallRepository.update (hall)
 
-  def getHallById (hallId: String) = hallRepository.retrieveById (hallId)
-
-  def createIfNotExists (hall: Hall, isGreen: Boolean): Future[Either[String, Hall]] = hallRepository.retrieveByField ("hallName", hall.hallName).flatMap {
+  def createIfNotExists (hall: Hall, isGreen: Boolean): Future[Either[String, Hall]] = hallRepository.findFirstByField("hallName", hall.hallName).flatMap {
   case Some (foundHall) => Future (Left (s"De opgegeven zaalnaam ${
   hall.hallName
 } bestaat al.") )
@@ -98,7 +96,7 @@ def deleteMatchInHall (hallId: String, row: Int, column: Int): Future[Option[Hal
 }
 
 
-  def retrieveAll: Future[List[Hall]] = hallRepository.retrieveAll ()
+  def retrieveAll: Future[List[Hall]] = hallRepository.findAll ()
 
 
   def generateTables (hallId: String, rows: Int, columns: Int, isGreen: Boolean): List[HallTable] = {

@@ -13,7 +13,7 @@ case class TournamentSeries(
                              extraHandicapForRecs: Int,
                              showReferees: Boolean,
                              currentRoundNr: Int=1,
-                             tournamentId: String)
+                             tournamentId: String) extends repositories.numongo.Model[String]
   object SeriesEvidence {
 
     implicit object seriesIsModel extends Model[TournamentSeries] {

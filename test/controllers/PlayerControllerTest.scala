@@ -1,7 +1,6 @@
 package controllers
 
 import org.scalatestplus.play._
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
